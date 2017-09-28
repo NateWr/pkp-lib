@@ -18,18 +18,6 @@
 							<a id="{$field}-ancor-dropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="{$navigationMenuItemAssignment->navigationMenuItem->getUrl()}">
 								{$navigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
 							</a>
-							{*
-							{if $navigationMenuItemAssignment->navigationMenuItem->getUseCustomUrl()}
-								<a href="{$navigationMenuItemAssignment->navigationMenuItem->getUrl()}">
-									{$navigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
-								</a>
-							{else}
-								<a href="{url router=$smarty.const.ROUTE_PAGE page=$navigationMenuItemAssignment->navigationMenuItem->getPage() op=$navigationMenuItemAssignment->navigationMenuItem->getOp() path=$navigationMenuItemAssignment->navigationMenuItem->getPath()}">
-									{$navigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
-								</a>
-							{/if}
-							*}
-						
 							<ul class="dropdown-menu" aria-labelledby="{$field}-ancor-dropDown">
 							{foreach key=childField item=childNavigationMenuItemAssignment from=$navigationMenuItemAssignment->children}
 								{if $childNavigationMenuItemAssignment->navigationMenuItem->getIsDisplayed()}
@@ -37,19 +25,6 @@
 										<a href="{$childNavigationMenuItemAssignment->navigationMenuItem->getUrl()}">
 											{$childNavigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
 										</a>
-										{*
-										{if $childNavigationMenuItemAssignment->navigationMenuItem->getUseCustomUrl()}
-											<a href="{$childNavigationMenuItemAssignment->navigationMenuItem->getUrl()}">
-												{$childNavigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
-											</a>
-										{else}
-											<a href="{url router=$smarty.const.ROUTE_PAGE page=$childNavigationMenuItemAssignment->navigationMenuItem->getPage() op=$childNavigationMenuItemAssignment->navigationMenuItem->getOp() path=$childNavigationMenuItemAssignment->navigationMenuItem->getPath()}">
-												{$childNavigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
-											</a>
-										{/if}
-										*}
-								
-								
 									</li>
 								{/if}
 							{/foreach}
@@ -62,18 +37,6 @@
 							<a href="{$navigationMenuItemAssignment->navigationMenuItem->getUrl()}">
 								{$navigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
 							</a>
-							{*
-							{if $navigationMenuItemAssignment->navigationMenuItem->getUseCustomUrl()}
-								<a href="{$navigationMenuItemAssignment->navigationMenuItem->getUrl()}">
-									{$navigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
-								</a>
-							{else}
-								<a href="{url router=$smarty.const.ROUTE_PAGE page=$navigationMenuItemAssignment->navigationMenuItem->getPage() op=$navigationMenuItemAssignment->navigationMenuItem->getOp() path=$navigationMenuItemAssignment->navigationMenuItem->getPath()}">
-									{$navigationMenuItemAssignment->navigationMenuItem->getLocalizedTitle()}
-								</a>
-							{/if}
-							*}
-						
 						</li>
 					{/if}
 				{/if}

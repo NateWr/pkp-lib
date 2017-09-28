@@ -14,64 +14,29 @@
 
 
 	/**
-		* @constructor
-		*
-		* @extends $.pkp.controllers.form.AjaxFormHandler
-		*
-		* @param {jQueryObject} $formElement A wrapped HTML element that
-		*  represents the approved proof form interface element.
-		* @param {Object} options Tabbed modal options.
-		*/
+	 * @constructor
+	 *
+	 * @extends $.pkp.controllers.form.AjaxFormHandler
+	 *
+	 * @param {jQueryObject} $formElement A wrapped HTML element that
+	 *  represents the approved proof form interface element.
+	 * @param {Object} options Tabbed modal options.
+	 */
 	$.pkp.controllers.grid.navigationMenus.form.NavigationMenuItemsFormHandler =
 			function($formElement, options) {
 
 		this.parent($formElement, options);
 
-		// Save the preview URL for later
 		this.previewUrl_ = options.previewUrl;
+		this.itemTypeDescriptions_ = options.itemTypeDescriptions;
+		this.itemTypeConditionalWarnings_ = options.itemTypeConditionalWarnings;
 
-		// bind a handler to make sure we update the required state
-		// of the comments field.
 		$('#previewButton', $formElement).click(this.callbackWrapper(
-				this.showPreview_));
+				this.showPreview_))
+			.hide();
 
-		$('#previewButton').hide();
-
-		// custom url or path functionality change
-		$('#useCustomUrl').change(
-				function() {
-					if ($(this).is(':checked')) {
-						$('#targetUrl').show();
-						$('#targetPath').hide();
-						$('#previewButton').hide();
-					} else {
-						$('#targetUrl').hide();
-						$('#targetPath').show();
-						$('#previewButton').show();
-					}
-				}
-		);
-
-		// type change event
-		$('#type').change(
-				function() {
-					// add global variable somehow
-					if ($(this)[0].value == 'NMI_TYPE_CUSTOM') {
-						$('#customItemFields').show();
-						if ($('#useCustomUrl').is(':checked')) {
-							$('#previewButton').hide();
-						} else {
-							$('#previewButton').show();
-						}
-					} else {
-						$('#customItemFields').hide();
-						$('#previewButton').hide();
-					}
-				}
-		);
-
-		$('#useCustomUrl').trigger('change');
-		$('#type').trigger('change');
+		$('#menuItemType', $formElement).change(this.callbackWrapper(this.setType));
+		$('#menuItemType', $formElement).trigger('change');
 	};
 
 
@@ -86,24 +51,40 @@
 
 
 	/**
-		* The preview url.
-		* @private
-		* @type {?string}
-		*/
+	 * The preview url.
+	 * @private
+	 * @type {?string}
+	 */
 	$.pkp.controllers.grid.navigationMenus.form.
 			NavigationMenuItemsFormHandler.prototype.previewUrl_ = null;
 
+	/**
+	 * Descriptions for each item type.
+	 * @private
+	 * @type {?Object}
+	 */
+	$.pkp.controllers.grid.navigationMenus.form.
+			NavigationMenuItemsFormHandler.prototype.itemTypeDescriptions_ = null;
 
 	/**
-		* Callback triggered on clicking the "preview"
-		* button to open a preview window.
-		*
-		* @param {HTMLElement} submitButton The submit button.
-		* @param {Event} event The event that triggered the
-		*  submit button.
-		* @return {boolean} true.
-		* @private
-		*/
+	 * Warnings about the conditions of display for each item type.
+	 * @private
+	 * @type {?Object}
+	 */
+	$.pkp.controllers.grid.navigationMenus.form.
+			NavigationMenuItemsFormHandler.prototype.itemTypeConditionalWarnings_ = null;
+
+
+	/**
+	 * Callback triggered on clicking the "preview"
+	 * button to open a preview window.
+	 *
+	 * @param {HTMLElement} submitButton The submit button.
+	 * @param {Event} event The event that triggered the
+	 *  submit button.
+	 * @return {boolean} true.
+	 * @private
+	 */
 	$.pkp.controllers.grid.navigationMenus.form.NavigationMenuItemsFormHandler.
 			prototype.showPreview_ = function(submitButton, event) {
 
@@ -119,6 +100,31 @@
 		);
 
 		return true;
+	};
+
+
+	/**
+	 * Callback triggered when the type is set
+	 */
+	$.pkp.controllers.grid.navigationMenus.form.NavigationMenuItemsFormHandler.
+			prototype.setType = function() {
+		var itemType = $('#menuItemType', this.getHtmlElement()).val(),
+			$customPageEls = $('#customPageOptions, #previewButton'),
+			$remoteUrlEls = $('#remoteUrlTarget'),
+			$descriptionEl = $('#menuItemTypeSection [for="menuItemType"]');
+
+		$customPageEls.hide();
+		$remoteUrlEls.hide();
+
+		if (itemType === 'NMI_TYPE_CUSTOM') {
+			$customPageEls.fadeIn();
+		} else if (itemType === 'NMI_TYPE_REMOTE_URL') {
+			$remoteUrlEls.fadeIn();
+		}
+
+		if (typeof this.itemTypeDescriptions_[itemType] !== 'undefined') {
+			$descriptionEl.text(this.itemTypeDescriptions_[itemType]);
+		}
 	};
 
 

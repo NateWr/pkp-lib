@@ -14,7 +14,9 @@
 		$('#navigationMenuItemForm').pkpHandler(
 			'$.pkp.controllers.grid.navigationMenus.form.NavigationMenuItemsFormHandler',
 			{ldelim}
-				previewUrl: {url|json_encode router=$smarty.const.ROUTE_PAGE page="navigationMenu" op="preview"}
+				previewUrl: {url|json_encode router=$smarty.const.ROUTE_PAGE page="navigationMenu" op="preview"},
+				itemTypeDescriptions: {$navigationMenuItemTypeDescriptions},
+				itemTypeConditionalWarnings: {$navigationMenuItemTypeConditionalWarnings}
 			{rdelim});
 	{rdelim});
 </script>
@@ -33,37 +35,29 @@
 			{fbvElement type="text" multilingual="true" id="title" value=$title maxlength="255" required="true"}
 		{/fbvFormSection}
 
-		{fbvFormSection title="manager.navigationMenus.form.navigationMenuItemType" for="area_name"}
-			{fbvElement type="select" id="type" from=$navigationMenuTypes selected=$type label="manager.navigationMenus.form.navigationMenuItemTypeMessage" translate=false}
+		{fbvFormSection id="menuItemTypeSection" title="manager.navigationMenus.form.navigationMenuItemType" for="area_name"}
+			{fbvElement type="select" id="menuItemType" from=$navigationMenuItemTypeTitles selected=$type label="manager.navigationMenus.form.navigationMenuItemTypeMessage" translate=false}
 		{/fbvFormSection}
-		
-		{fbvFormSection id="customItemFields"}
-			{fbvFormSection title="manager.navigationMenus.form.chooseTarget" for="useCustomUrl" list=true}
-				{if $useCustomUrl}
-					{assign var="checked" value=true}
-				{else}
-					{assign var="checked" value=false}
-				{/if}
-				{fbvElement type="checkbox" name="useCustomUrl" id="useCustomUrl" checked=$checked label="manager.navigationMenus.form.urlDescription" translate="true"}
-			{/fbvFormSection}
-			{fbvFormSection id="targetUrl" title="manager.navigationMenus.form.url" for="url" list=true required="true"}
-				{fbvElement type="text" id="url" value=$url maxlength="255" required="true"}
-			{/fbvFormSection}
+
+		{fbvFormSection id="remoteUrlTarget" title="manager.navigationMenus.form.url" for="url" list=true required="true"}
+			{fbvElement type="text" id="url" value=$url maxlength="255" required="true"}
+		{/fbvFormSection}
+
+		<div id="customPageOptions">
 			{fbvFormSection id="targetPath"}
 				{fbvFormSection title="manager.navigationMenus.form.path" for="path" required="true"}
-					{fbvElement type="text" id="path" value=$path maxlength="255" required="true"}
-				{/fbvFormSection}
-				{fbvFormSection}
-					{url|replace:"REPLACEME":"%PATH%"|assign:"exampleUrl" router=$smarty.const.ROUTE_PAGE context=$currentContext->getPath() page="REPLACEME"}
-					{translate key="manager.navigationMenus.form.viewInstructions" pagesPath=$exampleUrl}
+					{fbvElement type="text" id="path" value=$path required="true"}
+					<p>
+						{url|replace:"REPLACEME":"%PATH%"|assign:"exampleUrl" router=$smarty.const.ROUTE_PAGE context=$currentContext->getPath() page="REPLACEME"}
+						{translate key="manager.navigationMenus.form.viewInstructions" pagesPath=$exampleUrl}
+					</p>
 				{/fbvFormSection}
 				{fbvFormSection label="manager.navigationMenus.form.content" for="content"}
 					{fbvElement type="textarea" multilingual=true name="content" id="content" value=$content rich=true height=$fbvStyles.height.TALL variables=$allowedVariables}
 				{/fbvFormSection}
 			{/fbvFormSection}
-		{/fbvFormSection}
+		</div>
 	{/fbvFormArea}
-	<p><span class="formRequired">{translate key="common.requiredField"}</span></p>
 
 	{fbvFormSection class="formButtons"}
 		{fbvElement type="submit" class="submitFormButton pkp_helpers_align_left pkp_button_primary" id=$buttonId label="common.save"}
