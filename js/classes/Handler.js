@@ -704,6 +704,7 @@
 					settings.forced_root_block = false;
 					settings.valid_elements = "em/i,sup,sub";
 					settings.branding = false;
+					settings.inline = true;
 				}
 				else {
 					settings.toolbar = settings.defaultToolbar;
