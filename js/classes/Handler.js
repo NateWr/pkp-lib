@@ -696,6 +696,7 @@
 						settings = tinyMCE.EditorManager.settings;
 
 				// Set the requested toolbar
+				settings.inline = false;
 				if ($(this).hasClass('extendedRichContent')) {
 					settings.toolbar = settings.richToolbar;
 				}
