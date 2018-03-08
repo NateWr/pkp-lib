@@ -66,6 +66,16 @@ class StageAssignmentDAO extends DAO {
 	}
 
 	/**
+	 * Retrieve StageAssignments by submission and user IDs
+	 * @param $submissionId int Submission ID
+	 * @param $userId int User ID
+	 * @return DAOResultFactory StageAssignment
+	 */
+	function getBySubmissionAndUserId($submissionId, $userId) {
+		return $this->_getByIds($submissionId, null, null, $userId);
+	}
+
+	/**
 	 * Get editor stage assignments.
 	 * @param $submissionId int
 	 * @param $stageId int
@@ -251,7 +261,8 @@ class StageAssignmentDAO extends DAO {
 	 * @param $userId int optional
 	 * @param $roleId int optional ROLE_ID_...
 	 * @param $single bool specify if only one stage assignment (default is a ResultFactory)
-	 * @return StageAssignment|ResultFactory Mixed, depending on $single
+	 * @return StageAssignment|ResultFactory|bool Mixed, depending on $single.
+	 *  false if no results found when $single is true.
 	 */
 	function _getByIds($submissionId = null, $stageId = null, $userGroupId = null, $userId = null, $roleId = null, $single = false) {
 		$conditions = array();

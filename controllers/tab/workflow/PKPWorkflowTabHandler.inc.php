@@ -38,9 +38,18 @@ abstract class PKPWorkflowTabHandler extends Handler {
 	 * @copydoc PKPHandler::authorize()
 	 */
 	function authorize($request, &$args, $roleAssignments) {
-		// Authorize stage id.
-		import('lib.pkp.classes.security.authorization.WorkflowStageAccessPolicy');
-		$this->addPolicy(new WorkflowStageAccessPolicy($request, $args, $roleAssignments, 'submissionId', $this->_identifyStageId($request)));
+
+		// Authorize requested submission.
+		import('lib.pkp.classes.security.authorization.internal.SubmissionRequiredPolicy');
+		$this->addPolicy(new SubmissionRequiredPolicy($request, $args, 'submissionId'));
+
+		// Authorize requested stage
+		import('lib.pkp.classes.security.authorization.internal.WorkflowStageRequiredPolicy');
+		$this->addPolicy(new WorkflowStageRequiredPolicy($this->_identifyStageId($request)));
+
+		// Authorize user access to the requested stage
+		import('lib.pkp.classes.security.authorization.SubmissionAssignmentPolicy');
+		$this->addPolicy(new SubmissionAssignmentPolicy($this->_identifyStageId($request)));
 
 		return parent::authorize($request, $args, $roleAssignments);
 	}

@@ -33,19 +33,17 @@ abstract class PKPWorkflowHandler extends Handler {
 		$router = $request->getRouter();
 		$operation = $router->getRequestedOp($request);
 
-		if ($operation == 'access') {
-			// Authorize requested submission.
-			import('lib.pkp.classes.security.authorization.internal.SubmissionRequiredPolicy');
-			$this->addPolicy(new SubmissionRequiredPolicy($request, $args, 'submissionId'));
+		// Authorize requested submission.
+		import('lib.pkp.classes.security.authorization.internal.SubmissionRequiredPolicy');
+		$this->addPolicy(new SubmissionRequiredPolicy($request, $args, 'submissionId'));
 
-			// This policy will deny access if user has no accessible workflow stage.
-			// Otherwise it will build an authorized object with all accessible
-			// workflow stages and authorize user operation access.
-			import('lib.pkp.classes.security.authorization.internal.UserAccessibleWorkflowStageRequiredPolicy');
-			$this->addPolicy(new UserAccessibleWorkflowStageRequiredPolicy($request));
-		} else {
-			import('lib.pkp.classes.security.authorization.WorkflowStageAccessPolicy');
-			$this->addPolicy(new WorkflowStageAccessPolicy($request, $args, $roleAssignments, 'submissionId', $this->identifyStageId($request, $args)));
+		// Authorize user access to at least one stage in this submisssion workflow
+		import('lib.pkp.classes.security.authorization.SubmissionAssignmentPolicy');
+		$this->addPolicy(new SubmissionAssignmentPolicy());
+
+		if ($operation !== 'access') {
+			import('lib.pkp.classes.security.authorization.internal.WorkflowStageRequiredPolicy');
+			$this->addPolicy(new WorkflowStageRequiredPolicy($this->identifyStageId($request, $args)));
 		}
 
 		return parent::authorize($request, $args, $roleAssignments);
@@ -58,7 +56,7 @@ abstract class PKPWorkflowHandler extends Handler {
 		$router = $request->getRouter();
 		$operation = $router->getRequestedOp($request);
 
-		if ($operation != 'access') {
+		if ($operation !== 'access') {
 			$this->setupTemplate($request);
 		}
 
@@ -92,6 +90,7 @@ abstract class PKPWorkflowHandler extends Handler {
 				break;
 			}
 		}
+
 
 		// If no stage was found, user still have access to future stages of the
 		// submission. Try to get the closest future workflow stage.
