@@ -37,9 +37,13 @@ abstract class PKPWorkflowHandler extends Handler {
 		import('lib.pkp.classes.security.authorization.internal.SubmissionRequiredPolicy');
 		$this->addPolicy(new SubmissionRequiredPolicy($request, $args, 'submissionId'));
 
-		// Authorize user access to at least one stage in this submisssion workflow
+		// Authorize user access to at least one stage in this submission workflow
 		import('lib.pkp.classes.security.authorization.SubmissionAssignmentPolicy');
 		$this->addPolicy(new SubmissionAssignmentPolicy());
+
+		// Authorize user access to the requested op based on roles assigned in the submission
+		import('lib.pkp.classes.security.authorization.SubmissionAssignedRoleOperationPolicy');
+		$this->addPolicy(new SubmissionAssignedRoleOperationPolicy($operation, $roleAssignments));
 
 		if ($operation !== 'access') {
 			import('lib.pkp.classes.security.authorization.internal.WorkflowStageRequiredPolicy');

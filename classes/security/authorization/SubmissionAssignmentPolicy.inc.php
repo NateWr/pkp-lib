@@ -26,7 +26,7 @@ class SubmissionAssignmentPolicy extends AuthorizationPolicy {
 	 *  any allowed stage will be sufficient to be authorized.
 	 */
 	public function __construct($stageId = null) {
-		parent::__construct('user.authorization.accessDenied');
+		parent::__construct($stageId ? 'user.authorization.submissionRoleBasedStageAccessDenied' : 'user.authorization.accessDenied');
 		$this->stageId = $stageId;
 
 	}
@@ -55,47 +55,48 @@ class SubmissionAssignmentPolicy extends AuthorizationPolicy {
 			return AUTHORIZATION_DENY;
 		}
 
-		$allowedStages = $this->getAuthorizedContextObject(ASSOC_TYPE_ACCESSIBLE_WORKFLOW_STAGES);
+		$contextId = $submission->getContextId();
 
-		if (!is_array($allowedStages)) {
-			$contextId = $submission->getContextId();
+		// Get user group IDs for each stage assignment
+		$stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
+		$stageAssignments = $stageAssignmentDao->getBySubmissionAndUserId($submission->getId(), $request->getUser()->getId())->toArray();
 
-			// Get user group IDs for each stage assignment
-			$stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
-			$stageAssignments = $stageAssignmentDao->getBySubmissionAndUserId($submission->getId(), $request->getUser()->getId())->toArray();
+		// All assigned users are allowed stage access based on assignment
+		if (!empty($stageAssignments)) {
+			$stageAssignmentGroupIds = array_map(function($stageAssignment) {
+				return $stageAssignment->getUserGroupId();
+			}, $stageAssignments);
 
-			// All assigned users are allowed stage access based on assignment
-			if (!empty($stageAssignments)) {
-				$stageAssignmentGroupIds = array_map(function($stageAssignment) {
-					return $stageAssignment->getUserGroupId();
-				}, $stageAssignments);
+			// Get assigned user groups, excluding non-editorial groups
+			$userGroupDao = DAORegistry::getDAO('UserGroupDAO');
+			$userGroups = $userGroupDao->getByContextId($contextId)->toArray();
+			$excludeNonEditorialRoleIds = array(ROLE_ID_REVIEWER, ROLE_ID_AUTHOR);
+			$stageAssignmentUserGroups = array_values(array_filter($userGroups, function($userGroup) use ($excludeNonEditorialRoleIds, $stageAssignmentGroupIds) {
+				return !in_array($userGroup->getRoleId(), $excludeNonEditorialRoleIds) && in_array($userGroup->getId(), $stageAssignmentGroupIds);
+			}));
 
-				// Get assigned user groups, excluding non-editorial groups
-				$userGroupDao = DAORegistry::getDAO('UserGroupDAO');
-				$userGroups = $userGroupDao->getByContextId($contextId)->toArray();
-				$excludeNonEditorialRoleIds = array(ROLE_ID_REVIEWER, ROLE_ID_AUTHOR);
-				$stageAssignmentUserGroups = array_values(array_filter($userGroups, function($userGroup) use ($excludeNonEditorialRoleIds, $stageAssignmentGroupIds) {
-					return !in_array($userGroup->getRoleId(), $excludeNonEditorialRoleIds) && in_array($userGroup->getId(), $stageAssignmentGroupIds);
-				}));
-
-				// Get allowed stages for remaining user groups
-				$allowedStages = array();
-				foreach ($stageAssignmentUserGroups as $userGroup) {
-					$stages = $userGroupDao->getAssignedStagesByUserGroupId($contextId, $userGroup->getId());
-					$allowedStages = array_merge($allowedStages, array_keys($stages));
-				}
-				$allowedStages = array_unique($allowedStages);
-
-			// Managers and admins can access all stages when not assigned
-			} else {
-				$userRoles = $this->getAuthorizedContextObject(ASSOC_TYPE_USER_ROLES);
-				if (in_array(ROLE_ID_MANAGER, $userRoles) || in_array(ROLE_ID_SITE_ADMIN, $userRoles)) {
-					$allowedStages = Application::getApplicationStages();
-				}
+			// Get allowed stages and assigned roles for remaining user groups
+			$allowedStages = array();
+			$assignedRoles = array();
+			foreach ($stageAssignmentUserGroups as $userGroup) {
+				$stages = $userGroupDao->getAssignedStagesByUserGroupId($contextId, $userGroup->getId());
+				$allowedStages = array_merge($allowedStages, array_keys($stages));
+				$assignedRoles[] = $userGroup->getRoleId();
 			}
+			$allowedStages = array_unique($allowedStages);
+			$assignedRoles = array_unique($assignedRoles);
 
-			$this->addAuthorizedContextObject(ASSOC_TYPE_ACCESSIBLE_WORKFLOW_STAGES, $allowedStages);
+		// Managers and admins can access all stages when not assigned
+		} else {
+			$assignedRoles = array(ROLE_ID_MANAGER, ROLE_ID_SITE_ADMIN);
+			$userRoles = $this->getAuthorizedContextObject(ASSOC_TYPE_USER_ROLES);
+			if (in_array(ROLE_ID_MANAGER, $userRoles) || in_array(ROLE_ID_SITE_ADMIN, $userRoles)) {
+				$allowedStages = Application::getApplicationStages();
+			}
 		}
+
+		$this->addAuthorizedContextObject(ASSOC_TYPE_ACCESSIBLE_WORKFLOW_STAGES, $allowedStages);
+		$this->addAuthorizedContextObject(ASSOC_TYPE_ASSIGNED_WORKFLOW_ROLES, $assignedRoles);
 
 		// Check against a specific stage ID when requested
 		if ($this->stageId) {

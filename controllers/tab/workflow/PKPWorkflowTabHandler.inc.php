@@ -161,6 +161,7 @@ abstract class PKPWorkflowTabHandler extends Handler {
 
 		$submission = $this->getAuthorizedContextObject(ASSOC_TYPE_SUBMISSION);
 		$stageId = $this->getAuthorizedContextObject(ASSOC_TYPE_WORKFLOW_STAGE);
+		$assignedWorkflowRoles = $this->getAuthorizedContextObject(ASSOC_TYPE_ASSIGNED_WORKFLOW_ROLES);
 
 		$templateMgr = TemplateManager::getManager($request);
 
@@ -170,6 +171,7 @@ abstract class PKPWorkflowTabHandler extends Handler {
 		// Assign workflow stages related data.
 		$templateMgr->assign('stageId', $stageId);
 		$templateMgr->assign('submissionStageId', $submission->getStageId());
+		$templateMgr->assign('assignedWorkflowRoles', $assignedWorkflowRoles);
 
 		// Get the right notifications type based on current stage id.
 		$notificationMgr = new NotificationManager();

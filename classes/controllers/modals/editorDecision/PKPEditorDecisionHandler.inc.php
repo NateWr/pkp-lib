@@ -27,10 +27,25 @@ class PKPEditorDecisionHandler extends Handler {
 	 * @copydoc PKPHandler::authorize()
 	 */
 	function authorize($request, &$args, $roleAssignments) {
+		$router = $request->getRouter();
+		$operation = $router->getRequestedOp($request);
+
 		// Some operations need a review round id in request.
 		$reviewRoundOps = $this->_getReviewRoundOps();
 		import('lib.pkp.classes.security.authorization.internal.ReviewRoundRequiredPolicy');
 		$this->addPolicy(new ReviewRoundRequiredPolicy($request, $args, 'reviewRoundId', $reviewRoundOps));
+
+		// Authorize requested submission.
+		import('lib.pkp.classes.security.authorization.internal.SubmissionRequiredPolicy');
+		$this->addPolicy(new SubmissionRequiredPolicy($request, $args, 'submissionId'));
+
+		// Authorize user access to at least one stage in this submission workflow
+		import('lib.pkp.classes.security.authorization.SubmissionAssignmentPolicy');
+		$this->addPolicy(new SubmissionAssignmentPolicy());
+
+		// Authorize user access to the requested op based on roles assigned in the submission
+		import('lib.pkp.classes.security.authorization.SubmissionAssignedRoleOperationPolicy');
+		$this->addPolicy(new SubmissionAssignedRoleOperationPolicy($operation, $roleAssignments));
 
 		return parent::authorize($request, $args, $roleAssignments);
 	}
