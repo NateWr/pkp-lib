@@ -75,7 +75,7 @@ class SubmissionFilesCategoryGridDataProvider extends CategoryGridDataProvider {
 	 */
 	function loadData() {
 		// Return only the user accessible workflow stages.
-		return array_keys($this->getAuthorizedContextObject(ASSOC_TYPE_ACCESSIBLE_WORKFLOW_STAGES));
+		return $this->getAuthorizedContextObject(ASSOC_TYPE_ACCESSIBLE_WORKFLOW_STAGES);
 	}
 
 

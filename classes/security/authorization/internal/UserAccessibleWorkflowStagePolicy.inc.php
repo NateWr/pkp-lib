@@ -43,7 +43,7 @@ class UserAccessibleWorkflowStagePolicy extends AuthorizationPolicy {
 
 		$stageId = $this->_stageId;
 
-		if (array_key_exists($stageId, $userAccessibleStages)) {
+		if (in_array($stageId, $userAccessibleStages)) {
 			return AUTHORIZATION_PERMIT;
 		}
 

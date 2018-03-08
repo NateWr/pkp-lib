@@ -88,7 +88,7 @@ abstract class PKPWorkflowHandler extends Handler {
 		$workingStageId = null;
 
 		for ($workingStageId = $currentStageId; $workingStageId >= WORKFLOW_STAGE_ID_SUBMISSION; $workingStageId--) {
-			if (array_key_exists($workingStageId, $accessibleWorkflowStages)) {
+			if (in_array($workingStageId, $accessibleWorkflowStages)) {
 				break;
 			}
 		}
@@ -97,7 +97,7 @@ abstract class PKPWorkflowHandler extends Handler {
 		// submission. Try to get the closest future workflow stage.
 		if ($workingStageId == null) {
 			for ($workingStageId = $currentStageId; $workingStageId <= WORKFLOW_STAGE_ID_PRODUCTION; $workingStageId++) {
-				if (array_key_exists($workingStageId, $accessibleWorkflowStages)) {
+				if (in_array($workingStageId, $accessibleWorkflowStages)) {
 					break;
 				}
 			}

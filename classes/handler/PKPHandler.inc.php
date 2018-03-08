@@ -438,9 +438,6 @@ class PKPHandler {
 
 		$templateMgr = TemplateManager::getManager($request);
 		$templateMgr->assign('userRoles', $userRoles);
-
-		$accessibleWorkflowStages = $this->getAuthorizedContextObject(ASSOC_TYPE_ACCESSIBLE_WORKFLOW_STAGES);
-		if ($accessibleWorkflowStages) $templateMgr->assign('accessibleWorkflowStages', $accessibleWorkflowStages);
 	}
 
 	/**

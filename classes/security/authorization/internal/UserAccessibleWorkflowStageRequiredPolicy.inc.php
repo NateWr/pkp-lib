@@ -52,7 +52,7 @@ class UserAccessibleWorkflowStageRequiredPolicy extends AuthorizationPolicy {
 		foreach ($workflowStages as $stageId => $translationKey) {
 			$accessibleStageRoles = $this->_getAccessibleStageRoles($userId, $contextId, $submission, $stageId);
 			if (!empty($accessibleStageRoles)) {
-				$accessibleWorkflowStages[$stageId] = $accessibleStageRoles;
+				$accessibleWorkflowStages[] = $stageId;
 			}
 		}
 
