@@ -295,6 +295,8 @@
 	<message key="plugins.categories.auth">Authorization Plugins</message>
 	<message key="plugins.categories.blocks">Block Plugins</message>
 	<message key="plugins.categories.blocks.description">Block Plugins are pluggable UI components, such as the various sidebar tools.</message>
+	<message key="plugins.categories.checks">Pre-publication Checks Plugins</message>
+	<message key="plugins.categories.checks.description">Plugins that implement pre-publication checks.</message>
 	<message key="plugins.categories.gateways.description">Gateway Plugins provide live data to external systems.</message>
 	<message key="plugins.categories.gateways">Gateway Plugins</message>
 	<message key="plugins.categories.generic">Generic Plugins</message>

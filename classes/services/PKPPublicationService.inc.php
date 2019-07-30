@@ -301,6 +301,14 @@ class PKPPublicationService implements EntityPropertyInterface, EntityReadInterf
 			$errors['reviewStage'] = __('publication.required.reviewStage');
 		}
 
+		$plugins = \PluginRegistry::loadCategory('checks', true);
+		foreach ($plugins as $plugin) {
+			$errors = (array) $plugin->check($publication, $submission, $allowedLocales, $primaryLocale);
+			if (!empty($errors)) {
+				$errors = array_merge($errors, $errors);
+			}
+		}
+
 		\HookRegistry::call('Publication::validatePublish', [&$errors, $publication, $submission, $allowedLocales, $primaryLocale]);
 
 		return $errors;
