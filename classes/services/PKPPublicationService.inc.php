@@ -303,9 +303,13 @@ class PKPPublicationService implements EntityPropertyInterface, EntityReadInterf
 
 		$plugins = \PluginRegistry::loadCategory('checks', true);
 		foreach ($plugins as $plugin) {
-			$errors = (array) $plugin->check($publication, $submission, $allowedLocales, $primaryLocale);
-			if (!empty($errors)) {
-				$errors = array_merge($errors, $errors);
+			$isDisabledInSection = $plugin->getSetting($submission->getData('contextId'), 'section-' . $publication->getData('sectionId')) === false;
+			if ($isDisabledInSection) {
+				continue;
+			}
+			$pluginErrors = (array) $plugin->check($publication, $submission, $allowedLocales, $primaryLocale);
+			if (!empty($pluginErrors)) {
+				$errors = array_merge($errors, $pluginErrors);
 			}
 		}
 

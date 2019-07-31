@@ -50,10 +50,78 @@ class PKPSectionForm extends Form {
 	}
 
 	/**
+	 * @copydoc Form::initData()
+	 */
+	public function initData() {
+
+		$sectionId = $this->getSectionId();
+		if (!$sectionId) {
+			return;
+		}
+
+		$context = Application::get()->getRequest()->getContext();
+		$section = DAORegistry::getDAO('SectionDAO')->getById($sectionId, $context->getId());
+
+		$checks = [];
+		$checkPlugins = PluginRegistry::loadCategory('checks', true);
+		foreach ($checkPlugins as $checkPlugin) {
+			if ($checkPlugin->getSetting($context->getId(), 'section-' . $section->getId())) {
+				$checks[] = $checkPlugin->getName();
+			}
+		}
+
+		$this->setData('checks', $checks);
+
+		parent::initData();
+	}
+
+	/**
 	 * @copydoc Form::readInputData()
 	 */
 	function readInputData() {
-		$this->readUserVars(array('title', 'subEditors'));
+		$this->readUserVars(array('title', 'subEditors', 'checks'));
+	}
+
+	/**
+	 * @copydoc Form::fetch()
+	 */
+	function fetch($request, $template = null, $display = false) {
+
+		$checkOptions = [];
+		$checkPlugins = PluginRegistry::loadCategory('checks', true);
+		foreach ($checkPlugins as $checkPlugin) {
+			$checkOptions[] = [
+				'name' => $checkPlugin->getName(),
+				'isEnabled' => empty($this->getData('checks')) || in_array($checkPlugin->getName(), $this->getData('checks')),
+				'description' => $checkPlugin->getDescription(),
+			];
+		}
+
+		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign([
+			'checkOptions' => $checkOptions,
+		]);
+
+		return parent::fetch($request, $template, $display);
+	}
+
+	/**
+	 * @copydoc Form::execute
+	 */
+	function execute() {
+		if (!$this->getSectionId()) {
+			return;
+		}
+
+		$context = Application::get()->getRequest()->getContext();
+		$sectionDao = DAORegistry::getDAO('SectionDAO');
+		$section = $sectionDao->getById($this->getSectionId(), $context->getId());
+
+		$checks = $this->getData('checks');
+		$checkPlugins = PluginRegistry::loadCategory('checks', true);
+		foreach ($checkPlugins as $checkPlugin) {
+			$checkPlugin->updateSetting($context->getId(), 'section-' . $section->getId(), in_array($checkPlugin->getName(), $checks));
+		}
 	}
 
 	/**
