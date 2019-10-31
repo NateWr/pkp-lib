@@ -407,7 +407,7 @@ abstract class PKPNotificationOperationManager implements INotificationInfoProvi
 
 				$mail->setBody($body);
 			}
-			
+
 			$mail->assignParams($emailParams);
 
 			$mail->addRecipient($user->getEmail(), $user->getFullName());
@@ -478,7 +478,7 @@ abstract class PKPNotificationOperationManager implements INotificationInfoProvi
 	 */
 	function getUnsubscribeNotificationUrl($request, $notification) {
 		$dispatcher = $request->getDispatcher();
-		$unsubscribeUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'Notification', 'unsubscribeForm', null, array('validate' => $this->createUnsubscribeToken($notification), 'id' => $notification->getId()));
+		$unsubscribeUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'notification', 'unsubscribe', null, array('validate' => $this->createUnsubscribeToken($notification), 'id' => $notification->getId()));
 
 		return $unsubscribeUrl;
 	}
