@@ -108,7 +108,9 @@ class SessionManager {
 		// having the APC opcode cache installed
 		// Bugzilla: https://pkp.sfu.ca/bugzilla/show_bug.cgi?id=8151
 		// PHP Bug tracker: https://bugs.php.net/bug.php?id=58739
-		register_shutdown_function('session_write_close'); 
+		if (!SESSION_DISABLE_INIT) {
+			register_shutdown_function('session_write_close');
+		}
 	}
 
 	/**
@@ -180,7 +182,7 @@ class SessionManager {
 	 * @return boolean
 	 */
 	function write($sessionId, $data) {
-		if (isset($this->userSession)) {
+		if (isset($this->userSession) && !SESSION_DISABLE_INIT) {
 			$this->userSession->setSessionData($data);
 			return $this->sessionDao->updateObject($this->userSession);
 

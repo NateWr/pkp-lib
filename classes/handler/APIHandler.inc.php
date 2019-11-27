@@ -118,7 +118,7 @@ class APIHandler extends PKPHandler {
 				// pkp/pkp-lib#4919: PKP software routes with PATH_INFO (unaffected by
 				// mod_rewrite) but Slim relies on REQUEST_URI. Inject PATH_INFO into
 				// Slim for consistent behavior in URL rewriting scenarios.
-				$newUri = $uri->withPath($_SERVER['PATH_INFO']);
+				$newUri = $uri->withPath($_SERVER['PATH_INFO'] ?? '');
 				if ($uri != $newUri) {
 					$handler->_slimRequest = $request->withUri($newUri);
 					return $app->process($handler->_slimRequest, $response);

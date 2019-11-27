@@ -23,7 +23,8 @@
 	"require-dev": {
 		"facebook/webdriver": "~1.6",
 		"phpunit/phpunit": "~6",
-		"psy/psysh": "@stable"
+		"psy/psysh": "@stable",
+		"symfony/console": "^4.4"
 	},
 	"config": {
 		"component-dir": "lib/components",
