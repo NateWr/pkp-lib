@@ -121,7 +121,8 @@ class PKPSubmissionHandler extends APIHandler {
 	// Implement methods from PKPHandler
 	//
 	function authorize($request, &$args, $roleAssignments) {
-		$routeName = $this->getSlimRequest()->getAttribute('route')->getName();
+		$route = $this->getSlimRequest()->getAttribute('route');
+		$routeName = $route ? $route->getName() : '';
 
 		import('lib.pkp.classes.security.authorization.ContextAccessPolicy');
 		$this->addPolicy(new ContextAccessPolicy($request, $roleAssignments));
