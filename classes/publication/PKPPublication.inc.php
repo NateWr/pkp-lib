@@ -14,7 +14,7 @@
  * @brief Base class for Publication.
  */
 
-class PKPPublication extends DataObject {
+abstract class PKPPublication extends DataObject {
 
 	/**
 	 * Get localized data for this object.
@@ -213,6 +213,14 @@ class PKPPublication extends DataObject {
 			}
 		}
 	}
+
+	/**
+	 * Get the galleys (OJS/OPS) or publication formats (OMP)
+	 * of this publication
+	 *
+	 * @return array
+	 */
+	abstract function getRepresentations();
 
 	/**
 	 * Stamp the date of the last modification to the current time.
