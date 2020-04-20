@@ -18,9 +18,6 @@
 			$('body').pkpHandler(
 				'$.pkp.controllers.SiteHandler',
 				{ldelim}
-					{if $isUserLoggedIn}
-						inlineHelpState: {$initialHelpState},
-					{/if}
 					toggleHelpUrl: {url|json_encode page="user" op="toggleHelp" escape=false},
 					toggleHelpOnText: {$toggleHelpOnText|json_encode},
 					toggleHelpOffText: {$toggleHelpOffText|json_encode},
@@ -28,137 +25,127 @@
 				{rdelim});
 		{rdelim});
 	</script>
-	<div class="pkp_structure_page">
-		<header class="pkp_structure_head" role="banner">
-			<div class="pkp_navigation" id="headerNavigationContainer">
 
-				{* Logo or site title *}
-				<div class="pkp_site_name">
-					{if $currentContext && $multipleContexts}
-						{capture assign=homeUrl}{url journal="index" router=$smarty.const.ROUTE_PAGE}{/capture}
-					{else}
-						{capture assign=homeUrl}{url page="index" router=$smarty.const.ROUTE_PAGE}{/capture}
-					{/if}
-					{if $displayPageHeaderLogo && is_array($displayPageHeaderLogo)}
-						<a href="{$homeUrl}" class="is_img">
-							<img src="{$publicFilesDir}/{$displayPageHeaderLogo.uploadName|escape:"url"}" {if $displayPageHeaderLogo.altText != ''}alt="{$displayPageHeaderLogo.altText|escape}"{/if}>
-						</a>
-					{else}
-						<a href="{$homeUrl}" class="is_img">
-							<img src="{$baseUrl}/templates/images/structure/logo.png">
-						</a>
-					{/if}
-				</div>
-
-				{* Primary navigation menu *}
-				{if $isUserLoggedIn}
-					<script type="text/javascript">
-						// Attach the JS file tab handler.
-						$(function() {ldelim}
-							$('#navigationPrimary').pkpHandler(
-									'$.pkp.controllers.MenuHandler');
-						{rdelim});
-					 </script>
-					<ul id="navigationPrimary" class="pkp_navigation_primary pkp_nav_list" role="navigation" aria-label="{translate|escape key="common.navigation.site"}">
-
-						{* Users with ONLY the reader role *}
-						{if (count((array) $userRoles) === 1 && in_array(ROLE_ID_READER, (array) $userRoles))}
-							<li>
-								<a href="{url router=$smarty.const.ROUTE_PAGE page="submission" op="wizard"}">
-									{translate key="author.submit"}
-								</a>
-							</li>
-						{/if}
-
-						{if array_intersect(array(ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_REVIEWER, ROLE_ID_AUTHOR), (array)$userRoles)}
-							<li>
-								<a href="{url router=$smarty.const.ROUTE_PAGE page="submissions"}">
-									{translate key="navigation.submissions"}
-								</a>
-							</li>
-						{/if}
-
-						{$appSpecificMenuItems}
-
-						{if array_intersect(array(ROLE_ID_MANAGER), (array)$userRoles) && $currentContext && $currentContext->getData('enableAnnouncements')}
-							<li>
-								<a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="settings" path="announcements"}">
-									{translate key="announcement.announcements"}
-								</a>
-							</li>
-						{/if}
-
-						{if array_intersect(array(ROLE_ID_MANAGER), (array)$userRoles)}
-							<li aria-haspopup="true" aria-expanded="false">
-								<a href="#">{translate key="navigation.settings"}</a>
-								<ul>
-									<li><a href="{$contextSettingsUrl}">{translate key="context.context"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="settings" path="website"}">{translate key="manager.website"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="settings" path="workflow"}">{translate key="manager.workflow"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="settings" path="distribution"}">{translate key="manager.distribution"}</a></li>
-								</ul>
-							</li>
-							<li aria-haspopup="true" aria-expanded="false">
-								<a href="#">{translate key="navigation.access"}</a>
-								<ul>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="settings" path="access" anchor="users"}">{translate key="manager.users"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="settings" path="access" anchor="roles"}">{translate key="manager.roles"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="settings" path="access" anchor="access"}">{translate key="manager.siteAccessOptions.siteAccessOptions"}</a></li>
-								</ul>
-							</li>
-							<li aria-haspopup="true" aria-expanded="false">
-								<a href="#">{translate key="navigation.tools"}</a>
-								<ul>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="tools" anchor="importexport"}">{translate key="navigation.tools.importExport"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="tools" anchor="statistics"}">{translate key="manager.statistics.reports"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="tools" anchor="permissions"}">{translate key="settings.libraryFiles.category.permissions"}</a></li>
-								</ul>
-							</li>
-							<li aria-haspopup="true" aria-expanded="false">
-								<a href="#">{translate key="navigation.tools.statistics"}</a>
-								<ul>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="stats" op="publications"}">{translate key="common.publications"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="stats" op="editorial"}">{translate key="stats.editorialActivity"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="stats" op="users"}">{translate key="manager.users"}</a></li>
-									<li><a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="tools" anchor="statistics"}">{translate key="manager.statistics.reports"}</a></li>
-								</ul>
-							</li>
-						{/if}
-						{if array_intersect(array(ROLE_ID_SITE_ADMIN), (array)$userRoles)}
-							{if $currentContext && !array_intersect(array(ROLE_ID_MANAGER), (array)$userRoles)}
-							<li>
-								<a href="{url router=$smarty.const.ROUTE_PAGE page="management" op="access" anchor="users"}">
-									{translate key="navigation.access"}
-								</a>
-							</li>
+	<div id="app" class="app {if $isLoggedInAs} app--isLoggedInAs{/if}" v-cloak>
+		<header class="app__header" role="banner">
+			{if $availableContexts}
+				<dropdown class="app__headerAction app__contexts">
+					<template slot="button">
+						<icon icon="sitemap"></icon>
+						<span class="-screenReader">{translate key="context.contexts"}</span>
+					</template>
+					<ul>
+						{foreach from=$availableContexts item=$availableContext}
+							{if $availableContext->name !== $currentContext->getLocalizedData('name')}
+								<li>
+									<a href="{$availableContext->url|escape}" class="pkpDropdown__action">
+										{$availableContext->name|escape}
+									</a>
+								</li>
 							{/if}
-							<li>
-								<a href="{if $multipleContexts}{url router=$smarty.const.ROUTE_PAGE context="index" page="admin" op="index"}{else}{url router=$smarty.const.ROUTE_PAGE page="admin" op="index"}{/if}">
-									{translate key="navigation.admin"}
-								</a>
-							</li>
-						{/if}
+						{/foreach}
 					</ul>
-				{/if}
-
-				{capture assign=fetchHeaderUrl}{url router=$smarty.const.ROUTE_COMPONENT component="page.PageHandler" op="userNavBackend" escape=false}{/capture}
-				{load_url_in_div class="pkp_navigation_user" id="navigationUserWrapper" url=$fetchHeaderUrl}
-			</div><!-- pkp_navigation -->
+				</dropdown>
+			{/if}
+			<div class="app__contextTitle">
+				{$currentContext->getLocalizedData('name')}
+			</div>
+			{if $currentUser}
+				<div class="app__headerActions">
+					<dropdown class="app__headerAction app__tasks">
+						<template slot="button">
+							Tasks
+							<badge>1</badge>
+						</template>
+						<div style="width: 400px; height: 300px;">
+							... tasks grid ...
+						</div>
+					</dropdown>
+					<dropdown class="app__headerAction app__userNav">
+						<template slot="button">
+							<icon icon="user-circle-o"></icon>
+							{if $isUserLoggedInAs}
+								<icon icon="user-circle" class="app__userNav__isLoggedInAsWarning"></icon>
+							{/if}
+							<span class="-screenReader">{$currentUser->getData('username')}</span>
+						</template>
+						<nav aria-label="{translate key="common.navigation.user"}">
+							<div class="pkpDropdown__section">
+								<div class="app__userNav__changeLocale">Change Language</div>
+								<ul>
+									{foreach from=$supportedLocales item="locale" key="localeKey"}
+										<li>
+											<a href="{url router=$smarty.const.ROUTE_PAGE page="user" op="setLocale" path=$localeKey}" class="pkpDropdown__action">
+												{if $localeKey == $currentLocale}
+													<icon icon="check" :inline="true"></icon>
+												{/if}
+												{$locale|escape}
+											</a>
+										</li>
+									{/foreach}
+								</ul>
+							</div>
+							{if $isUserLoggedInAs}
+								<div class="pkpDropdown__section">
+									<div class="app__userNav__loggedInAs">
+										{translate key="manager.people.signedInAs" username=$currentUser->getData('username')}
+										<a href="{url router=$smarty.const.ROUTE_PAGE page="login" op="signOutAsUser"}" class="app__userNav__logOutAs">{translate key="user.logOutAs" username=$currentUser->getData('username')}</a>.
+									</div>
+								</div>
+							{/if}
+							<div class="pkpDropdown__section">
+								<ul>
+									<li>
+										<a href="{url router=$smarty.const.ROUTE_PAGE page="user" op="profile"}" class="pkpDropdown__action">
+											{translate key="user.profile.editProfile"}
+										</a>
+									</li>
+									<li>
+										{if $isUserLoggedInAs}
+											<a href="{url router=$smarty.const.ROUTE_PAGE page="login" op="signOutAsUser"}" class="pkpDropdown__action">
+												{translate key="user.logOutAs" username=$currentUser->getData('username')}
+											</a>
+										{else}
+											<a href="{url router=$smarty.const.ROUTE_PAGE page="login" op="signOut"}" class="pkpDropdown__action">
+												{translate key="user.logOut"}
+											</a>
+										{/if}
+									</li>
+								</ul>
+							</div>
+						</nav>
+					</dropdown>
+				</div>
+			{/if}
 		</header>
 
-		<div class="pkp_structure_content">
+		<div class="app__body">
+			<nav v-if="!!menu" class="app__nav" aria-label="{translate key="common.navigation.site"}">
+				<ul>
+					<li v-for="(menuItem, key) in menu" :key="key" :class="!!menuItem.submenu ? 'app__navGroup' : ''">
+						<div v-if="!!menuItem.submenu" class="app__navItem app__navItem--hasSubmenu">
+							{{ menuItem.name }}
+						</div>
+						<a v-else class="app__navItem" :class="menuItem.isCurrent ? 'app__navItem--isCurrent' : ''" :href="menuItem.url">
+							{{ menuItem.name }}
+						</a>
+						<ul v-if="!!menuItem.submenu">
+							<li v-for="(submenuItem, submenuKey) in menuItem.submenu" :key="submenuKey">
+								<a class="app__navItem" :class="submenuItem.isCurrent ? 'app__navItem--isCurrent' : ''" :href="submenuItem.url">
+									{{ submenuItem.name }}
+								</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
 
-			<script type="text/javascript">
-				// Attach the JS page handler to the main content wrapper.
-				$(function() {ldelim}
-					$('div.pkp_structure_main').pkpHandler('$.pkp.controllers.PageHandler');
-				{rdelim});
-			</script>
+			<main class="app__main">
+				<div class="app__page">
 
-			<div class="pkp_structure_main" role="main">
-				{** allow pages to provide their own titles **}
-				{if !$suppressPageTitle}
-					<div class="pkp_page_title">
-						<h1>{$pageTitleTranslated}</h1>
-					</div>
-				{/if}
+					{** allow pages to provide their own titles **}
+					{if !$suppressPageTitle}
+						<div class="pkp_page_title">
+							<h1>{$pageTitleTranslated}</h1>
+						</div>
+					{/if}

@@ -51,14 +51,6 @@ class PKPStatsEditorialContainer extends PKPStatsComponent {
 				'averagesApiUrl' => $this->averagesApiUrl,
 				'percentageStats' => $this->percentageStats,
 				'tableRows' => $this->tableRows,
-				'i18n' => array_merge(
-					$config['i18n'],
-					[
-						'descriptionForStat' => __('stats.descriptionForStat'),
-						'countWithYearlyAverage' => __('stats.countWithYearlyAverage'),
-					],
-					$this->i18n
-				),
 			]
 		);
 

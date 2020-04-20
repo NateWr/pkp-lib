@@ -19,6 +19,9 @@ import('lib.pkp.classes.submission.SubmissionFile'); // SUBMISSION_FILE_REVIEW_.
 
 abstract class PKPAuthorDashboardHandler extends Handler {
 
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * Constructor
 	 */

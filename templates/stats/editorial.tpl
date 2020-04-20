@@ -10,27 +10,26 @@
  *}
 {include file="common/header.tpl" suppressPageTitle=true pageTitle="stats.editorialActivity"}
 
-<div class="pkp_page_content">
-	{assign var="uuid" value=""|uniqid|escape}
-	<div id="editorial-stats-handler-{$uuid}" class="pkpStats pkpStats--editorial">
-		<h1 class="-screenReader">{translate key="stats.editorialActivity"}</h1>
-		<div v-if="activeByStage" class="pkpStats__graph">
-			<div class="pkpStats--editorial__stageWrapper -pkpClearfix">
-				<div class="pkpStats--editorial__stageChartWrapper">
-					<doughnut-chart :chart-data="chartData"></doughnut-chart>
-				</div>
-				<div class="pkpStats--editorial__stageList">
-					<h2 class="pkpStats--editorial__stage pkpStats--editorial__stage--total">
-						<span class="pkpStats--editorial__stageCount">{{ totalActive }}</span>
-						<span class="pkpStats--editorial__stageLabel">{translate key="stats.submissionsActive"}</span>
-					</h2>
-					<div v-for="stage in activeByStage" :key="stage.name" class="pkpStats--editorial__stage">
-						<span class="pkpStats--editorial__stageCount">{{ stage.count }}</span>
-						<span class="pkpStats--editorial__stageLabel">{{ stage.name }}</span>
-					</div>
+<div class="pkpStats pkpStats--editorial">
+	<h1 class="-screenReader">{translate key="stats.editorialActivity"}</h1>
+	<div v-if="activeByStage" class="pkpStats__graph">
+		<div class="pkpStats--editorial__stageWrapper -pkpClearfix">
+			<div class="pkpStats--editorial__stageChartWrapper">
+				<doughnut-chart :chart-data="chartData"></doughnut-chart>
+			</div>
+			<div class="pkpStats--editorial__stageList">
+				<h2 class="pkpStats--editorial__stage pkpStats--editorial__stage--total">
+					<span class="pkpStats--editorial__stageCount">{{ totalActive }}</span>
+					<span class="pkpStats--editorial__stageLabel">{translate key="stats.submissionsActive"}</span>
+				</h2>
+				<div v-for="stage in activeByStage" :key="stage.name" class="pkpStats--editorial__stage">
+					<span class="pkpStats--editorial__stageCount">{{ stage.count }}</span>
+					<span class="pkpStats--editorial__stageLabel">{{ stage.name }}</span>
 				</div>
 			</div>
 		</div>
+	</div>
+	<div class="pkpStats__panel">
 		<pkp-header>
 			<h1 id="editorialActivityTabelLabel">
 				{translate key="stats.trends"}
@@ -44,21 +43,21 @@
 					:date-end="dateEnd"
 					:date-end-max="dateEndMax"
 					:options="dateRangeOptions"
-					dateRangeLabel="{translate key="stats.dateRange"}"
-					dateFormatInstructionsLabel="{translate key="stats.dateRange.instructions"}"
-					changeDateRangeLabel="{translate key="stats.dateRange.change"}"
-					sinceDateLabel="{translate key="stats.dateRange.sinceDate"}"
-					untilDateLabel="{translate key="stats.dateRange.untilDate"}"
-					allDatesLabel="{translate key="stats.dateRange.allDates"}"
-					customRangeLabel="{translate key="stats.dateRange.customRange"}"
-					fromDateLabel="{translate key="stats.dateRange.from"}"
-					toDateLabel="{translate key="stats.dateRange.to"}"
-					applyLabel="{translate key="stats.dateRange.apply"}"
-					invalidDateLabel="{translate key="stats.dateRange.invalidDate"}"
-					dateDoesNotExistLabel="{translate key="stats.dateRange.dateDoesNotExist"}"
-					invalidDateRangeLabel="{translate key="stats.dateRange.invalidDateRange"}"
-					invalidEndDateMaxLabel="{translate key="stats.dateRange.invalidEndDateMax"}"
-					invalidStartDateMinLabel="{translate key="stats.dateRange.invalidStartDateMin"}"
+					date-range-label="{translate key="stats.dateRange"}"
+					date-format-instructions-label="{translate key="stats.dateRange.instructions"}"
+					change-date-range-label="{translate key="stats.dateRange.change"}"
+					since-date-label="{translate key="stats.dateRange.sinceDate"}"
+					until-date-label="{translate key="stats.dateRange.untilDate"}"
+					all-dates-label="{translate key="stats.dateRange.allDates"}"
+					custom-range-label="{translate key="stats.dateRange.customRange"}"
+					from-date-label="{translate key="stats.dateRange.from"}"
+					to-date-label="{translate key="stats.dateRange.to"}"
+					apply-label="{translate key="stats.dateRange.apply"}"
+					invalid-date-label="{translate key="stats.dateRange.invalidDate"}"
+					date-does-not-exist-label="{translate key="stats.dateRange.dateDoesNotExist"}"
+					invalid-date-range-label="{translate key="stats.dateRange.invalidDateRange"}"
+					invalid-end-date-max-label="{translate key="stats.dateRange.invalidEndDateMax"}"
+					invalid-start-date-min-label="{translate key="stats.dateRange.invalidStartDateMin"}"
 					@set-range="setDateRange"
 					@updated:current-range="setCurrentDateRange"
 				></date-range>
@@ -67,7 +66,7 @@
 					:is-active="isSidebarVisible"
 					@click="toggleSidebar"
 				>
-					<icon icon="filter" :inline="true" />
+					<icon icon="filter" :inline="true"></icon>
 					{translate key="common.filter"}
 				</pkp-button>
 			</template>
@@ -93,7 +92,6 @@
 						:key="filter.param + filter.value"
 						v-bind="filter"
 						:is-filter-active="isFilterActive(filter.param, filter.value)"
-						:i18n="i18n"
 						@add-filter="addFilter"
 						@remove-filter="removeFilter"
 					></pkp-filter>
@@ -118,7 +116,7 @@
 								<template v-if="column.name === 'name'">
 									{{ row.name }}
 									<tooltip v-if="row.description"
-										:label="__('descriptionForStat', {ldelim}stat: row.name{rdelim})"
+										:label="__('stats.descriptionForStat', {ldelim}stat: row.name{rdelim})"
 										:tooltip="row.description"
 									></tooltip>
 								</template>
@@ -129,9 +127,6 @@
 			</div>
 		</div>
 	</div>
-	<script>
-		pkp.registry.init('editorial-stats-handler-{$uuid}', 'StatsEditorialContainer', {$statsComponent->getConfig()|json_encode});
-	</script>
 </div>
 
 {include file="common/footer.tpl"}

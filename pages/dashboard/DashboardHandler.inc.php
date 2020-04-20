@@ -20,6 +20,10 @@ define('SUBMISSIONS_LIST_MY_QUEUE', 'myQueue');
 define('SUBMISSIONS_LIST_UNASSIGNED', 'unassigned');
 
 class DashboardHandler extends Handler {
+
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * Constructor
 	 */

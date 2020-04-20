@@ -1222,7 +1222,7 @@ msgid "locale.supported"
 msgstr "Supported locales"
 
 msgid "navigation.access"
-msgstr "Users &amp; Roles"
+msgstr "Users & Roles"
 
 msgid "navigation.about"
 msgstr "About"

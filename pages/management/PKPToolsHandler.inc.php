@@ -19,6 +19,10 @@ import('lib.pkp.pages.management.ManagementHandler');
 define('IMPORTEXPORT_PLUGIN_CATEGORY', 'importexport');
 
 class PKPToolsHandler extends ManagementHandler {
+
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * Constructor.
 	 */

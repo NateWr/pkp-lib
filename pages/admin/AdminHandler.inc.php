@@ -16,6 +16,10 @@
 import('classes.handler.Handler');
 
 class AdminHandler extends Handler {
+
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * Constructor
 	 */

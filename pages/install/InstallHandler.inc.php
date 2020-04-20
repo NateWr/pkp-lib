@@ -19,6 +19,9 @@ import('classes.handler.Handler');
 
 class InstallHandler extends Handler {
 
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * If no context is selected, list all.
 	 * Otherwise, display the index page for the selected context.

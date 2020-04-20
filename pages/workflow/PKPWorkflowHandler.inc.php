@@ -23,6 +23,9 @@ import('lib.pkp.classes.linkAction.request.AjaxModal');
 
 abstract class PKPWorkflowHandler extends Handler {
 
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	//
 	// Implement template methods from PKPHandler
 	//

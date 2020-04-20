@@ -58,6 +58,9 @@ class PKPTemplateManager extends Smarty {
 	/** @var array Key/value list of locale keys to expose in the JS interface */
 	private $_localeKeys = array();
 
+	/** @var array Initial state data to be managed by the page's Vue.js component */
+	private $_state = array();
+
 	/** @var string Type of cacheability (Cache-Control). */
 	private $_cacheability;
 
@@ -111,8 +114,6 @@ class PKPTemplateManager extends Smarty {
 		$this->assign(array(
 			'defaultCharset' => Config::getVar('i18n', 'client_charset'),
 			'baseUrl' => $request->getBaseUrl(),
-			'requiresFormRequest' => $request->isPost(),
-			'currentUrl' => $request->getCompleteUrl(),
 			'dateFormatTrunc' => Config::getVar('general', 'date_format_trunc'),
 			'dateFormatShort' => Config::getVar('general', 'date_format_short'),
 			'dateFormatLong' => Config::getVar('general', 'date_format_long'),
@@ -121,7 +122,7 @@ class PKPTemplateManager extends Smarty {
 			'timeFormat' => Config::getVar('general', 'time_format'),
 			'currentContext' => $currentContext,
 			'currentLocale' => $locale,
-			'pageTitle' => $application->getNameKey(),
+			'currentLocaleLangDir' => AppLocale::getLocaleDirection($locale),
 			'applicationName' => __($application->getNameKey()),
 		));
 
@@ -148,202 +149,26 @@ class PKPTemplateManager extends Smarty {
 			$this->assign(['activeTheme' => $activeTheme]);
 		}
 
-		$this->setConstants([
-			'REALLY_BIG_NUMBER',
-			'UPLOAD_MAX_FILESIZE',
-			'WORKFLOW_STAGE_ID_PUBLISHED',
-			'WORKFLOW_STAGE_ID_SUBMISSION',
-			'WORKFLOW_STAGE_ID_INTERNAL_REVIEW',
-			'WORKFLOW_STAGE_ID_EXTERNAL_REVIEW',
-			'WORKFLOW_STAGE_ID_EDITING',
-			'WORKFLOW_STAGE_ID_PRODUCTION',
-			'INSERT_TAG_VARIABLE_TYPE_PLAIN_TEXT',
-			'ROLE_ID_MANAGER',
-			'ROLE_ID_SITE_ADMIN',
-			'ROLE_ID_AUTHOR',
-			'ROLE_ID_REVIEWER',
-			'ROLE_ID_ASSISTANT',
-			'ROLE_ID_READER',
-			'ROLE_ID_SUB_EDITOR',
-			'ROLE_ID_SUBSCRIPTION_MANAGER',
-		]);
-
-		// Always pass these ListBuilder constants to the browser
-		// because we a ListBuilder may be loaded in an ajax request
-		// and won't have an opportunity to pass its constants to
-		// the template manager. This is not a recommended practice,
-		// but these are the only constants from a controller that are
-		// required on the frontend. We can remove them once the
-		// ListBuilderHandler is no longer needed.
-		import('lib.pkp.classes.controllers.listbuilder.ListbuilderHandler');
-		$this->setConstants([
-			'LISTBUILDER_SOURCE_TYPE_TEXT',
-			'LISTBUILDER_SOURCE_TYPE_SELECT',
-			'LISTBUILDER_OPTGROUP_LABEL',
-		]);
-
 		if (is_a($router, 'PKPPageRouter')) {
 			$this->assign(array(
 				'requestedPage' => $router->getRequestedPage($request),
 				'requestedOp' => $router->getRequestedOp($request),
 			));
 
-			// Register the jQuery script
-			$min = Config::getVar('general', 'enable_minified') ? '.min' : '';
-			if (Config::getVar('general', 'enable_cdn')) {
-				$jquery = '//ajax.googleapis.com/ajax/libs/jquery/' . CDN_JQUERY_VERSION . '/jquery' . $min . '.js';
-				$jqueryUI = '//ajax.googleapis.com/ajax/libs/jqueryui/' . CDN_JQUERY_UI_VERSION . '/jquery-ui' . $min . '.js';
-			} else {
-				$jquery = $request->getBaseUrl() . '/lib/pkp/lib/vendor/components/jquery/jquery' . $min . '.js';
-				$jqueryUI = $request->getBaseUrl() . '/lib/pkp/lib/vendor/components/jqueryui/jquery-ui' . $min . '.js';
-			}
-			$this->addJavaScript(
-				'jquery',
-				$jquery,
-				array(
-					'priority' => STYLE_SEQUENCE_CORE,
-					'contexts' => 'backend',
-				)
-			);
-			$this->addJavaScript(
-				'jqueryUI',
-				$jqueryUI,
-				array(
-					'priority' => STYLE_SEQUENCE_CORE,
-					'contexts' => 'backend',
-				)
-			);
-
-			// Common locale keys available in the browser for every page
-			$this->setLocaleKeys([
-				'common.cancel',
-				'common.clearSearch',
-				'common.close',
-				'common.confirm',
-				'common.delete',
-				'common.edit',
-				'common.error',
-				'common.filter',
-				'common.filterAdd',
-				'common.filterRemove',
-				'common.loading',
-				'common.no',
-				'common.noItemsFound',
-				'common.ok',
-				'common.orderUp',
-				'common.orderDown',
-				'common.pageNumber',
-				'common.pagination.goToPage',
-				'common.pagination.label',
-				'common.pagination.next',
-				'common.pagination.previous',
-				'common.remove',
-				'common.required',
-				'common.save',
-				'common.saving',
-				'common.search',
-				'common.unknownError',
-				'common.view',
-				'common.viewLess',
-				'common.viewMore',
-				'common.yes',
-				'form.dataHasChanged',
-				'form.errorA11y',
-				'form.errorGoTo',
-				'form.errorMany',
-				'form.errorOne',
-				'form.errors',
-				'form.multilingualLabel',
-				'form.multilingualProgress',
-				'help.help',
-				'validator.required'
-			]);
-
-			// Register the pkp-lib JS library
-			$this->registerJSLibraryData();
-			$this->registerJSLibrary();
-
-			// Load Noto Sans font from Google Font CDN
-			// To load extended latin or other character sets, see:
-			// https://www.google.com/fonts#UsePlace:use/Collection:Noto+Sans
-			if (Config::getVar('general', 'enable_cdn')) {
-				$this->addStyleSheet(
-					'pkpLibNotoSans',
-					'//fonts.googleapis.com/css?family=Noto+Sans:400,400italic,700,700italic',
-					array(
-						'priority' => STYLE_SEQUENCE_CORE,
-						'contexts' => 'backend',
-					)
-				);
-			}
-
-			// Register the backend app stylesheets
-			if ($dispatcher = $request->getDispatcher()) {
-
-				// FontAwesome - http://fontawesome.io/
-				if (Config::getVar('general', 'enable_cdn')) {
-					$url = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css';
-				} else {
-					$url = $request->getBaseUrl() . '/lib/pkp/styles/fontawesome/fontawesome.css';
+			// A user-uploaded stylesheet
+			if ($currentContext) {
+				$contextStyleSheet = $currentContext->getData('styleSheet');
+				if ($contextStyleSheet) {
+					import('classes.file.PublicFileManager');
+					$publicFileManager = new PublicFileManager();
+					$this->addStyleSheet(
+						'contextStylesheet',
+						$request->getBaseUrl() . '/' . $publicFileManager->getContextFilesPath($currentContext->getId()) . '/' . $contextStyleSheet['uploadName'],
+						array(
+							'priority' => STYLE_SEQUENCE_LATE
+						)
+					);
 				}
-				$this->addStyleSheet(
-					'fontAwesome',
-					$url,
-					array(
-						'priority' => STYLE_SEQUENCE_CORE,
-						'contexts' => 'backend',
-					)
-				);
-
-				// Stylesheet compiled from Vue.js single-file components
-				$this->addStyleSheet(
-					'build',
-					$request->getBaseUrl() . '/styles/build.css',
-					array(
-						'priority' => STYLE_SEQUENCE_CORE,
-						'contexts' => 'backend',
-					)
-				);
-
-				// The legacy stylesheet for the backend
-				$this->addStyleSheet(
-					'pkpLib',
-					$dispatcher->url($request, ROUTE_COMPONENT, null, 'page.PageHandler', 'css'),
-					array(
-						'priority' => STYLE_SEQUENCE_CORE,
-						'contexts' => 'backend',
-					)
-				);
-
-				// A user-uploaded stylesheet
-				if ($currentContext) {
-					$contextStyleSheet = $currentContext->getData('styleSheet');
-					if ($contextStyleSheet) {
-						import('classes.file.PublicFileManager');
-						$publicFileManager = new PublicFileManager();
-						$this->addStyleSheet(
-							'contextStylesheet',
-							$request->getBaseUrl() . '/' . $publicFileManager->getContextFilesPath($currentContext->getId()) . '/' . $contextStyleSheet['uploadName'],
-							array(
-								'priority' => STYLE_SEQUENCE_LATE
-							)
-						);
-					}
-				}
-			}
-
-			// Add reading language flag based on locale
-			$this->assign('currentLocaleLangDir', AppLocale::getLocaleDirection($locale) );
-
-			// If there's a locale-specific stylesheet, add it.
-			if (($localeStyleSheet = AppLocale::getLocaleStyleSheet($locale)) != null) {
-				$this->addStyleSheet(
-					'pkpLibLocale',
-					$request->getBaseUrl() . '/' . $localeStyleSheet,
-					array(
-						'contexts' => array('frontend', 'backend'),
-					)
-				);
 			}
 
 			// Register recaptcha on relevant pages
@@ -421,20 +246,7 @@ class PKPTemplateManager extends Smarty {
 		$this->registerPlugin('function','page_info', array($this, 'smartyPageInfo'));
 		$this->registerPlugin('function','pluck_files', array($this, 'smartyPluckFiles'));
 
-		// Modified vocabulary for creating forms
-		$fbv = $this->getFBV();
-		$this->registerPlugin('block', 'fbvFormSection', array($fbv, 'smartyFBVFormSection'));
-		$this->registerPlugin('block', 'fbvFormArea', array($fbv, 'smartyFBVFormArea'));
-		$this->registerPlugin('function', 'fbvFormButtons', array($fbv, 'smartyFBVFormButtons'));
-		$this->registerPlugin('function', 'fbvElement', array($fbv, 'smartyFBVElement'));
-		$this->assign('fbvStyles', $fbv->getStyles());
-
-		$this->registerPlugin('function', 'fieldLabel', array($fbv, 'smartyFieldLabel'));
-
 		$this->registerPlugin('function', 'url', array($this, 'smartyUrl'));
-		// ajax load into a div or any element
-		$this->registerPlugin('function', 'load_url_in_el', array($this, 'smartyLoadUrlInEl'));
-		$this->registerPlugin('function', 'load_url_in_div', array($this, 'smartyLoadUrlInDiv'));
 
 		// load stylesheets/scripts/headers from a given context
 		$this->registerPlugin('function', 'load_stylesheet', array($this, 'smartyLoadStylesheet'));
@@ -444,40 +256,56 @@ class PKPTemplateManager extends Smarty {
 		// load NavigationMenu Areas from context
 		$this->registerPlugin('function', 'load_menu', array($this, 'smartyLoadNavigationMenuArea'));
 
+		// Load form builder vocabulary
+		$fbv = $this->getFBV();
+		$this->registerPlugin('block', 'fbvFormSection', array($fbv, 'smartyFBVFormSection'));
+		$this->registerPlugin('block', 'fbvFormArea', array($fbv, 'smartyFBVFormArea'));
+		$this->registerPlugin('function', 'fbvFormButtons', array($fbv, 'smartyFBVFormButtons'));
+		$this->registerPlugin('function', 'fbvElement', array($fbv, 'smartyFBVElement'));
+		$this->registerPlugin('function', 'fieldLabel', array($fbv, 'smartyFieldLabel'));
+		$this->assign('fbvStyles', $fbv->getStyles());
+
+		// ajax load into a div or any element
+		$this->registerPlugin('function', 'load_url_in_el', array($this, 'smartyLoadUrlInEl'));
+		$this->registerPlugin('function', 'load_url_in_div', array($this, 'smartyLoadUrlInDiv'));
+
+		// Always pass these ListBuilder constants to the browser
+		// because a ListBuilder may be loaded in an ajax request
+		// and won't have an opportunity to pass its constants to
+		// the template manager. This is not a recommended practice,
+		// but these are the only constants from a controller that are
+		// required on the frontend. We can remove them once the
+		// ListBuilderHandler is no longer needed.
+		import('lib.pkp.classes.controllers.listbuilder.ListbuilderHandler');
+		$this->setConstants([
+			'LISTBUILDER_SOURCE_TYPE_TEXT',
+			'LISTBUILDER_SOURCE_TYPE_SELECT',
+			'LISTBUILDER_OPTGROUP_LABEL',
+		]);
+
 		/**
 		 * Kludge to make sure no code that tries to connect to the
 		 * database is executed (e.g., when loading installer pages).
 		 */
 		if (!defined('SESSION_DISABLE_INIT')) {
-			$this->assign(array(
+			$this->assign([
 				'isUserLoggedIn' => Validation::isLoggedIn(),
 				'isUserLoggedInAs' => Validation::isLoggedInAs(),
 				'itemsPerPage' => Config::getVar('interface', 'items_per_page'),
 				'numPageLinks' => Config::getVar('interface', 'page_links'),
-			));
+			]);
 
 			$user = $request->getUser();
 			if ($user) {
-				$notificationDao = DAORegistry::getDAO('NotificationDAO'); /* @var $notificationDao NotificationDAO */
-				$notifications = $notificationDao->getByUserId($user->getId(), NOTIFICATION_LEVEL_TRIVIAL);
-				if ($notifications->getCount() > 0) {
-					$this->assign('hasSystemNotifications', true);
-				}
+				$this->assign([
+					'currentUser' => $user,
+				]);
 
 				// Assign the user name to be used in the sitenav
-				$this->assign(array(
+				$this->assign([
 					'loggedInUsername' => $user->getUserName(),
-					'initialHelpState' => (int) $user->getInlineHelp(),
-				));
+				]);
 			}
-
-			$multipleContexts = false;
-			$contextDao = Application::getContextDAO();
-			$workingContexts = $contextDao->getAvailable($user?$user->getId():null);
-			if ($workingContexts && $workingContexts->getCount() > 1) {
-				$multipleContexts = true;
-			}
-			$this->assign('multipleContexts', $multipleContexts);
 		}
 
 		if (Config::getVar('general', 'installed')) {
@@ -698,6 +526,27 @@ class PKPTemplateManager extends Smarty {
 	}
 
 	/**
+	 * Get a piece of the state data
+	 *
+	 * @param string $key
+	 * @return mixed
+	 */
+	function getState($key) {
+		return array_key_exists($key, $this->_state)
+			? $this->_state[$key]
+			: null;
+	}
+
+	/**
+	 * Set initial state data to be managed by the Vue.js component on this page
+	 *
+	 * @param array $data
+	 */
+	function setState($data) {
+		$this->_state = array_merge($this->_state, $data);
+	}
+
+	/**
 	 * Register all files required by the core JavaScript library
 	 */
 	function registerJSLibrary() {
@@ -829,6 +678,316 @@ class PKPTemplateManager extends Smarty {
 	}
 
 	/**
+	 * Set up the template requirements for editorial backend pages
+	 */
+	function setupBackendPage() {
+
+		$request = Application::get()->getRequest();
+		$dispatcher = $request->getDispatcher();
+		$router = $request->getRouter();
+
+		if (empty($this->get_template_vars('pageComponent'))) {
+			$this->assign('pageComponent', 'PageContainer');
+		}
+
+		$this->setConstants([
+			'REALLY_BIG_NUMBER',
+			'UPLOAD_MAX_FILESIZE',
+			'WORKFLOW_STAGE_ID_PUBLISHED',
+			'WORKFLOW_STAGE_ID_SUBMISSION',
+			'WORKFLOW_STAGE_ID_INTERNAL_REVIEW',
+			'WORKFLOW_STAGE_ID_EXTERNAL_REVIEW',
+			'WORKFLOW_STAGE_ID_EDITING',
+			'WORKFLOW_STAGE_ID_PRODUCTION',
+			'INSERT_TAG_VARIABLE_TYPE_PLAIN_TEXT',
+			'ROLE_ID_MANAGER',
+			'ROLE_ID_SITE_ADMIN',
+			'ROLE_ID_AUTHOR',
+			'ROLE_ID_REVIEWER',
+			'ROLE_ID_ASSISTANT',
+			'ROLE_ID_READER',
+			'ROLE_ID_SUB_EDITOR',
+			'ROLE_ID_SUBSCRIPTION_MANAGER',
+		]);
+
+		// Common locale keys available in the browser for every page
+		$this->setLocaleKeys([
+			'common.cancel',
+			'common.clearSearch',
+			'common.close',
+			'common.confirm',
+			'common.delete',
+			'common.edit',
+			'common.error',
+			'common.filter',
+			'common.filterAdd',
+			'common.filterRemove',
+			'common.loading',
+			'common.no',
+			'common.noItemsFound',
+			'common.ok',
+			'common.orderUp',
+			'common.orderDown',
+			'common.pageNumber',
+			'common.pagination.goToPage',
+			'common.pagination.label',
+			'common.pagination.next',
+			'common.pagination.previous',
+			'common.remove',
+			'common.required',
+			'common.save',
+			'common.saving',
+			'common.search',
+			'common.unknownError',
+			'common.view',
+			'common.viewLess',
+			'common.viewMore',
+			'common.yes',
+			'form.dataHasChanged',
+			'form.errorA11y',
+			'form.errorGoTo',
+			'form.errorMany',
+			'form.errorOne',
+			'form.errors',
+			'form.multilingualLabel',
+			'form.multilingualProgress',
+			'help.help',
+			'validator.required'
+		]);
+
+		// Register the jQuery script
+		$min = Config::getVar('general', 'enable_minified') ? '.min' : '';
+		if (Config::getVar('general', 'enable_cdn')) {
+			$jquery = '//ajax.googleapis.com/ajax/libs/jquery/' . CDN_JQUERY_VERSION . '/jquery' . $min . '.js';
+			$jqueryUI = '//ajax.googleapis.com/ajax/libs/jqueryui/' . CDN_JQUERY_UI_VERSION . '/jquery-ui' . $min . '.js';
+		} else {
+			$jquery = $request->getBaseUrl() . '/lib/pkp/lib/vendor/components/jquery/jquery' . $min . '.js';
+			$jqueryUI = $request->getBaseUrl() . '/lib/pkp/lib/vendor/components/jqueryui/jquery-ui' . $min . '.js';
+		}
+		$this->addJavaScript(
+			'jquery',
+			$jquery,
+			array(
+				'priority' => STYLE_SEQUENCE_CORE,
+				'contexts' => 'backend',
+			)
+		);
+		$this->addJavaScript(
+			'jqueryUI',
+			$jqueryUI,
+			array(
+				'priority' => STYLE_SEQUENCE_CORE,
+				'contexts' => 'backend',
+			)
+		);
+
+		// Load Noto Sans font from Google Font CDN
+		// To load extended latin or other character sets, see:
+		// https://www.google.com/fonts#UsePlace:use/Collection:Noto+Sans
+		if (Config::getVar('general', 'enable_cdn')) {
+			$this->addStyleSheet(
+				'pkpLibNotoSans',
+				'//fonts.googleapis.com/css?family=Noto+Sans:400,400italic,700,700italic',
+				array(
+					'priority' => STYLE_SEQUENCE_CORE,
+					'contexts' => 'backend',
+				)
+			);
+		}
+
+		// Register the pkp-lib JS library
+		$this->registerJSLibraryData();
+		$this->registerJSLibrary();
+
+		// FontAwesome - http://fontawesome.io/
+		if (Config::getVar('general', 'enable_cdn')) {
+			$url = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css';
+		} else {
+			$url = $request->getBaseUrl() . '/lib/pkp/styles/fontawesome/fontawesome.css';
+		}
+		$this->addStyleSheet(
+			'fontAwesome',
+			$url,
+			array(
+				'priority' => STYLE_SEQUENCE_CORE,
+				'contexts' => 'backend',
+			)
+		);
+
+		// Stylesheet compiled from Vue.js single-file components
+		$this->addStyleSheet(
+			'build',
+			$request->getBaseUrl() . '/styles/build.css',
+			array(
+				'priority' => STYLE_SEQUENCE_CORE,
+				'contexts' => 'backend',
+			)
+		);
+
+		// The legacy stylesheet for the backend
+		$this->addStyleSheet(
+			'pkpLib',
+			$dispatcher->url($request, ROUTE_COMPONENT, null, 'page.PageHandler', 'css'),
+			array(
+				'priority' => STYLE_SEQUENCE_CORE,
+				'contexts' => 'backend',
+			)
+		);
+
+		// If there's a locale-specific stylesheet, add it.
+		if (($localeStyleSheet = AppLocale::getLocaleStyleSheet(AppLocale::getLocale())) != null) {
+			$this->addStyleSheet(
+				'pkpLibLocale',
+				$request->getBaseUrl() . '/' . $localeStyleSheet,
+				array(
+					'contexts' => array('backend'),
+				)
+			);
+		}
+
+		/**
+		 * Kludge to make sure no code that tries to connect to the
+		 * database is executed (e.g., when loading installer pages).
+		 */
+		if (!defined('SESSION_DISABLE_INIT')) {
+
+			if ($request->getUser()) {
+
+				// Load notifications in SiteHandler.js
+				$notificationDao = DAORegistry::getDAO('NotificationDAO'); /* @var $notificationDao NotificationDAO */
+				$notifications = $notificationDao->getByUserId($request->getUser()->getId(), NOTIFICATION_LEVEL_TRIVIAL);
+
+				// Load context switcher
+				if (in_array(ROLE_ID_SITE_ADMIN, $this->get_template_vars('userRoles'))) {
+					$args = [];
+				} else {
+					$args = ['userId' => $request->getUser()->getId()];
+				}
+				$availableContexts = Services::get('context')->getManySummary($args);
+				if ($request->getContext()) {
+					$availableContexts = array_filter($availableContexts, function($context) use ($request) {
+						return $context->id !== $request->getContext()->getId();
+					});
+				}
+				foreach ($availableContexts as $availableContext) {
+					// Site admins redirected to the same page. Everyone else to submission lists
+					if (in_array(ROLE_ID_SITE_ADMIN, $this->get_template_vars('userRoles'))) {
+						$availableContext->url = $dispatcher->url($request, ROUTE_PAGE, $availableContext->urlPath, $request->getRequestedPage(), $request->getRequestedOp(), $request->getRequestedArgs($request));
+					} else {
+						$availableContext->url = $dispatcher->url($request, ROUTE_PAGE, $availableContext->urlPath, 'submissions');
+					}
+				}
+
+				// Create main navigation menu
+				$userRoles = (array) $router->getHandler()->getAuthorizedContextObject(ASSOC_TYPE_USER_ROLES);
+
+				if (count(array_intersect([ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_REVIEWER, ROLE_ID_AUTHOR], $userRoles))) {
+					$menu['submissions'] = [
+						'name' => __('navigation.submissions'),
+						'url' => $router->url($request, null, 'submissions'),
+						'isCurrent' => $router->getRequestedPage($request) === 'submissions',
+					];
+				} elseif (count($userRoles) === 1 && in_array(ROLE_ID_READER, $userRoles)) {
+					$menu['submit'] = [
+						'name' => __('author.submit'),
+						'url' => $router->url($request, null, 'submission', 'wizard'),
+						'isCurrent' => $router->getRequestedPage($request) === 'submission',
+					];
+				}
+
+				if (in_array(ROLE_ID_MANAGER, $userRoles)) {
+					if ($request->getContext()->getData('enableAnnouncements')) {
+						$menu['announcements'] = [
+							'name' => __('announcement.announcements'),
+							'url' => $router->url($request, null, 'management', 'settings', 'announcements'),
+							'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('announcements', (array) $router->getRequestedArgs($request)),
+						];
+					}
+					$menu['settings'] = [
+						'name' => __('navigation.settings'),
+						'submenu' => [
+							'context' => [
+								'name' => __('context.context'),
+								'url' => $router->url($request, null, 'management', 'settings', 'context'),
+								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('context', (array) $router->getRequestedArgs($request)),
+							],
+							'website' => [
+								'name' => __('manager.website'),
+								'url' => $router->url($request, null, 'management', 'settings', 'website'),
+								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('website', (array) $router->getRequestedArgs($request)),
+							],
+							'workflow' => [
+								'name' => __('manager.workflow'),
+								'url' => $router->url($request, null, 'management', 'settings', 'workflow'),
+								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('workflow', (array) $router->getRequestedArgs($request)),
+							],
+							'distribution' => [
+								'name' => __('manager.distribution'),
+								'url' => $router->url($request, null, 'management', 'settings', 'distribution'),
+								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('distribution', (array) $router->getRequestedArgs($request)),
+							],
+							'access' => [
+								'name' => __('navigation.access'),
+								'url' => $router->url($request, null, 'management', 'settings', 'access'),
+								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('access', (array) $router->getRequestedArgs($request)),
+							]
+						]
+					];
+					$menu['statistics'] = [
+						'name' => __('navigation.tools.statistics'),
+						'submenu' => [
+							'publications' => [
+								'name' => __('common.publications'),
+								'url' => $router->url($request, null, 'stats', 'publications', 'publications'),
+								'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp() === 'publications',
+							],
+							'editorial' => [
+								'name' => __('stats.editorialActivity'),
+								'url' => $router->url($request, null, 'stats', 'editorial', 'editorial'),
+								'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp() === 'editorial',
+							],
+							'users' => [
+								'name' => __('navigation.access'),
+								'url' => $router->url($request, null, 'stats', 'users', 'users'),
+								'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp() === 'users',
+							],
+							'reports' => [
+								'name' => __('manager.statistics.reports'),
+								'url' => $router->url($request, null, 'management', 'tools', null, null, 'statistics'),
+								'isCurrent' => $router->getRequestedPage($request) === 'management' && $router->getRequestedAnchor($request) === 'statistics',
+							]
+						]
+					];
+					$menu['tools'] = [
+						'name' => __('navigation.tools'),
+						'url' => $router->url($request, null, 'management', 'tools'),
+						'isCurrent' => $router->getRequestedPage($request) === 'management' && $router->getRequestedOp($request) === 'tools',
+					];
+				}
+
+				if (in_array(ROLE_ID_SITE_ADMIN, $userRoles)) {
+					$menu['admin'] = [
+						'name' => __('navigation.admin'),
+						'url' => $router->url($request, null, 'admin'),
+						'isCurrent' => $router->getRequestedPage($request) === 'admin',
+					];
+				}
+
+				$this->setState([
+					'menu' => $menu,
+				]);
+
+				$this->assign([
+					'availableContexts' => $availableContexts,
+					'hasSystemNotifications' => $notifications->getCount() > 0,
+				]);
+			}
+		}
+
+		HookRegistry::call('TemplateManager::setupBackendPage');
+	}
+
+	/**
 	 * @copydoc Smarty::fetch()
 	 */
 	function fetch($template = null, $cache_id = null, $compile_id = null, $parent = null) {
@@ -940,6 +1099,9 @@ class PKPTemplateManager extends Smarty {
 			echo $output;
 			return;
 		}
+
+		// Pass the initial state data for this page
+		$this->assign('state', $this->_state);
 
 		// Explicitly set the character encoding. Required in
 		// case server is using Apache's AddDefaultCharset

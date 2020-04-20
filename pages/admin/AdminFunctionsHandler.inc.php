@@ -19,6 +19,10 @@ import('lib.pkp.classes.site.VersionCheck');
 import('lib.pkp.pages.admin.AdminHandler');
 
 class AdminFunctionsHandler extends AdminHandler {
+
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * Constructor
 	 */

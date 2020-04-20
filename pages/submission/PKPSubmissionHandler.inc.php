@@ -18,6 +18,9 @@ import('lib.pkp.classes.core.JSONMessage');
 
 abstract class PKPSubmissionHandler extends Handler {
 
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * @copydoc PKPHandler::authorize()
 	 */

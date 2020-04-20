@@ -8,16 +8,14 @@
  * Common site footer.
  *}
 
-</div><!-- pkp_structure_main -->
-</div><!-- pkp_structure_body -->
+</div><!-- .app__page -->
+</main>
+</div><!-- .app__body -->
+</div><!-- .app -->
 
-<div class="pkp_structure_footer" role="contentinfo">
-	<div class="pkp_brand_footer">
-		<a href="{$pkpLink}">
-			<img alt="{translate key="common.publicKnowledgeProject"|default:''}" src="{$baseUrl}/{$brandImage}">
-		</a>
-	</div>
-</div>
+<script type="text/javascript">
+	pkp.registry.init('app', {$pageComponent|json_encode}, {$state|json_encode});
+</script>
 
 <script type="text/javascript">
 	// Initialize JS handler

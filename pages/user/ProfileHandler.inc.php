@@ -18,6 +18,9 @@ import('pages.user.UserHandler');
 
 class ProfileHandler extends UserHandler {
 
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	//
 	// Implement template methods from PKPHandler
 	//

@@ -17,6 +17,10 @@ import('classes.handler.Handler');
 import('classes.statistics.StatisticsHelper');
 
 class PKPStatsHandler extends Handler {
+
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * Constructor.
 	 */
@@ -188,7 +192,12 @@ class PKPStatsHandler extends Handler {
 			]
 		);
 
-		$templateMgr->assign('statsComponent', $statsComponent);
+		$templateMgr->setLocaleKeys([
+			'stats.descriptionForStat',
+			'stats.countWithYearlyAverage',
+		]);
+		$templateMgr->assign('pageComponent', 'StatsEditorialContainer');
+		$templateMgr->setState($statsComponent->getConfig());
 
 		$templateMgr->display('stats/editorial.tpl');
 	}
@@ -299,7 +308,8 @@ class PKPStatsHandler extends Handler {
 			]
 		);
 
-		$templateMgr->assign('statsComponent', $statsComponent);
+		$templateMgr->assign('pageComponent', 'StatsPublicationsContainer');
+		$templateMgr->setState($statsComponent->getConfig());
 
 		$templateMgr->display('stats/publications.tpl');
 	}

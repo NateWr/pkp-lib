@@ -467,6 +467,9 @@ msgstr "Remove"
 msgid "manager.people.saveAndCreateAnotherUser"
 msgstr "Save and Create Another"
 
+msgid "manager.people.signedInAs"
+msgstr "You are currently logged in as {$username}"
+
 msgid "manager.people.signInAs"
 msgstr "Log In As"
 

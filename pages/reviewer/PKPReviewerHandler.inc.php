@@ -19,6 +19,9 @@ import('lib.pkp.classes.submission.reviewer.ReviewerAction');
 
 class PKPReviewerHandler extends Handler {
 
+	/** @copydoc PKPHandler::_isBackendPage */
+	var $_isBackendPage = true;
+
 	/**
 	 * Display the submission review page.
 	 * @param $args array

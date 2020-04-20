@@ -10,27 +10,27 @@
  *}
 {include file="common/header.tpl" suppressPageTitle=true pageTitle="stats.userStatistics"}
 
-<div class="pkp_page_content">
-	<h1 id="usersTableLabel" class="pkpHeader__title">{translate key="manager.statistics.statistics.registeredUsers"}</h1>
-	<div class="pkpStats__container">
-		<div class="pkpStats__content">
-			<table class="pkpTable" labelled-by="usersTableLabel">
-				<thead>
+<div class="pkpStats">
+	<div class="pkpStats__panel">
+		<pkp-header>
+			<h1 id="usersTableLabel" class="pkpHeader__title">{translate key="manager.statistics.statistics.registeredUsers"}</h1>
+		</pkp-header>
+		<table class="pkpTable" labelled-by="usersTableLabel">
+			<thead>
+				<tr>
+					<th>{translate key="common.name"}</th>
+					<th>{translate key="stats.total"}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{foreach from=$userStats item=$row}
 					<tr>
-						<th>{translate key="common.name"}</th>
-						<th>{translate key="stats.total"}</th>
+						<td>{$row.name}</td>
+						<td>{$row.value}</td>
 					</tr>
-				</thead>
-				<tbody>
-					{foreach from=$userStats item=$row}
-						<tr>
-							<td>{$row.name}</td>
-							<td>{$row.value}</td>
-						</tr>
-					{/foreach}
-				</tbody>
-			</table>
-		</div>
+				{/foreach}
+			</tbody>
+		</table>
 	</div>
 </div>
 
