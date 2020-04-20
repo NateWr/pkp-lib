@@ -54,7 +54,7 @@
 				<div class="app__headerActions">
 					<dropdown class="app__headerAction app__tasks">
 						<template slot="button">
-							Tasks
+							{translate key="common.tasks"}
 							<badge>1</badge>
 						</template>
 						<div style="width: 400px; height: 300px;">
