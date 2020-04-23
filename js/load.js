@@ -15,6 +15,9 @@ import VModal from 'vue-js-modal';
 import VTooltip from 'v-tooltip';
 import VueScrollTo from 'vue-scrollto';
 
+// Global components of UI Library
+import Icon from '@/components/Icon/Icon.vue';
+
 // Helper for initializing and tracking Vue controllers
 import VueRegistry from './classes/VueRegistry.js';
 
@@ -25,6 +28,9 @@ Vue.use(VModal, {
 Vue.use(VTooltip, {defaultTrigger: 'click'});
 Vue.use(VueScrollTo);
 Vue.mixin(GlobalMixins);
+
+// Register global components
+Vue.component('Icon', Icon);
 
 export default {
 	Vue: Vue,

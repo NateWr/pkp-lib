@@ -132,7 +132,10 @@ class DashboardHandler extends Handler {
 		);
 		$lists[$archivedListPanel->id] = $archivedListPanel->getConfig();
 
-		$templateMgr->assign('containerData', ['components' => $lists]);
+		$templateMgr->setState(['components' => $lists]);
+		$templateMgr->assign([
+			'pageTitle' => __('navigation.submissions'),
+		]);
 
 		return $templateMgr->display('dashboard/index.tpl');
 	}

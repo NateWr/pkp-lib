@@ -24,9 +24,6 @@
 	 * @param {jQueryObject} $widgetWrapper An HTML element that this handle will
 	 * be attached to.
 	 * @param {{
-	 *   toggleHelpUrl: string,
-	 *   toggleHelpOffText: string,
-	 *   toggleHelpOnText: string,
 	 *   fetchNotificationUrl: string,
 	 *   requestOptions: Object
 	 *   }} options Handler options.

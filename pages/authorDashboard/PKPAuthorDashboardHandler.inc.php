@@ -289,7 +289,7 @@ abstract class PKPAuthorDashboardHandler extends Handler {
 			$canEditPublication =  false;
 		}
 
-		$workflowData = [
+		$state = [
 			'canEditPublication' => $canEditPublication,
 			'components' => [
 				FORM_TITLE_ABSTRACT => $titleAbstractForm->getConfig(),
@@ -330,17 +330,22 @@ abstract class PKPAuthorDashboardHandler extends Handler {
 			$vocabSuggestionUrlBase =$request->getDispatcher()->url($request, ROUTE_API, $submissionContext->getData('urlPath'), 'vocabs', null, null, ['vocab' => '__vocab__']);
 			$metadataForm = new PKP\components\forms\publication\PKPMetadataForm($latestPublicationApiUrl, $locales, $latestPublication, $submissionContext, $vocabSuggestionUrlBase);
 			$templateMgr->setConstants(['FORM_METADATA']);
-			$workflowData['components'][FORM_METADATA] = $metadataForm->getConfig();
-			$workflowData['publicationFormIds'][] = FORM_METADATA;
+			$state['components'][FORM_METADATA] = $metadataForm->getConfig();
+			$state['publicationFormIds'][] = FORM_METADATA;
 		}
+
+		$templateMgr->setState($state);
 
 		$templateMgr->assign([
 			'metadataEnabled' => $metadataEnabled,
+			'pageComponent' => 'WorkflowContainer',
+			'pageTitle' => join(__('common.titleSeparator'), [
+				$submission->getShortAuthorString(),
+				$submission->getLocalizedTitle()
+			]),
 			'submission' => $submission,
-			'workflowData' => $workflowData,
 			'workflowStages' => $workflowStages,
 		]);
-
 	}
 
 	/**

@@ -36,14 +36,17 @@ class PKPReviewerHandler extends Handler {
 		$this->setupTemplate($request);
 
 		$templateMgr = TemplateManager::getManager($request);
-		$templateMgr->assign('submission', $reviewerSubmission);
 		$reviewStep = max($reviewerSubmission->getStep(), 1);
 		$userStep = (int) $request->getUserVar('step');
 		$step = (int) (!empty($userStep) ? $userStep: $reviewStep);
 		if ($step > $reviewStep) $step = $reviewStep; // Reviewer can't go past incomplete steps
-		if ($step < 1 || $step > 4) fatalError('Invalid step!');
-		$templateMgr->assign('reviewStep', $reviewStep);
-		$templateMgr->assign('selected', $step - 1);
+		if ($step < 1 || $step > 4) throw new Exception('Invalid step!');
+		$templateMgr->assign([
+			'pageTitle' => __('semicolon', ['label' => __('submission.review')]) . $reviewerSubmission->getLocalizedTitle(),
+			'reviewStep' => $reviewStep,
+			'selected' => $step - 1,
+			'submission' => $reviewerSubmission,
+		]);
 
 		$templateMgr->display('reviewer/review/reviewStepHeader.tpl');
 	}

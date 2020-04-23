@@ -40,6 +40,11 @@ define('CDN_JQUERY_UI_VERSION', '1.12.0');
 
 define('CSS_FILENAME_SUFFIX', 'css');
 
+define('PAGE_WIDTH_NARROW', 'narrow');
+define('PAGE_WIDTH_NORMAL', 'normal');
+define('PAGE_WIDTH_WIDE', 'wide');
+define('PAGE_WIDTH_FULL', 'full');
+
 import('lib.pkp.classes.template.PKPTemplateResource');
 
 class PKPTemplateManager extends Smarty {
@@ -246,6 +251,7 @@ class PKPTemplateManager extends Smarty {
 		$this->registerPlugin('function','page_info', array($this, 'smartyPageInfo'));
 		$this->registerPlugin('function','pluck_files', array($this, 'smartyPluckFiles'));
 
+		$this->registerPlugin('function','title', array($this, 'smartyTitle'));
 		$this->registerPlugin('function', 'url', array($this, 'smartyUrl'));
 
 		// load stylesheets/scripts/headers from a given context
@@ -293,6 +299,7 @@ class PKPTemplateManager extends Smarty {
 				'isUserLoggedInAs' => Validation::isLoggedInAs(),
 				'itemsPerPage' => Config::getVar('interface', 'items_per_page'),
 				'numPageLinks' => Config::getVar('interface', 'page_links'),
+				'siteTitle' => $request->getSite()->getLocalizedData('title'),
 			]);
 
 			$user = $request->getUser();
@@ -849,7 +856,7 @@ class PKPTemplateManager extends Smarty {
 		 * Kludge to make sure no code that tries to connect to the
 		 * database is executed (e.g., when loading installer pages).
 		 */
-		if (!defined('SESSION_DISABLE_INIT')) {
+		if (Config::getVar('general', 'installed') && !defined('SESSION_DISABLE_INIT')) {
 
 			if ($request->getUser()) {
 
@@ -869,9 +876,10 @@ class PKPTemplateManager extends Smarty {
 						return $context->id !== $request->getContext()->getId();
 					});
 				}
+				$requestedPage = $router->getRequestedPage($requested);
 				foreach ($availableContexts as $availableContext) {
 					// Site admins redirected to the same page. Everyone else to submission lists
-					if (in_array(ROLE_ID_SITE_ADMIN, $this->get_template_vars('userRoles'))) {
+					if ($requestedPage !== 'admin' && in_array(ROLE_ID_SITE_ADMIN, $this->get_template_vars('userRoles'))) {
 						$availableContext->url = $dispatcher->url($request, ROUTE_PAGE, $availableContext->urlPath, $request->getRequestedPage(), $request->getRequestedOp(), $request->getRequestedArgs($request));
 					} else {
 						$availableContext->url = $dispatcher->url($request, ROUTE_PAGE, $availableContext->urlPath, 'submissions');
@@ -881,96 +889,100 @@ class PKPTemplateManager extends Smarty {
 				// Create main navigation menu
 				$userRoles = (array) $router->getHandler()->getAuthorizedContextObject(ASSOC_TYPE_USER_ROLES);
 
-				if (count(array_intersect([ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_REVIEWER, ROLE_ID_AUTHOR], $userRoles))) {
-					$menu['submissions'] = [
-						'name' => __('navigation.submissions'),
-						'url' => $router->url($request, null, 'submissions'),
-						'isCurrent' => $router->getRequestedPage($request) === 'submissions',
-					];
-				} elseif (count($userRoles) === 1 && in_array(ROLE_ID_READER, $userRoles)) {
-					$menu['submit'] = [
-						'name' => __('author.submit'),
-						'url' => $router->url($request, null, 'submission', 'wizard'),
-						'isCurrent' => $router->getRequestedPage($request) === 'submission',
-					];
-				}
+				$menu = [];
 
-				if (in_array(ROLE_ID_MANAGER, $userRoles)) {
-					if ($request->getContext()->getData('enableAnnouncements')) {
-						$menu['announcements'] = [
-							'name' => __('announcement.announcements'),
-							'url' => $router->url($request, null, 'management', 'settings', 'announcements'),
-							'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('announcements', (array) $router->getRequestedArgs($request)),
+				if ($request->getContext()) {
+					if (count(array_intersect([ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_REVIEWER, ROLE_ID_AUTHOR], $userRoles))) {
+						$menu['submissions'] = [
+							'name' => __('navigation.submissions'),
+							'url' => $router->url($request, null, 'submissions'),
+							'isCurrent' => $router->getRequestedPage($request) === 'submissions',
+						];
+					} elseif (count($userRoles) === 1 && in_array(ROLE_ID_READER, $userRoles)) {
+						$menu['submit'] = [
+							'name' => __('author.submit'),
+							'url' => $router->url($request, null, 'submission', 'wizard'),
+							'isCurrent' => $router->getRequestedPage($request) === 'submission',
 						];
 					}
-					$menu['settings'] = [
-						'name' => __('navigation.settings'),
-						'submenu' => [
-							'context' => [
-								'name' => __('context.context'),
-								'url' => $router->url($request, null, 'management', 'settings', 'context'),
-								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('context', (array) $router->getRequestedArgs($request)),
-							],
-							'website' => [
-								'name' => __('manager.website'),
-								'url' => $router->url($request, null, 'management', 'settings', 'website'),
-								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('website', (array) $router->getRequestedArgs($request)),
-							],
-							'workflow' => [
-								'name' => __('manager.workflow'),
-								'url' => $router->url($request, null, 'management', 'settings', 'workflow'),
-								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('workflow', (array) $router->getRequestedArgs($request)),
-							],
-							'distribution' => [
-								'name' => __('manager.distribution'),
-								'url' => $router->url($request, null, 'management', 'settings', 'distribution'),
-								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('distribution', (array) $router->getRequestedArgs($request)),
-							],
-							'access' => [
-								'name' => __('navigation.access'),
-								'url' => $router->url($request, null, 'management', 'settings', 'access'),
-								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('access', (array) $router->getRequestedArgs($request)),
-							]
-						]
-					];
-					$menu['statistics'] = [
-						'name' => __('navigation.tools.statistics'),
-						'submenu' => [
-							'publications' => [
-								'name' => __('common.publications'),
-								'url' => $router->url($request, null, 'stats', 'publications', 'publications'),
-								'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp() === 'publications',
-							],
-							'editorial' => [
-								'name' => __('stats.editorialActivity'),
-								'url' => $router->url($request, null, 'stats', 'editorial', 'editorial'),
-								'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp() === 'editorial',
-							],
-							'users' => [
-								'name' => __('navigation.access'),
-								'url' => $router->url($request, null, 'stats', 'users', 'users'),
-								'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp() === 'users',
-							],
-							'reports' => [
-								'name' => __('manager.statistics.reports'),
-								'url' => $router->url($request, null, 'management', 'tools', null, null, 'statistics'),
-								'isCurrent' => $router->getRequestedPage($request) === 'management' && $router->getRequestedAnchor($request) === 'statistics',
-							]
-						]
-					];
-					$menu['tools'] = [
-						'name' => __('navigation.tools'),
-						'url' => $router->url($request, null, 'management', 'tools'),
-						'isCurrent' => $router->getRequestedPage($request) === 'management' && $router->getRequestedOp($request) === 'tools',
-					];
-				}
 
-				if (in_array(ROLE_ID_SITE_ADMIN, $userRoles)) {
-					$menu['admin'] = [
-						'name' => __('navigation.admin'),
-						'url' => $router->url($request, null, 'admin'),
-						'isCurrent' => $router->getRequestedPage($request) === 'admin',
-					];
+					if (in_array(ROLE_ID_MANAGER, $userRoles)) {
+						if ($request->getContext()->getData('enableAnnouncements')) {
+							$menu['announcements'] = [
+								'name' => __('announcement.announcements'),
+								'url' => $router->url($request, null, 'management', 'settings', 'announcements'),
+								'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('announcements', (array) $router->getRequestedArgs($request)),
+							];
+						}
+						$menu['settings'] = [
+							'name' => __('navigation.settings'),
+							'submenu' => [
+								'context' => [
+									'name' => __('context.context'),
+									'url' => $router->url($request, null, 'management', 'settings', 'context'),
+									'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('context', (array) $router->getRequestedArgs($request)),
+								],
+								'website' => [
+									'name' => __('manager.website'),
+									'url' => $router->url($request, null, 'management', 'settings', 'website'),
+									'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('website', (array) $router->getRequestedArgs($request)),
+								],
+								'workflow' => [
+									'name' => __('manager.workflow'),
+									'url' => $router->url($request, null, 'management', 'settings', 'workflow'),
+									'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('workflow', (array) $router->getRequestedArgs($request)),
+								],
+								'distribution' => [
+									'name' => __('manager.distribution'),
+									'url' => $router->url($request, null, 'management', 'settings', 'distribution'),
+									'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('distribution', (array) $router->getRequestedArgs($request)),
+								],
+								'access' => [
+									'name' => __('navigation.access'),
+									'url' => $router->url($request, null, 'management', 'settings', 'access'),
+									'isCurrent' => $router->getRequestedPage($request) === 'management' && in_array('access', (array) $router->getRequestedArgs($request)),
+								]
+							]
+						];
+						$menu['statistics'] = [
+							'name' => __('navigation.tools.statistics'),
+							'submenu' => [
+								'publications' => [
+									'name' => __('common.publications'),
+									'url' => $router->url($request, null, 'stats', 'publications', 'publications'),
+									'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp($request) === 'publications',
+								],
+								'editorial' => [
+									'name' => __('stats.editorialActivity'),
+									'url' => $router->url($request, null, 'stats', 'editorial', 'editorial'),
+									'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp($request) === 'editorial',
+								],
+								'users' => [
+									'name' => __('manager.users'),
+									'url' => $router->url($request, null, 'stats', 'users', 'users'),
+									'isCurrent' => $router->getRequestedPage($request) === 'stats' && $router->getRequestedOp($request) === 'users',
+								],
+								'reports' => [
+									'name' => __('manager.statistics.reports'),
+									'url' => $router->url($request, null, 'management', 'tools', null, null, 'statistics'),
+									'isCurrent' => $router->getRequestedPage($request) === 'management' && $router->getRequestedAnchor($request) === 'statistics',
+								]
+							]
+						];
+						$menu['tools'] = [
+							'name' => __('navigation.tools'),
+							'url' => $router->url($request, null, 'management', 'tools'),
+							'isCurrent' => $router->getRequestedPage($request) === 'management' && $router->getRequestedOp($request) === 'tools',
+						];
+					}
+
+					if (in_array(ROLE_ID_SITE_ADMIN, $userRoles)) {
+						$menu['admin'] = [
+							'name' => __('navigation.admin'),
+							'url' => $router->url($request, 'index', 'admin'),
+							'isCurrent' => $router->getRequestedPage($request) === 'admin',
+						];
+					}
 				}
 
 				$this->setState([
@@ -1532,6 +1544,41 @@ class PKPTemplateManager extends Smarty {
 
 		// Let the dispatcher create the url
 		return $dispatcher->url($this->_request, $router, $context, $handler, $op, $path, $parameters, $anchor, !isset($escape) || $escape);
+	}
+
+	/**
+	 * Generate the <title> tag for a page
+	 *
+	 * Usage: {title value="Journal Settings"}
+	 *
+	 * @param $parameters array
+	 * @param $smarty object
+	 * Available parameters:
+	 * - router: which router to use
+	 * - context
+	 * - page
+	 * - component
+	 * - op
+	 * - path (array)
+	 * - anchor
+	 * - escape (default to true unless otherwise specified)
+	 * - params: parameters to include in the URL if available as an array
+	 */
+	function smartyTitle($parameters, $smarty) {
+		$page = $parameters['value'] ?? '';
+		if ($smarty->get_template_vars('currentContext')) {
+			$siteTitle = $smarty->get_template_vars('currentContext')->getLocalizedData('name');
+		} elseif ($smarty->get_template_vars('siteTitle')) {
+			$siteTitle = $smarty->get_template_vars('siteTitle');
+		} else {
+			$siteTitle = __('common.software');
+		}
+
+		if (empty($parameters['value'])) {
+			return $siteTitle;
+		}
+
+		return $parameters['value'] . __('common.titleSeparator') . $siteTitle;
 	}
 
 	/**

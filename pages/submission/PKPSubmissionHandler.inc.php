@@ -102,6 +102,9 @@ abstract class PKPSubmissionHandler extends Handler {
 		} else {
 			$templateMgr->assign('submissionProgress', 1);
 		}
+		$templateMgr->assign([
+			'pageTitle' => __('submission.submit.title'),
+		]);
 		$templateMgr->display('submission/form/index.tpl');
 	}
 

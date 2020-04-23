@@ -131,6 +131,7 @@ class ManagementHandler extends Handler {
 		}
 
 		AppLocale::requireComponents(LOCALE_COMPONENT_PKP_SUBMISSION);
+		$templateMgr->assign('pageTitle', __('manager.setup'));
 		$templateMgr->display('management/context.tpl');
 	}
 
@@ -191,6 +192,7 @@ class ManagementHandler extends Handler {
 			],
 		]);
 
+		$templateMgr->assign('pageTitle', __('manager.website.title'));
 		$templateMgr->display('management/website.tpl');
 	}
 
@@ -252,6 +254,7 @@ class ManagementHandler extends Handler {
 				'emailTemplates' => $emailTemplatesListPanel->getConfig(),
 			],
 		]);
+		$templateMgr->assign('pageTitle', __('manager.workflow.title'));
 	}
 
 	/**
@@ -297,6 +300,7 @@ class ManagementHandler extends Handler {
 				'isCurrent' => false,
 			],
 		]);
+		$templateMgr->assign('pageTitle', __('manager.distribution.title'));
 	}
 
 	/**
@@ -350,6 +354,10 @@ class ManagementHandler extends Handler {
 			],
 		]);
 
+		$templateMgr->assign([
+			'pageTitle' => __('manager.setup.announcements'),
+		]);
+
 		$templateMgr->display('management/announcements.tpl');
 	}
 
@@ -374,6 +382,7 @@ class ManagementHandler extends Handler {
 			],
 		]);
 
+		$templateMgr->assign('pageTitle', __('navigation.access'));
 		$templateMgr->display('management/access.tpl');
 	}
 }

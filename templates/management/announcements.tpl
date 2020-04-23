@@ -7,20 +7,24 @@
  *
  * @brief Add and edit announcements and announcement types
  *}
-{include file="common/header.tpl" pageTitle="manager.setup.announcements"}
+{extends file="layouts/backend.tpl"}
 
-<tabs>
-	<tab id="announcements" label="{translate key="manager.setup.announcements"}">
-		<announcements-list-panel
-			v-bind="components.announcements"
-			@set="set"
-		/>
-	</tab>
-	<tab id="announcementTypes" label="{translate key="manager.announcementTypes"}">
-		{capture assign=announcementTypeGridUrl}{url router=$smarty.const.ROUTE_COMPONENT component="grid.announcements.AnnouncementTypeGridHandler" op="fetchGrid" escape=false}{/capture}
-		{load_url_in_div id="announcementTypeGridContainer" url=$announcementTypeGridUrl}
-	</tab>
-	{call_hook name="Template::Announcements"}
-</tabs>
+{block name="page"}
+	<h1 class="app__pageHeading">
+		{translate key="manager.setup.announcements"}
+	</h1>
 
-{include file="common/footer.tpl"}
+	<tabs>
+		<tab id="announcements" label="{translate key="manager.setup.announcements"}">
+			<announcements-list-panel
+				v-bind="components.announcements"
+				@set="set"
+			/>
+		</tab>
+		<tab id="announcementTypes" label="{translate key="manager.announcementTypes"}">
+			{capture assign=announcementTypeGridUrl}{url router=$smarty.const.ROUTE_COMPONENT component="grid.announcements.AnnouncementTypeGridHandler" op="fetchGrid" escape=false}{/capture}
+			{load_url_in_div id="announcementTypeGridContainer" url=$announcementTypeGridUrl}
+		</tab>
+		{call_hook name="Template::Announcements"}
+	</tabs>
+{/block}

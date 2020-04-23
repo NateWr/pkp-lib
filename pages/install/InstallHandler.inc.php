@@ -39,6 +39,11 @@ class InstallHandler extends Handler {
 			$request->setCookieVar('currentLocale', $setLocale);
 		}
 
+		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign([
+			'pageTitle' => __('installer.appInstallation'),
+		]);
+
 		$installForm = new InstallForm($request);
 		$installForm->initData();
 		$installForm->display($request);
@@ -62,13 +67,20 @@ class InstallHandler extends Handler {
 	function install($args, $request) {
 		$this->validate(null, $request);
 		$this->setupTemplate($request);
+		$templateMgr = TemplateManager::getManager($request);
 
 		$installForm = new InstallForm($request);
 		$installForm->readInputData();
 
 		if ($installForm->validate()) {
+			$templateMgr->assign([
+				'pageTitle' => __('installer.installationComplete'),
+			]);
 			$installForm->execute();
 		} else {
+			$templateMgr->assign([
+				'pageTitle' => __('installer.appInstallation'),
+			]);
 			$errors = $installForm->getErrorsArray();
 			$error = array_shift($errors);
 			$installForm->installError($error, false);
@@ -88,6 +100,11 @@ class InstallHandler extends Handler {
 			$request->setCookieVar('currentLocale', $setLocale);
 		}
 
+		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign([
+			'pageTitle' => __('installer.upgradeApplication'),
+		]);
+
 		$installForm = new UpgradeForm($request);
 		$installForm->initData();
 		$installForm->display($request);
@@ -101,6 +118,10 @@ class InstallHandler extends Handler {
 	function installUpgrade($args, $request) {
 		$this->validate(null, $request);
 		$this->setupTemplate($request);
+		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign([
+			'pageTitle' => __('installer.upgradeApplication'),
+		]);
 
 		$installForm = new UpgradeForm($request);
 		$installForm->readInputData();

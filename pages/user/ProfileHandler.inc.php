@@ -70,6 +70,9 @@ class ProfileHandler extends UserHandler {
 		$this->setupTemplate($request);
 
 		$templateMgr = TemplateManager::getManager($request);
+		$templateMgr->assign([
+			'pageTitle' => __('user.profile'),
+		]);
 		$templateMgr->display('user/profile.tpl');
 	}
 }

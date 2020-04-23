@@ -1,5 +1,5 @@
 {**
- * lib/pkp/templates/common/header.tpl
+ * lib/pkp/templates/layouts/backend.tpl
  *
  * Copyright (c) 2014-2020 Simon Fraser University
  * Copyright (c) 2003-2020 John Willinsky
@@ -9,34 +9,38 @@
  *}
 <!DOCTYPE html>
 <html lang="{$currentLocale|replace:"_":"-"}" xml:lang="{$currentLocale|replace:"_":"-"}">
-{if !$pageTitleTranslated}{capture assign=pageTitleTranslated}{translate key=$pageTitle}{/capture}{/if}
-{include file="core:common/headerHead.tpl"}
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset={$defaultCharset|escape}" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{title|strip_tags value=$pageTitle}</title>
+	{load_header context="backend"}
+	{load_stylesheet context="backend"}
+	{load_script context="backend"}
+</head>
 <body class="pkp_page_{$requestedPage|escape|default:"index"} pkp_op_{$requestedOp|escape|default:"index"}" dir="{$currentLocaleLangDir|escape|default:"ltr"}">
+
 	<script type="text/javascript">
 		// Initialise JS handler.
 		$(function() {ldelim}
 			$('body').pkpHandler(
 				'$.pkp.controllers.SiteHandler',
 				{ldelim}
-					toggleHelpUrl: {url|json_encode page="user" op="toggleHelp" escape=false},
-					toggleHelpOnText: {$toggleHelpOnText|json_encode},
-					toggleHelpOffText: {$toggleHelpOffText|json_encode},
 					{include file="controllers/notification/notificationOptions.tpl"}
 				{rdelim});
 		{rdelim});
 	</script>
 
-	<div id="app" class="app {if $isLoggedInAs} app--isLoggedInAs{/if}" v-cloak>
+	<div id="app" class="app {if $isLoggedInAs} app--isLoggedInAs{/if}">
 		<header class="app__header" role="banner">
 			{if $availableContexts}
-				<dropdown class="app__headerAction app__contexts">
+				<dropdown class="app__headerAction app__contexts" v-cloak>
 					<template slot="button">
 						<icon icon="sitemap"></icon>
 						<span class="-screenReader">{translate key="context.contexts"}</span>
 					</template>
 					<ul>
 						{foreach from=$availableContexts item=$availableContext}
-							{if $availableContext->name !== $currentContext->getLocalizedData('name')}
+							{if !$currentContext || $availableContext->name !== $currentContext->getLocalizedData('name')}
 								<li>
 									<a href="{$availableContext->url|escape}" class="pkpDropdown__action">
 										{$availableContext->name|escape}
@@ -48,10 +52,17 @@
 				</dropdown>
 			{/if}
 			<div class="app__contextTitle">
-				{$currentContext->getLocalizedData('name')}
+				{if $currentContext}
+					{$currentContext->getLocalizedData('name')}
+				{elseif $siteTitle}
+					{$siteTitle}
+				{else}
+					{translate key="common.software"}
+				{/if}
 			</div>
 			{if $currentUser}
-				<div class="app__headerActions">
+				<div class="app__headerActions" v-cloak>
+					{call_hook name="Template::Layout::Backend::HeaderActions"}
 					<dropdown class="app__headerAction app__tasks">
 						<template slot="button">
 							{translate key="common.tasks"}
@@ -120,32 +131,97 @@
 		</header>
 
 		<div class="app__body">
-			<nav v-if="!!menu" class="app__nav" aria-label="{translate key="common.navigation.site"}">
-				<ul>
-					<li v-for="(menuItem, key) in menu" :key="key" :class="!!menuItem.submenu ? 'app__navGroup' : ''">
-						<div v-if="!!menuItem.submenu" class="app__navItem app__navItem--hasSubmenu">
-							{{ menuItem.name }}
-						</div>
-						<a v-else class="app__navItem" :class="menuItem.isCurrent ? 'app__navItem--isCurrent' : ''" :href="menuItem.url">
-							{{ menuItem.name }}
-						</a>
-						<ul v-if="!!menuItem.submenu">
-							<li v-for="(submenuItem, submenuKey) in menuItem.submenu" :key="submenuKey">
-								<a class="app__navItem" :class="submenuItem.isCurrent ? 'app__navItem--isCurrent' : ''" :href="submenuItem.url">
-									{{ submenuItem.name }}
-								</a>
-							</li>
-						</ul>
-					</li>
-				</ul>
-			</nav>
+			{block name="menu"}
+				<nav v-if="!!menu" class="app__nav" aria-label="{translate key="common.navigation.site"}">
+					<ul>
+						<li v-for="(menuItem, key) in menu" :key="key" :class="!!menuItem.submenu ? 'app__navGroup' : ''">
+							<div v-if="!!menuItem.submenu" class="app__navItem app__navItem--hasSubmenu">
+								{{ menuItem.name }}
+							</div>
+							<a v-else class="app__navItem" :class="menuItem.isCurrent ? 'app__navItem--isCurrent' : ''" :href="menuItem.url">
+								{{ menuItem.name }}
+							</a>
+							<ul v-if="!!menuItem.submenu">
+								<li v-for="(submenuItem, submenuKey) in menuItem.submenu" :key="submenuKey">
+									<a class="app__navItem" :class="submenuItem.isCurrent ? 'app__navItem--isCurrent' : ''" :href="submenuItem.url">
+										{{ submenuItem.name }}
+									</a>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</nav>
+			{/block}
 
 			<main class="app__main">
-				<div class="app__page">
+				<div class="app__page{if $pageWidth} app__page--{$pageWidth}{/if}">
+					{block name="breadcrumbs"}
+						{if $breadcrumbs}
+							<nav class="app__breadcrumbs" role="navigation" aria-label="{translate key="navigation.breadcrumbLabel"}">
+								<ol>
+									{foreach from=$breadcrumbs item="breadcrumb" name="breadcrumbs"}
+										<li>
+											{if $smarty.foreach.breadcrumbs.last}
+												<span aria-current="page">{$breadcrumb.name|escape}</span>
+											{else}
+												<a href="{$breadcrumb.url|escape}">
+													{$breadcrumb.name|escape}
+												</a>
+												<span class="app__breadcrumbsSeparator" aria-hidden="true">{translate key="navigation.breadcrumbSeparator"}</span>
+											{/if}
+										</li>
+									{/foreach}
+								</ol>
+							</nav>
+						{/if}
+					{/block}
 
-					{** allow pages to provide their own titles **}
-					{if !$suppressPageTitle}
-						<div class="pkp_page_title">
-							<h1>{$pageTitleTranslated}</h1>
-						</div>
-					{/if}
+					{block name="page"}{/block}
+
+				</div>
+			</main>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		pkp.registry.init('app', {$pageComponent|json_encode}, {$state|json_encode});
+	</script>
+
+	<script type="text/javascript">
+		// Initialize JS handler
+		$(function() {ldelim}
+			$('#pkpHelpPanel').pkpHandler(
+				'$.pkp.controllers.HelpPanelHandler',
+				{ldelim}
+					helpUrl: {url|json_encode page="help" escape=false},
+					helpLocale: '{$currentLocale|substr:0:2}',
+				{rdelim}
+			);
+		{rdelim});
+	</script>
+	<div id="pkpHelpPanel" class="pkp_help_panel" tabindex="-1">
+		<div class="panel">
+			<div class="header">
+				<a href="#" class="pkpHomeHelpPanel home">
+					{translate key="help.toc"}
+				</a>
+				<a href="#" class="pkpCloseHelpPanel close">
+					{translate key="common.close"}
+				</a>
+			</div>
+			<div class="content">
+				{include file="common/loadingContainer.tpl"}
+			</div>
+			<div class="footer">
+				<a href="#" class="pkpPreviousHelpPanel previous">
+					{translate key="help.previous"}
+				</a>
+				<a href="#" class="pkpNextHelpPanel next">
+					{translate key="help.next"}
+				</a>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

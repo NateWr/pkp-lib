@@ -462,7 +462,7 @@ class PKPHandler {
 		if ($accessibleWorkflowStages) $templateMgr->assign('accessibleWorkflowStages', $accessibleWorkflowStages);
 
 		// Set up template requirements for the backend editorial UI
-		if ($this->_isBackendPage && Config::getVar('general', 'installed') && !defined('SESSION_DISABLE_INIT')) {
+		if ($this->_isBackendPage) {
 			$templateMgr->setupBackendPage();
 		}
 	}

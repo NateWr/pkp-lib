@@ -1259,9 +1259,6 @@ msgstr "Títol"
 msgid "search.typeMethodApproach"
 msgstr "Tipus (mètode/enfocament)"
 
-msgid "grid.action.toggleHelp"
-msgstr "Alterna la previsualització de l'ajuda en cua"
-
 msgid "grid.action.downloadFile"
 msgstr "Descarrega aquest fitxer"
 

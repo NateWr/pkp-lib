@@ -753,6 +753,9 @@ msgstr "Suggest"
 msgid "common.title"
 msgstr "Title"
 
+msgid "common.titleSeparator"
+msgstr " | "
+
 msgid "common.top"
 msgstr "Top"
 

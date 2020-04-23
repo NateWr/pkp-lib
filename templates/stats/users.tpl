@@ -8,30 +8,30 @@
  * The editorial statistics page.
  *
  *}
-{include file="common/header.tpl" suppressPageTitle=true pageTitle="stats.userStatistics"}
+{extends file="layouts/backend.tpl"}
 
-<div class="pkpStats">
-	<div class="pkpStats__panel">
-		<pkp-header>
-			<h1 id="usersTableLabel" class="pkpHeader__title">{translate key="manager.statistics.statistics.registeredUsers"}</h1>
-		</pkp-header>
-		<table class="pkpTable" labelled-by="usersTableLabel">
-			<thead>
-				<tr>
-					<th>{translate key="common.name"}</th>
-					<th>{translate key="stats.total"}</th>
-				</tr>
-			</thead>
-			<tbody>
-				{foreach from=$userStats item=$row}
+{block name="page"}
+	<div class="pkpStats">
+		<div class="pkpStats__panel">
+			<pkp-header>
+				<h1 id="usersTableLabel" class="pkpHeader__title">{translate key="manager.statistics.statistics.registeredUsers"}</h1>
+			</pkp-header>
+			<table class="pkpTable" labelled-by="usersTableLabel">
+				<thead>
 					<tr>
-						<td>{$row.name}</td>
-						<td>{$row.value}</td>
+						<th>{translate key="common.name"}</th>
+						<th>{translate key="stats.total"}</th>
 					</tr>
-				{/foreach}
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					{foreach from=$userStats item=$row}
+						<tr>
+							<td>{$row.name}</td>
+							<td>{$row.value}</td>
+						</tr>
+					{/foreach}
+				</tbody>
+			</table>
+		</div>
 	</div>
-</div>
-
-{include file="common/footer.tpl"}
+{/block}

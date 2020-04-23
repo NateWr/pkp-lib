@@ -196,8 +196,11 @@ class PKPStatsHandler extends Handler {
 			'stats.descriptionForStat',
 			'stats.countWithYearlyAverage',
 		]);
-		$templateMgr->assign('pageComponent', 'StatsEditorialContainer');
 		$templateMgr->setState($statsComponent->getConfig());
+		$templateMgr->assign([
+			'pageComponent' => 'StatsEditorialContainer',
+			'pageTitle' => __('stats.editorialActivity'),
+		]);
 
 		$templateMgr->display('stats/editorial.tpl');
 	}
@@ -308,8 +311,12 @@ class PKPStatsHandler extends Handler {
 			]
 		);
 
-		$templateMgr->assign('pageComponent', 'StatsPublicationsContainer');
 		$templateMgr->setState($statsComponent->getConfig());
+		$templateMgr->assign([
+			'pageComponent' => 'StatsPublicationsContainer',
+			'pageTitle' => __('stats.publicationStats'),
+			'pageWidth' => PAGE_WIDTH_WIDE,
+		]);
 
 		$templateMgr->display('stats/publications.tpl');
 	}
@@ -330,7 +337,10 @@ class PKPStatsHandler extends Handler {
 
 		$templateMgr = TemplateManager::getManager($request);
 		$this->setupTemplate($request);
-		$templateMgr->assign('userStats', Services::get('user')->getRolesOverview(['contextId' => $context->getId()]));
+		$templateMgr->assign([
+			'pageTitle' => __('stats.userStatistics'),
+			'userStats' => Services::get('user')->getRolesOverview(['contextId' => $context->getId()]),
+		]);
 		$templateMgr->display('stats/users.tpl');
 	}
 

@@ -64,6 +64,8 @@ class ContextGridHandler extends GridHandler {
 			LOCALE_COMPONENT_APP_ADMIN
 		);
 
+		$this->setTitle('context.contexts');
+
 		// Grid actions.
 		$router = $request->getRouter();
 

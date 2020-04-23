@@ -88,6 +88,7 @@ class PKPToolsHandler extends ManagementHandler {
 	function index($args, $request) {
 		$templateMgr = TemplateManager::getManager($request);
 		$this->setupTemplate($request);
+		$templateMgr->assign('pageTitle', __('navigation.tools'));
 		$templateMgr->display('management/tools/index.tpl');
 	}
 
@@ -170,6 +171,20 @@ class PKPToolsHandler extends ManagementHandler {
 		AppLocale::requireComponents(LOCALE_COMPONENT_PKP_SUBMISSION, LOCALE_COMPONENT_APP_EDITOR);
 
 		$templateMgr = TemplateManager::getManager();
+		$templateMgr->assign([
+			'breadcrumbs' => [
+				[
+					'id' => 'tools',
+					'name' => __('navigation.tools'),
+					'url' => $request->getRouter()->url($request, null, 'management', 'tools'),
+				],
+				[
+					'id' => 'reportGenerator',
+					'name' => __('manager.statistics.reports')
+				],
+			],
+			'pageTitle', __('manager.statistics.reports'),
+		]);
 		$templateMgr->display('management/tools/reportGenerator.tpl');
 	}
 
