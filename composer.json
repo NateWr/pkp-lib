@@ -13,6 +13,7 @@
 		"michelf/php-markdown": "1.*",
 		"slim/slim": "3.*",
 		"pimple/pimple": "3.*",
+		"illuminate/auth": "^5.8.36",
 		"illuminate/database": "^5.5.41",
 		"illuminate/validation": "^5.5.41",
 		"firebase/php-jwt": "5.*",

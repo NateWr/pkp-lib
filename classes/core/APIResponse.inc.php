@@ -15,6 +15,8 @@ use Slim\Http\Response;
 
 class APIResponse extends Response {
 
+	public $isAuthorized = false;
+
 	/**
 	 * Response with an error message
 	 *

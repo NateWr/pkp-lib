@@ -92,7 +92,7 @@ class APIRouter extends PKPRouter {
 		// Ensure slim library is available
 		require_once('lib/pkp/lib/vendor/autoload.php');
 
-		$sourceFile = sprintf('api/%s/%s/index.php', $this->getVersion(), $this->getEntity());
+		$sourceFile = sprintf('api/%s/Routes.inc.php', $this->getVersion());
 
 		if (!file_exists($sourceFile)) {
 			AppLocale::requireComponents(LOCALE_COMPONENT_PKP_API, LOCALE_COMPONENT_APP_API);
@@ -110,7 +110,8 @@ class APIRouter extends PKPRouter {
 			SessionManager::getManager();
 		}
 
-		$handler = require ('./'.$sourceFile);
+		require ('./'.$sourceFile);
+		$handler = new RoutesHandler();
 		$this->setHandler($handler);
 		$handler->getApp()->run();
 	}

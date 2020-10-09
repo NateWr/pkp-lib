@@ -49,7 +49,7 @@ class APIHandler extends PKPHandler {
 				'determineRouteBeforeAppMiddleware' => true,
 			)
 		));
-		$this->_app->add(new ApiAuthorizationMiddleware($this));
+		$this->_app->add(new ApiAuthorizationMiddleware());
 		$this->_app->add(new ApiCsrfMiddleware($this));
 		$this->_app->add(new ApiTokenDecodingMiddleware($this));
 		// remove trailing slashes
@@ -132,7 +132,7 @@ class APIHandler extends PKPHandler {
 			return $next($request, $response);
 		});
 		$this->_request = Application::get()->getRequest();
-		$this->setupEndpoints();
+		// $this->setupEndpoints();
 	}
 
 	/**
