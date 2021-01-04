@@ -105,6 +105,14 @@ class Form {
 			// this method is only called by a subclass. Results
 			// in hook calls named e.g. "papergalleyform::Constructor"
 			// Note that class names are always lower case.
+			/**
+			 * Modify a form when it is created
+			 *
+			 * @hook <form_class_name>::Constructor
+			 * @group FormController
+			 * @param Form $this The form object
+			 * @param string $template the path to the form's template file
+			 */
 			HookRegistry::call(strtolower_codesafe(get_class($this)) . '::Constructor', array($this, &$template));
 		}
 	}

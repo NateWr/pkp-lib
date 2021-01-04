@@ -151,7 +151,27 @@ class PKPAnnouncementHandler extends APIHandler {
 			$params['contextIds'] = [$this->getRequest()->getContext()->getId()];
 		}
 
-		\HookRegistry::call('API::submissions::params', array(&$params, $slimRequest));
+		/**
+		 * Modify the query params accepted by the announcements API
+		 *
+		 * This is a longer description. This is a longer description. This is a
+		 * longer description. This is a longer description. This is a longer
+		 * description.
+		 *
+		 * And here is another description.
+		 *
+		 * ```
+		 * $this = something[
+		 * 	'hello' => $whatever,
+		 * ]
+		 * ```
+		 *
+		 * @hook API::announcements::params
+		 * @group API/Announcements
+		 * @param array $params This is a description of the params
+		 * @param SlimRequest $slimRequest SlimAPI request object
+		 */
+		HookRegistry::call('API::announcements::params', array(&$params, $slimRequest));
 
 		$result = Services::get('announcement')->getMany($params);
 		$items = [];
@@ -163,6 +183,23 @@ class PKPAnnouncementHandler extends APIHandler {
 				]);
 			}
 		}
+
+		/**
+		 * Test
+		 *
+		 * test description
+		 *
+		 * @hook API::<entity>::params
+		 * @param array $params This is a description of the params
+		 * @param SlimRequest $slimRequest SlimAPI request object
+		 */
+		\HookRegistry::call('TEST::thing', [&$params, $slimRequest]);
+
+		/**
+		 * @param array $params This is a description of the params
+		 * @param SlimRequest $slimRequest SlimAPI request object
+		 */
+		\HookRegistry::call('TEST::thing::two', [&$params, $slimRequest]);
 
 		return $response->withJson([
 			'itemsMax' => Services::get('announcement')->getMax($params),
