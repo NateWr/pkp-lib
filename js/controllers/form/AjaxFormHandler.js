@@ -74,12 +74,26 @@
 
 		// This form implementation will post the form,
 		// and act depending on the returned JSON message.
-		var $form = this.getHtmlElement();
+		var $form = this.getHtmlElement(),
+			data,
+			submitButton;
 
 		this.disableFormControls();
 
 		if (!this.confirmText.length || confirm(this.confirmText)) {
-			$.post($form.attr('action'), $form.serialize(),
+			data = $form.serialize();
+			submitButton = validator.submitButton;
+			console.log(validator);
+			if (typeof submitButton !== 'undefined') {
+				console.log(submitButton, submitButton.id.indexOf('saveFormButton') > -1, submitButton.id);
+			}
+			if (typeof submitButton !== 'undefined' && submitButton.id
+					&& submitButton.id.indexOf('saveFormButton') > -1) {
+				data += '&saveFormButton=1';
+			} else {
+				data = data.replace('&saveFormButton=1', '');
+			}
+			$.post($form.attr('action'), data,
 					this.callbackWrapper(this.handleResponse), 'json');
 		}
 	};

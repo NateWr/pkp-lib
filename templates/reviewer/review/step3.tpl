@@ -32,14 +32,14 @@
 			</div>
 		{/fbvFormSection}
 	{/if}
-	
+
 	{if $reviewForm}
 		{fbvFormSection}
 			<h3>{$reviewForm->getLocalizedTitle()|escape}</h3>
 			<p>{$reviewForm->getLocalizedDescription()}</p>
 
 			{include file="reviewer/review/reviewFormResponse.tpl"}
-		{/fbvFormSection}	
+		{/fbvFormSection}
 	{else}
 		{fbvFormSection label="submission.review" description="reviewer.submission.reviewDescription"}
 			{fbvFormSection label="submission.comments.canShareWithAuthor"}
@@ -58,7 +58,7 @@
 
 	<!-- Display queries grid -->
 	{capture assign="queriesGridUrl"}{url router=$smarty.const.ROUTE_COMPONENT component="grid.queries.QueriesGridHandler" op="fetchGrid" submissionId=$submission->getId() stageId=$smarty.const.WORKFLOW_STAGE_ID_EXTERNAL_REVIEW escape=false}{/capture}
-	{load_url_in_div id="queriesGrid" url=$queriesGridUrl}	
+	{load_url_in_div id="queriesGrid" url=$queriesGridUrl}
 
 	{$additionalFormFields}
 

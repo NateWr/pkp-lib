@@ -214,7 +214,6 @@ class FormBuilderVocabulary {
 			'FBV_cancelUrlTarget' => isset($params['cancelUrlTarget']) ? $params['cancelUrlTarget'] : '',
 			'FBV_translate' => isset($params['translate']) ? $params['translate'] : true,
 			'FBV_saveText' => isset($params['saveText']) ? $params['saveText'] : null,
-			'FBV_saveValue' => isset($params['saveValue']) ? (boolean)$params['saveValue'] : null,
 		));
 		return $smarty->fetch('form/formButtons.tpl');
 	}
@@ -398,12 +397,12 @@ class FormBuilderVocabulary {
 		));
 		foreach ($params as $key => $value) {
 			switch ($key) {
-				case 'label': 
-					$smarty->assign('FBV_label_content', $this->_smartyFBVSubLabel($params, $smarty)); 
+				case 'label':
+					$smarty->assign('FBV_label_content', $this->_smartyFBVSubLabel($params, $smarty));
 				break;
 				case 'type':
 				case 'size':
-				case 'inline': 
+				case 'inline':
 				case 'subLabelTranslate':
 					break;
 				case 'urlValidationErrorMsg':
@@ -411,8 +410,8 @@ class FormBuilderVocabulary {
 						$smarty->assign('FBV_urlValidationErrorMessage', __($value));
 					}
 					break;
-				case 'placeholder': 
-					$textInputParams .= 'placeholder="' . htmlspecialchars(__($value), ENT_QUOTES, LOCALE_ENCODING) . '" '; 
+				case 'placeholder':
+					$textInputParams .= 'placeholder="' . htmlspecialchars(__($value), ENT_QUOTES, LOCALE_ENCODING) . '" ';
 				break;
 				case 'disabled':
 				case 'readonly':
@@ -422,10 +421,10 @@ class FormBuilderVocabulary {
 				case 'value':
 				case 'uniqId':
 					$smarty->assign('FBV_' . $key, $value); break;
-				case 'required': 
-					if ($value) $textInputParams .= 'required="' . htmlspecialchars($value, ENT_QUOTES, LOCALE_ENCODING) . '"'; 
+				case 'required':
+					if ($value) $textInputParams .= 'required="' . htmlspecialchars($value, ENT_QUOTES, LOCALE_ENCODING) . '"';
 				break;
-				default: 
+				default:
 					$textInputParams .= htmlspecialchars($key, ENT_QUOTES, LOCALE_ENCODING) . '="' . htmlspecialchars($value, ENT_QUOTES, LOCALE_ENCODING). '" ';
 			}
 		}

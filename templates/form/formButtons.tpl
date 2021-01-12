@@ -36,7 +36,7 @@
 	{* Save button *}
 	{if $FBV_saveText}
 		{assign var=saveButtonId value="saveFormButton"|concat:"-"|uniqid}
-		{fbvElement type="submit" class="saveFormButton" name="saveFormButton" id=$saveButtonId value=$FBV_saveValue label=$FBV_saveText disabled=$FBV_submitDisabled}
+		{fbvElement type="submit" class="saveFormButton" id=$saveButtonId label=$FBV_saveText disabled=$FBV_submitDisabled}
 	{/if}
 
 	{* Cancel button (if any) *}
