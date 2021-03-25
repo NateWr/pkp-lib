@@ -13,6 +13,7 @@
  * @brief Handle API requests for submission operations.
  *
  */
+use \Illuminate\Database\Capsule\Manager as DB;
 
 import('lib.pkp.classes.handler.APIHandler');
 import('classes.core.Services');
@@ -34,6 +35,9 @@ class PKPSubmissionHandler extends APIHandler {
 		'publishPublication',
 		'unpublishPublication',
 		'deletePublication',
+		'getJats',
+		'getJatsChanges',
+		'storeJatsChanges',
 	];
 
 	/** @var array Handlers that must be authorized to write to a publication */
@@ -95,6 +99,16 @@ class PKPSubmissionHandler extends APIHandler {
 					'handler' => [$this, 'getPublication'],
 					'roles' => [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_REVIEWER, ROLE_ID_AUTHOR],
 				],
+				[
+					'pattern' => $this->getEndpointPattern() . '/{submissionId}/publications/{publicationId}/jats/{fileId}',
+					'handler' => [$this, 'getJats'],
+					'roles' => [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_AUTHOR],
+				],
+				[
+					'pattern' => $this->getEndpointPattern() . '/{submissionId}/publications/{publicationId}/jats/{fileId}/changes',
+					'handler' => [$this, 'getJatsChanges'],
+					'roles' => [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_AUTHOR],
+				],
 			],
 			'POST' => [
 				[
@@ -111,6 +125,11 @@ class PKPSubmissionHandler extends APIHandler {
 					'pattern' => $this->getEndpointPattern() . '/{submissionId}/publications/{publicationId}/version',
 					'handler' => [$this, 'versionPublication'],
 					'roles' => [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT],
+				],
+				[
+					'pattern' => $this->getEndpointPattern() . '/{submissionId}/publications/{publicationId}/jats/{fileId}/changes',
+					'handler' => [$this, 'storeJatsChanges'],
+					'roles' => [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_AUTHOR],
 				],
 			],
 			'PUT' => [
@@ -874,5 +893,141 @@ class PKPSubmissionHandler extends APIHandler {
 		Services::get('publication')->delete($publication);
 
 		return $response->withJson($publicationProps, 200);
+	}
+
+	/**
+	 * Get a jats file for this submission
+	 *
+	 * @param $slimRequest Request Slim request object
+	 * @param $response Response object
+	 * @param array $args arguments
+	 * @return Response
+	 */
+	public function getJats($slimRequest, $response, $args) {
+		$submission = $this->getAuthorizedContextObject(ASSOC_TYPE_SUBMISSION);
+
+		$publication = Services::get('publication')->get((int) $args['publicationId']);
+		$fileId = (int) $args['fileId'];
+
+		if (!$publication) {
+			return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
+		}
+
+		if ($submission->getId() !== $publication->getData('submissionId')) {
+			return $response->withStatus(403)->withJsonError('api.publications.403.submissionsDidNotMatch');
+		}
+
+		if (!in_array($fileId, array_values((array) $publication->getData('jatsFileId')))) {
+			return $response->withStatus(403)->withJsonError('api.publications.403.jatsFileNotFound');
+		}
+
+		Services::get('file')->download($fileId, 'test.xml');
+	}
+
+	/**
+	 * Get the stored changes for a JATS file
+	 *
+	 * @param $slimRequest Request Slim request object
+	 * @param $response Response object
+	 * @param array $args arguments
+	 * @return Response
+	 */
+	public function getJatsChanges(Slim\Http\Request $slimRequest, $response, $args) {
+		$submission = $this->getAuthorizedContextObject(ASSOC_TYPE_SUBMISSION);
+
+		$publication = Services::get('publication')->get((int) $args['publicationId']);
+		$fileId = (int) $args['fileId'];
+
+		if (!$publication) {
+			return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
+		}
+
+		if ($submission->getId() !== $publication->getData('submissionId')) {
+			return $response->withStatus(403)->withJsonError('api.publications.403.submissionsDidNotMatch');
+		}
+
+		if (!in_array($fileId, array_values((array) $publication->getData('jatsFileId')))) {
+			return $response->withStatus(403)->withJsonError('api.publications.403.jatsFileNotFound');
+		}
+
+		$page = 0;
+		$requestParams = $slimRequest->getQueryParams();
+		if (isset($requestParams['page'])) {
+			$page = (int) $requestParams['page'];
+		}
+
+		$perPage = 50;
+
+		$total = DB::table('publication_jats_changes')
+			->where('file_id', $fileId)
+			->count();
+		$changes = DB::table('publication_jats_changes')
+			->where('file_id', $fileId)
+			->limit($perPage)
+			->offset($perPage * $page)
+			->get()
+			->map(function($row) {
+				return array_merge(
+					json_decode($row->change, TRUE),
+					[
+						'_id' => $row->change_id,
+						'user' => $row->user_id,
+						'applied' => $row->applied,
+						'articleId' => $row->publication_id,
+						'created' => $row->created_at,
+					]
+				);
+			});
+
+		return $response->withJson([
+			'changes' => $changes,
+			'total' => $total,
+		], 200);
+	}
+
+	/**
+	 * Store the changes to a JATS file
+	 *
+	 * @param $slimRequest Request Slim request object
+	 * @param $response Response object
+	 * @param array $args arguments
+	 * @return Response
+	 */
+	public function storeJatsChanges(Slim\Http\Request $slimRequest, $response, $args) {
+		$submission = $this->getAuthorizedContextObject(ASSOC_TYPE_SUBMISSION);
+
+		$publication = Services::get('publication')->get((int) $args['publicationId']);
+		$fileId = (int) $args['fileId'];
+
+		if (!$publication) {
+			return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
+		}
+
+		if ($submission->getId() !== $publication->getData('submissionId')) {
+			return $response->withStatus(403)->withJsonError('api.publications.403.submissionsDidNotMatch');
+		}
+
+		if (!in_array($fileId, array_values((array) $publication->getData('jatsFileId')))) {
+			return $response->withStatus(403)->withJsonError('This file is not part of this publication.');
+		}
+
+		$changes = $slimRequest->getParsedBody();
+
+		if (isset($changes['changes']) && is_array($changes['changes'])) {
+			$rows = [];
+			foreach ($changes['changes'] as $change) {
+				$rows[] = [
+					'file_id' => $fileId,
+					'publication_id' => $publication->getId(),
+					'user_id' => $this->getRequest()->getUser()->getId(),
+					'change' => json_encode($change),
+					'applied' => false,
+					'created_at' => Core::getCurrentDate(),
+				];
+			}
+			DB::table('publication_jats_changes')->insert($rows);
+		}
+
+		return $response->withStatus(200);
 	}
 }
