@@ -167,7 +167,7 @@ class PKPFileService {
 	 */
 	public function formatFilename($path, $filename) {
 		$extension = \Stringy\Stringy::create(pathinfo($path, PATHINFO_EXTENSION))->toLowerCase();
-		$newFilename = \Stringy\Stringy::create($filename)->toLowerCase()->dasherize()->regexReplace('[^a-z0-9\-\_.]', '');
+		$newFilename = \Stringy\Stringy::create($filename)->toLowerCase()->dasherize();
 		if (!empty($extension) && substr($newFilename, (strlen($extension) * -1)) != $extension) {
 			$newFilename .= '.' . $extension;
 		}
