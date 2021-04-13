@@ -9,6 +9,7 @@
  *
  * @class SubmissionDiscipline
  * @ingroup submission
+ *
  * @see SubmissionDisciplineEntryDAO
  *
  * @brief Basic class describing a submission discipline
@@ -17,30 +18,35 @@
 
 import('lib.pkp.classes.controlledVocab.ControlledVocabEntry');
 
-class SubmissionDiscipline extends ControlledVocabEntry {
-	//
-	// Get/set methods
-	//
+class SubmissionDiscipline extends ControlledVocabEntry
+{
+    //
+    // Get/set methods
+    //
 
-	/**
-	 * Get the discipline
-	 * @return string
-	 */
-	function getDiscipline() {
-		return $this->getData('submissionDiscipline');
-	}
+    /**
+     * Get the discipline
+     *
+     * @return string
+     */
+    public function getDiscipline()
+    {
+        return $this->getData('submissionDiscipline');
+    }
 
-	/**
-	 * Set the discipline text
-	 * @param discipline string
-	 * @param locale string
-	 */
-	function setDiscipline($discipline, $locale) {
-		$this->setData('submissionDiscipline', $discipline, $locale);
-	}
+    /**
+     * Set the discipline text
+     *
+     * @param discipline string
+     * @param locale string
+     */
+    public function setDiscipline($discipline, $locale)
+    {
+        $this->setData('submissionDiscipline', $discipline, $locale);
+    }
 
-	function getLocaleMetadataFieldNames() {
-		return array('submissionDiscipline');
-	}
+    public function getLocaleMetadataFieldNames()
+    {
+        return ['submissionDiscipline'];
+    }
 }
-

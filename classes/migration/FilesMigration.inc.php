@@ -11,29 +11,30 @@
  * @brief Create the files database table
  */
 
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Capsule\Manager as Capsule;
 
-class FilesMigration extends Migration {
-	/**
-	 * Run the migrations.
-	 * @return void
-	 */
-	public function up() {
-		// Create a new table to track files in file storage
-		Capsule::schema()->create('files', function (Blueprint $table) {
-			$table->bigIncrements('file_id');
-			$table->string('path', 255);
-			$table->string('mimetype', 255);
-		});
-	}
+class FilesMigration extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up()
+    {
+        // Create a new table to track files in file storage
+        Capsule::schema()->create('files', function (Blueprint $table) {
+            $table->bigIncrements('file_id');
+            $table->string('path', 255);
+            $table->string('mimetype', 255);
+        });
+    }
 
-	/**
-	 * Reverse the migration.
-	 * @return void
-	 */
-	public function down() {
-		Capsule::schema()->drop('files');
-	}
+    /**
+     * Reverse the migration.
+     */
+    public function down()
+    {
+        Capsule::schema()->drop('files');
+    }
 }

@@ -16,15 +16,17 @@
 
 import('lib.pkp.classes.core.PKPRequest');
 
-class Request extends PKPRequest {
-	private static $_requestMethod;
+class Request extends PKPRequest
+{
+    private static $_requestMethod;
 
-	public function setRequestMethod($requestMethod) {
-		self::$_requestMethod = $requestMethod;
-	}
+    public function setRequestMethod($requestMethod)
+    {
+        self::$_requestMethod = $requestMethod;
+    }
 
-	public function isPost() {
-		return (self::$_requestMethod == 'POST');
-	}
+    public function isPost()
+    {
+        return (self::$_requestMethod == 'POST');
+    }
 }
-

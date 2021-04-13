@@ -26,59 +26,60 @@
 define('PWD', getcwd());
 chdir(dirname(INDEX_FILE_LOCATION)); /* Change to base directory */
 if (!defined('STDIN')) {
-	define('STDIN', fopen('php://stdin','r'));
+    define('STDIN', fopen('php://stdin', 'r'));
 }
 define('SESSION_DISABLE_INIT', 1);
 require('./lib/pkp/includes/bootstrap.inc.php');
 
 if (!isset($argc)) {
-	// In PHP < 4.3.0 $argc/$argv are not automatically registered
-	if (isset($_SERVER['argc'])) {
-		$argc = $_SERVER['argc'];
-		$argv = $_SERVER['argv'];
-	} else {
-		$argc = $argv = null;
-	}
+    // In PHP < 4.3.0 $argc/$argv are not automatically registered
+    if (isset($_SERVER['argc'])) {
+        $argc = $_SERVER['argc'];
+        $argv = $_SERVER['argv'];
+    } else {
+        $argc = $argv = null;
+    }
 }
 
-class CommandLineTool {
+class CommandLineTool
+{
+    /** @var string the script being executed */
+    public $scriptName;
 
-	/** @var string the script being executed */
-	var $scriptName;
+    /** @vary array Command-line arguments */
+    public $argv;
 
-	/** @vary array Command-line arguments */
-	var $argv;
+    public function __construct($argv = [])
+    {
+        // Initialize the request object with a page router
+        $application = Application::get();
+        $request = $application->getRequest();
 
-	function __construct($argv = array()) {
-		// Initialize the request object with a page router
-		$application = Application::get();
-		$request = $application->getRequest();
+        // FIXME: Write and use a CLIRouter here (see classdoc)
+        import('classes.core.PageRouter');
+        $router = new PageRouter();
+        $router->setApplication($application);
+        $request->setRouter($router);
 
-		// FIXME: Write and use a CLIRouter here (see classdoc)
-		import('classes.core.PageRouter');
-		$router = new PageRouter();
-		$router->setApplication($application);
-		$request->setRouter($router);
+        // Initialize the locale and load generic plugins.
+        AppLocale::initialize($request);
+        PluginRegistry::loadCategory('generic');
 
-		// Initialize the locale and load generic plugins.
-		AppLocale::initialize($request);
-		PluginRegistry::loadCategory('generic');
+        $this->argv = isset($argv) && is_array($argv) ? $argv : [];
 
-		$this->argv = isset($argv) && is_array($argv) ? $argv : array();
+        if (isset($_SERVER['SERVER_NAME'])) {
+            die('This script can only be executed from the command-line');
+        }
 
-		if (isset($_SERVER['SERVER_NAME'])) {
-			die('This script can only be executed from the command-line');
-		}
+        $this->scriptName = isset($this->argv[0]) ? array_shift($this->argv) : '';
 
-		$this->scriptName = isset($this->argv[0]) ? array_shift($this->argv) : '';
+        if (isset($this->argv[0]) && $this->argv[0] == '-h') {
+            $this->usage();
+            exit(0);
+        }
+    }
 
-		if (isset($this->argv[0]) && $this->argv[0] == '-h') {
-			$this->usage();
-			exit(0);
-		}
-	}
-
-	function usage() {
-	}
-
+    public function usage()
+    {
+    }
 }

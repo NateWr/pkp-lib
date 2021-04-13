@@ -9,6 +9,7 @@
  *
  * @class Interest
  * @ingroup user
+ *
  * @see InterestDAO
  *
  * @brief Basic class describing a reviewer interest
@@ -17,26 +18,29 @@
 
 import('lib.pkp.classes.controlledVocab.ControlledVocabEntry');
 
-class InterestEntry extends ControlledVocabEntry {
-	//
-	// Get/set methods
-	//
+class InterestEntry extends ControlledVocabEntry
+{
+    //
+    // Get/set methods
+    //
 
-	/**
-	 * Get the interest
-	 * @return string
-	 */
-	function getInterest() {
-		return $this->getData('interest');
-	}
+    /**
+     * Get the interest
+     *
+     * @return string
+     */
+    public function getInterest()
+    {
+        return $this->getData('interest');
+    }
 
-	/**
-	 * Set the interest text
-	 * @param interest
-	 */
-	function setInterest($interest) {
-		$this->setData('interest', $interest);
-	}
+    /**
+     * Set the interest text
+     *
+     * @param interest
+     */
+    public function setInterest($interest)
+    {
+        $this->setData('interest', $interest);
+    }
 }
-
-

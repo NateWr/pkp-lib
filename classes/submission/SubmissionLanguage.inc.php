@@ -9,6 +9,7 @@
  *
  * @class SubmissionLanguage
  * @ingroup submission
+ *
  * @see SubmissionLanguageEntryDAO
  *
  * @brief Basic class describing a submission language
@@ -16,33 +17,38 @@
 
 import('lib.pkp.classes.controlledVocab.ControlledVocabEntry');
 
-class SubmissionLanguage extends ControlledVocabEntry {
-	//
-	// Get/set methods
-	//
+class SubmissionLanguage extends ControlledVocabEntry
+{
+    //
+    // Get/set methods
+    //
 
-	/**
-	 * Get the language
-	 * @return string
-	 */
-	function getLanguage() {
-		return $this->getData('submissionLanguage');
-	}
+    /**
+     * Get the language
+     *
+     * @return string
+     */
+    public function getLanguage()
+    {
+        return $this->getData('submissionLanguage');
+    }
 
-	/**
-	 * Set the language text
-	 * @param language string
-	 * @param locale string
-	 */
-	function setLanguage($language, $locale) {
-		$this->setData('submissionLanguage', $language, $locale);
-	}
+    /**
+     * Set the language text
+     *
+     * @param language string
+     * @param locale string
+     */
+    public function setLanguage($language, $locale)
+    {
+        $this->setData('submissionLanguage', $language, $locale);
+    }
 
-	/**
-	 * @copydoc ControlledVocabEntry::getLocaleMetadataFieldNames()
-	 */
-	function getLocaleMetadataFieldNames() {
-		return array('submissionLanguage');
-	}
+    /**
+     * @copydoc ControlledVocabEntry::getLocaleMetadataFieldNames()
+     */
+    public function getLocaleMetadataFieldNames()
+    {
+        return ['submissionLanguage'];
+    }
 }
-

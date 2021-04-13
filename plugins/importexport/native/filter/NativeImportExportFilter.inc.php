@@ -15,37 +15,42 @@
 
 import('lib.pkp.classes.filter.PersistableFilter');
 
-class NativeImportExportFilter extends PersistableFilter {
-	/** @var NativeImportExportDeployment */
-	var $_deployment;
+class NativeImportExportFilter extends PersistableFilter
+{
+    /** @var NativeImportExportDeployment */
+    public $_deployment;
 
-	/**
-	 * Constructor
-	 * @param $filterGroup FilterGroup
-	 */
-	function __construct($filterGroup) {
-		parent::__construct($filterGroup);
-	}
+    /**
+     * Constructor
+     *
+     * @param $filterGroup FilterGroup
+     */
+    public function __construct($filterGroup)
+    {
+        parent::__construct($filterGroup);
+    }
 
 
-	//
-	// Deployment management
-	//
-	/**
-	 * Set the import/export deployment
-	 * @param $deployment NativeImportExportDeployment
-	 */
-	function setDeployment($deployment) {
-		$this->_deployment = $deployment;
-	}
+    //
+    // Deployment management
+    //
+    /**
+     * Set the import/export deployment
+     *
+     * @param $deployment NativeImportExportDeployment
+     */
+    public function setDeployment($deployment)
+    {
+        $this->_deployment = $deployment;
+    }
 
-	/**
-	 * Get the import/export deployment
-	 * @return NativeImportExportDeployment
-	 */
-	function getDeployment() {
-		return $this->_deployment;
-	}
+    /**
+     * Get the import/export deployment
+     *
+     * @return NativeImportExportDeployment
+     */
+    public function getDeployment()
+    {
+        return $this->_deployment;
+    }
 }
-
-

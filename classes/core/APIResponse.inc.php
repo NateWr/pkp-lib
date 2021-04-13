@@ -13,21 +13,23 @@
  */
 use Slim\Http\Response;
 
-class APIResponse extends Response {
-
-	/**
-	 * Response with an error message
-	 *
-	 * @param string $msg The message translation key
-	 * @param string $params Optional parameters to pass to the translation
-	 * @return APIResponse
-	 */
-	public function withJsonError($msg, $params = null) {
-		return $this->withJson(
-			array(
-				'error' => $msg,
-				'errorMessage' => __($msg, $params),
-			)
-		);
-	}
+class APIResponse extends Response
+{
+    /**
+     * Response with an error message
+     *
+     * @param string $msg The message translation key
+     * @param string $params Optional parameters to pass to the translation
+     *
+     * @return APIResponse
+     */
+    public function withJsonError($msg, $params = null)
+    {
+        return $this->withJson(
+            [
+                'error' => $msg,
+                'errorMessage' => __($msg, $params),
+            ]
+        );
+    }
 }

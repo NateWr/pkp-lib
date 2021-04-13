@@ -14,6 +14,7 @@
  *
  * @class Language
  * @ingroup language
+ *
  * @see LanguageDAO
  * @deprecated Use \Sokil\IsoCodes directly.
  *
@@ -21,46 +22,57 @@
  *
  */
 
-class Language extends DataObject {
+class Language extends DataObject
+{
+    //
+    // Get/set methods
+    //
 
-	//
-	// Get/set methods
-	//
+    /**
+     * Get the name of the language.
+     *
+     * @deprecated Use \Sokil\IsoCodes directly.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->getData('name');
+    }
 
-	/**
-	 * Get the name of the language.
-	 * @deprecated Use \Sokil\IsoCodes directly.
-	 * @return string
-	 */
-	function getName() {
-		return $this->getData('name');
-	}
+    /**
+     * Set the name of the language.
+     *
+     * @deprecated Use \Sokil\IsoCodes directly.
+     *
+     * @param $name string
+     */
+    public function setName($name)
+    {
+        $this->setData('name', $name);
+    }
 
-	/**
-	 * Set the name of the language.
-	 * @deprecated Use \Sokil\IsoCodes directly.
-	 * @param $name string
-	 */
-	function setName($name) {
-		$this->setData('name', $name);
-	}
+    /**
+     * Get language code.
+     *
+     * @deprecated Use \Sokil\IsoCodes directly.
+     *
+     * @return string
+     */
+    public function getCode()
+    {
+        return $this->getData('code');
+    }
 
-	/**
-	 * Get language code.
-	 * @deprecated Use \Sokil\IsoCodes directly.
-	 * @return string
-	 */
-	function getCode() {
-		return $this->getData('code');
-	}
-
-	/**
-	 * Set language code.
-	 * @deprecated Use \Sokil\IsoCodes directly.
-	 * @param $code string
-	 */
-	function setCode($code) {
-		$this->setData('code', $code);
-	}
+    /**
+     * Set language code.
+     *
+     * @deprecated Use \Sokil\IsoCodes directly.
+     *
+     * @param $code string
+     */
+    public function setCode($code)
+    {
+        $this->setData('code', $code);
+    }
 }
-

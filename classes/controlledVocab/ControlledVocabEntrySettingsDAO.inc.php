@@ -15,23 +15,25 @@
 
 import('lib.pkp.classes.db.SettingsDAO');
 
-class ControlledVocabEntrySettingsDAO extends SettingsDAO {
+class ControlledVocabEntrySettingsDAO extends SettingsDAO
+{
+    /**
+     * Get the settings table name.
+     *
+     * @return string
+     */
+    protected function _getTableName()
+    {
+        return 'controlled_vocab_entry_settings';
+    }
 
-	/**
-	 * Get the settings table name.
-	 * @return string
-	 */
-	protected function _getTableName() {
-		return 'controlled_vocab_entry_settings';
-	}
-
-	/**
-	 * Get the primary key column name.
-	 * @return string
-	 */
-	protected function _getPrimaryKeyColumn() {
-		return 'controlled_vocab_entry_id';
-	}
+    /**
+     * Get the primary key column name.
+     *
+     * @return string
+     */
+    protected function _getPrimaryKeyColumn()
+    {
+        return 'controlled_vocab_entry_id';
+    }
 }
-
-
