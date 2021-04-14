@@ -12,6 +12,9 @@
  * @brief Base class to handle API requests for contexts (journals/presses).
  */
 
+use APP\Facade\Map;
+use APP\Facade\Query;
+
 import('lib.pkp.classes.handler.APIHandler');
 
 class PKPContextHandler extends APIHandler
@@ -34,12 +37,22 @@ class PKPContextHandler extends APIHandler
                     'roles' => $roles,
                 ],
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{contextId:\d+}',
+                    'pattern' => $this->getEndpointPattern() . '/csv',
+                    'handler' => [$this, 'getManyCSV'],
+                    'roles' => $roles,
+                ],
+                [
+                    'pattern' => $this->getEndpointPattern() . '/custom-props',
+                    'handler' => [$this, 'getManyCustomProps'],
+                    'roles' => $roles,
+                ],
+                [
+                    'pattern' => $this->getEndpointPattern() . '/{contextId}',
                     'handler' => [$this, 'get'],
                     'roles' => $roles,
                 ],
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{contextId:\d+}/theme',
+                    'pattern' => $this->getEndpointPattern() . '/{contextId}/theme',
                     'handler' => [$this, 'getTheme'],
                     'roles' => $roles,
                 ],
@@ -53,19 +66,19 @@ class PKPContextHandler extends APIHandler
             ],
             'PUT' => [
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{contextId:\d+}',
+                    'pattern' => $this->getEndpointPattern() . '/{contextId}',
                     'handler' => [$this, 'edit'],
                     'roles' => $roles,
                 ],
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{contextId:\d+}/theme',
+                    'pattern' => $this->getEndpointPattern() . '/{contextId}/theme',
                     'handler' => [$this, 'editTheme'],
                     'roles' => $roles,
                 ],
             ],
             'DELETE' => [
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{contextId:\d+}',
+                    'pattern' => $this->getEndpointPattern() . '/{contextId}',
                     'handler' => [$this, 'delete'],
                     'roles' => [ROLE_ID_SITE_ADMIN],
                 ],
@@ -102,43 +115,37 @@ class PKPContextHandler extends APIHandler
      */
     public function getMany($slimRequest, $response, $args)
     {
-        $request = $this->getRequest();
-
-        $defaultParams = [
-            'count' => 20,
-            'offset' => 0,
-        ];
-
-        $requestParams = array_merge($defaultParams, $slimRequest->getQueryParams());
-
-        $allowedParams = [];
+        $collector = Query::context()->getCollector()
+            ->limit(20)
+            ->offset(0);
 
         // Process query params to format incoming data as needed
-        foreach ($requestParams as $param => $val) {
+        $params = $slimRequest->getQueryParams();
+        foreach ($params as $param => $val) {
             switch ($param) {
                 case 'isEnabled':
-                    $allowedParams[$param] = (bool) $val;
+                    $collector->filterByIsEnabled((bool) $val);
                     break;
 
                 case 'searchPhrase':
-                    $allowedParams[$param] = trim($val);
+                    $collector->searchPhrase(trim($val));
                     break;
 
                 case 'count':
-                    $allowedParams[$param] = min(100, (int) $val);
+                    $collector->limit(min(100, (int) $val));
                     break;
 
                 case 'offset':
-                    $allowedParams[$param] = (int) $val;
+                    $collector->offset((int) $val);
                     break;
             }
         }
 
-        \HookRegistry::call('API::contexts::params', [&$allowedParams, $slimRequest]);
+        \HookRegistry::call('API::contexts::params', [$collector, $slimRequest]);
 
         // Anyone not a site admin should not be able to access contexts that are
         // not enabled
-        if (empty($allowedParams['isEnabled'])) {
+        if (empty($collector->isEnabled)) {
             $userRoles = $this->getAuthorizedContextObject(ASSOC_TYPE_USER_ROLES);
             $canAccessDisabledContexts = !empty(array_intersect([ROLE_ID_SITE_ADMIN], $userRoles));
             if (!$canAccessDisabledContexts) {
@@ -146,22 +153,149 @@ class PKPContextHandler extends APIHandler
             }
         }
 
-        $items = [];
-        $contextsIterator = Services::get('context')->getMany($allowedParams);
-        $propertyArgs = [
-            'request' => $request,
-            'slimRequest' => $slimRequest,
-        ];
-        foreach ($contextsIterator as $context) {
-            $items[] = Services::get('context')->getSummaryProperties($context, $propertyArgs);
-        }
+        $collection = Query::context()->getMany($collector);
+        $items = $collection->mapToSchema(Services::get('schema')->getSummaryProps(SCHEMA_CONTEXT), $this->getRequest());
 
         $data = [
-            'itemsMax' => Services::get('context')->getMax($allowedParams),
+            'itemsMax' => Query::context()->getCount($collector->limit(0)->offset(0)),
             'items' => $items,
         ];
 
         return $response->withJson($data, 200);
+    }
+
+    /**
+     * Test a CSV map
+     *
+     * @param $slimRequest Request Slim request object
+     * @param $response Response object
+     * @param $args array arguments
+     *
+     * @return Response
+     */
+    public function getManyCSV($slimRequest, Slim\Http\Response $response, $args)
+    {
+        $request = $this->getRequest();
+
+        $collector = Query::context()->getCollector()
+            ->limit(20)
+            ->offset(0);
+
+        // Process query params to format incoming data as needed
+        $params = $slimRequest->getQueryParams();
+        foreach ($params as $param => $val) {
+            switch ($param) {
+                case 'isEnabled':
+                    $collector->filterByIsEnabled((bool) $val);
+                    break;
+
+                case 'searchPhrase':
+                    $collector->searchPhrase(trim($val));
+                    break;
+
+                case 'count':
+                    $collector->limit(min(100, (int) $val));
+                    break;
+
+                case 'offset':
+                    $collector->offset((int) $val);
+                    break;
+            }
+        }
+
+        \HookRegistry::call('API::contexts::params', [$collector, $slimRequest]);
+
+        // Anyone not a site admin should not be able to access contexts that are
+        // not enabled
+        if (empty($collector->isEnabled)) {
+            $userRoles = $this->getAuthorizedContextObject(ASSOC_TYPE_USER_ROLES);
+            $canAccessDisabledContexts = !empty(array_intersect([ROLE_ID_SITE_ADMIN], $userRoles));
+            if (!$canAccessDisabledContexts) {
+                return $response->withStatus(403)->withJsonError('api.contexts.403.requestedDisabledContexts');
+            }
+        }
+
+        $contexts = Query::context()->getMany($collector);
+
+        $file = Config::getVar('files', 'files_dir') . '/test.csv';
+        $fp = fopen($file, 'w');
+        fputcsv($fp, ['id', 'name', 'urlPath']);
+
+        $contexts->each(function ($context, $key) use ($fp) {
+            fputcsv($fp, [
+                $context->getId(),
+                $context->getLocalizedData('name'),
+                $context->getData('urlPath'),
+            ]);
+        });
+
+        return $response->withJson($file);
+    }
+
+    /**
+     * Test a map with custom props
+     *
+     * @param $slimRequest Request Slim request object
+     * @param $response Response object
+     * @param $args array arguments
+     *
+     * @return Response
+     */
+    public function getManyCustomProps($slimRequest, Slim\Http\Response $response, $args)
+    {
+        $request = $this->getRequest();
+
+        $collector = Query::context()->getCollector()
+            ->limit(20)
+            ->offset(0);
+
+        // Process query params to format incoming data as needed
+        $params = $slimRequest->getQueryParams();
+        foreach ($params as $param => $val) {
+            switch ($param) {
+                case 'isEnabled':
+                    $collector->filterByIsEnabled((bool) $val);
+                    break;
+
+                case 'searchPhrase':
+                    $collector->searchPhrase(trim($val));
+                    break;
+
+                case 'count':
+                    $collector->limit(min(100, (int) $val));
+                    break;
+
+                case 'offset':
+                    $collector->offset((int) $val);
+                    break;
+            }
+        }
+
+        \HookRegistry::call('API::contexts::params', [$collector, $slimRequest]);
+
+        // Anyone not a site admin should not be able to access contexts that are
+        // not enabled
+        if (empty($collector->isEnabled)) {
+            $userRoles = $this->getAuthorizedContextObject(ASSOC_TYPE_USER_ROLES);
+            $canAccessDisabledContexts = !empty(array_intersect([ROLE_ID_SITE_ADMIN], $userRoles));
+            if (!$canAccessDisabledContexts) {
+                return $response->withStatus(403)->withJsonError('api.contexts.403.requestedDisabledContexts');
+            }
+        }
+
+
+
+
+        $contexts = Query::context()->getMany($collector);
+        $items = $contexts->map(function ($context) {
+            return [
+                'id' => $context->getId(),
+                'name' => $context->getLocalizedData('name'),
+                'publishedSubmissions' => Services::get('submission')->getCount(['contextId' => $context->getId(), 'status' => STATUS_PUBLISHED]),
+            ];
+        });
+
+        return $response->withJson($items);
     }
 
     /**
@@ -202,12 +336,9 @@ class PKPContextHandler extends APIHandler
             }
         }
 
-        $data = $contextService->getFullProperties($context, [
-            'request' => $request,
-            'slimRequest' => $slimRequest
-        ]);
+        $items = \PKP\Context\Collection::make([$context])->mapToSchema(Services::get('schema')->getFullProps(SCHEMA_CONTEXT), $request);
 
-        return $response->withJson($data, 200);
+        return $response->withJson($items->first(), 200);
     }
 
     /**

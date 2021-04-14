@@ -13,6 +13,9 @@
  * @brief Handle API requests for announcement operations.
  *
  */
+use APP\Facade\Command;
+use APP\Facade\Map;
+use APP\Facade\Query;
 
 import('lib.pkp.classes.handler.APIHandler');
 import('classes.core.Services');
@@ -33,7 +36,7 @@ class PKPAnnouncementHandler extends APIHandler
                     'roles' => [ROLE_ID_MANAGER],
                 ],
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{announcementId:\d+}',
+                    'pattern' => $this->getEndpointPattern() . '/{announcementId}',
                     'handler' => [$this, 'get'],
                     'roles' => [ROLE_ID_MANAGER],
                 ],
@@ -47,14 +50,14 @@ class PKPAnnouncementHandler extends APIHandler
             ],
             'PUT' => [
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{announcementId:\d+}',
+                    'pattern' => $this->getEndpointPattern() . '/{announcementId}',
                     'handler' => [$this, 'edit'],
                     'roles' => [ROLE_ID_MANAGER],
                 ],
             ],
             'DELETE' => [
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{announcementId:\d+}',
+                    'pattern' => $this->getEndpointPattern() . '/{announcementId}',
                     'handler' => [$this, 'delete'],
                     'roles' => [ROLE_ID_MANAGER],
                 ],
@@ -91,26 +94,23 @@ class PKPAnnouncementHandler extends APIHandler
      */
     public function get($slimRequest, $response, $args)
     {
-        $announcement = Services::get('announcement')->get((int) $args['announcementId']);
+        $request = $this->getRequest();
+        $announcement = Query::announcement()->get($args['announcementId']);
 
         if (!$announcement) {
             return $response->withStatus(404)->withJsonError('api.announcements.404.announcementNotFound');
         }
 
         // The assocId in announcements should always point to the contextId
-        if ($announcement->getData('assocId') !== $this->getRequest()->getContext()->getId()) {
+        if ($announcement->getData('assocId') !== $request->getContext()->getId()) {
             return $response->withStatus(404)->withJsonError('api.announcements.400.contextsNotMatched');
         }
 
-        $props = Services::get('announcement')->getFullProperties(
-            $announcement,
-            [
-                'request' => $this->getRequest(),
-                'announcementContext' => $this->getRequest()->getContext(),
-            ]
-        );
+        $items = Map::announcement([$announcement], $request->getContext(), $request)
+            ->bySchema()
+            ->toAssocArray();
 
-        return $response->withJson($props, 200);
+        return $response->withJson(array_shift($items), 200);
     }
 
     /**
@@ -126,10 +126,9 @@ class PKPAnnouncementHandler extends APIHandler
     {
         $request = Application::get()->getRequest();
 
-        $params = [
-            'count' => 30,
-            'offset' => 0,
-        ];
+        $collector = Query::announcement()->getCollector()
+            ->limit(30)
+            ->offset(0);
 
         $requestParams = $slimRequest->getQueryParams();
 
@@ -137,42 +136,49 @@ class PKPAnnouncementHandler extends APIHandler
         foreach ($requestParams as $param => $val) {
             switch ($param) {
                 case 'contextIds':
+                    if (is_string($val)) {
+                        $val = explode(',', $val);
+                    } elseif (!is_array($val)) {
+                        $val = [$val];
+                    }
+                    $collector->filterByContextIds(array_map('intval', $val));
+                    break;
                 case 'typeIds':
                     if (is_string($val)) {
                         $val = explode(',', $val);
                     } elseif (!is_array($val)) {
                         $val = [$val];
                     }
-                    $params[$param] = array_map('intval', $val);
+                    $collector->filterByTypeIds(array_map('intval', $val));
                     break;
                 case 'count':
+                    $collector->limit((int) $val);
+                    break;
                 case 'offset':
-                    $params[$param] = (int) $val;
+                    $collector->offset((int) $val);
                     break;
                 case 'searchPhrase':
-                    $params[$param] = $val;
+                    $collector->searchPhrase($val);
+                    break;
             }
         }
 
         if ($this->getRequest()->getContext()) {
-            $params['contextIds'] = [$this->getRequest()->getContext()->getId()];
+            $collector->filterByContextIds([$this->getRequest()->getContext()->getId()]);
         }
 
-        \HookRegistry::call('API::submissions::params', [&$params, $slimRequest]);
+        \HookRegistry::call('API::announcements::params', [$collector, $slimRequest]);
 
-        $result = Services::get('announcement')->getMany($params);
-        $items = [];
-        if ($result->valid()) {
-            foreach ($result as $announcement) {
-                $items[] = Services::get('announcement')->getSummaryProperties($announcement, [
-                    'request' => $this->getRequest(),
-                    'announcementContext' => $this->getRequest()->getContext(),
-                ]);
-            }
-        }
+        $announcementsIterator = Query::announcement()->getMany($collector);
+
+        $items = Map::announcement($announcementsIterator, $request->getContext(), $request)
+            ->bySchemaSummary()
+            ->toAssocArray();
+
+        $itemsMax = Query::announcement()->getCount($collector->limit(0)->offset(0));
 
         return $response->withJson([
-            'itemsMax' => Services::get('announcement')->getMax($params),
+            'itemsMax' => $itemsMax,
             'items' => $items,
         ], 200);
     }
@@ -208,7 +214,7 @@ class PKPAnnouncementHandler extends APIHandler
 
         $announcement = DAORegistry::getDao('AnnouncementDAO')->newDataObject();
         $announcement->setAllData($params);
-        $announcement = Services::get('announcement')->add($announcement, $request);
+        $announcement = Command::announcement()->add($announcement, $request);
         $announcementProps = Services::get('announcement')->getFullProperties($announcement, [
             'request' => $request,
             'announcementContext' => $request->getContext(),
@@ -252,12 +258,12 @@ class PKPAnnouncementHandler extends APIHandler
         $primaryLocale = $context->getPrimaryLocale();
         $allowedLocales = $context->getSupportedFormLocales();
 
-        $errors = Services::get('announcement')->validate(VALIDATE_ACTION_EDIT, $params, $allowedLocales, $primaryLocale);
+        $errors = Query::announcement()->validate(VALIDATE_ACTION_EDIT, $params, $allowedLocales, $primaryLocale);
         if (!empty($errors)) {
             return $response->withStatus(400)->withJson($errors);
         }
 
-        $announcement = Services::get('announcement')->edit($announcement, $params, $request);
+        $announcement = Command::announcement()->edit($announcement, $params, $request);
 
         $announcementProps = Services::get('announcement')->getFullProperties($announcement, [
             'request' => $request,
@@ -300,7 +306,7 @@ class PKPAnnouncementHandler extends APIHandler
             'announcementContext' => $request->getContext(),
         ]);
 
-        Services::get('announcement')->delete($announcement);
+        Command::announcement()->delete($announcement);
 
         return $response->withJson($announcementProps, 200);
     }
