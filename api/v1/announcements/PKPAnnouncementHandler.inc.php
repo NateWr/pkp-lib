@@ -36,7 +36,7 @@ class PKPAnnouncementHandler extends APIHandler
                     'roles' => [ROLE_ID_MANAGER],
                 ],
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{announcementId}',
+                    'pattern' => $this->getEndpointPattern() . '/{announcementId:\d+}',
                     'handler' => [$this, 'get'],
                     'roles' => [ROLE_ID_MANAGER],
                 ],
@@ -50,14 +50,14 @@ class PKPAnnouncementHandler extends APIHandler
             ],
             'PUT' => [
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{announcementId}',
+                    'pattern' => $this->getEndpointPattern() . '/{announcementId:\d+}',
                     'handler' => [$this, 'edit'],
                     'roles' => [ROLE_ID_MANAGER],
                 ],
             ],
             'DELETE' => [
                 [
-                    'pattern' => $this->getEndpointPattern() . '/{announcementId}',
+                    'pattern' => $this->getEndpointPattern() . '/{announcementId:\d+}',
                     'handler' => [$this, 'delete'],
                     'roles' => [ROLE_ID_MANAGER],
                 ],
@@ -106,11 +106,9 @@ class PKPAnnouncementHandler extends APIHandler
             return $response->withStatus(404)->withJsonError('api.announcements.400.contextsNotMatched');
         }
 
-        $items = Map::announcement([$announcement], $request->getContext(), $request)
-            ->bySchema()
-            ->toAssocArray();
+        $items = Map::announcementToSchema()->map(collect([$announcement]), $request->getContext(), $request);
 
-        return $response->withJson(array_shift($items), 200);
+        return $response->withJson($items->first(), 200);
     }
 
     /**
@@ -169,11 +167,9 @@ class PKPAnnouncementHandler extends APIHandler
 
         \HookRegistry::call('API::announcements::params', [$collector, $slimRequest]);
 
-        $announcementsIterator = Query::announcement()->getMany($collector);
+        $announcements = Query::announcement()->getMany($collector);
 
-        $items = Map::announcement($announcementsIterator, $request->getContext(), $request)
-            ->bySchemaSummary()
-            ->toAssocArray();
+        $items = Map::announcementToSchema()->summarize($announcements, $request->getContext(), $request);
 
         $itemsMax = Query::announcement()->getCount($collector->limit(0)->offset(0));
 
@@ -206,7 +202,7 @@ class PKPAnnouncementHandler extends APIHandler
 
         $primaryLocale = $request->getContext()->getPrimaryLocale();
         $allowedLocales = $request->getContext()->getSupportedFormLocales();
-        $errors = Services::get('announcement')->validate(VALIDATE_ACTION_ADD, $params, $allowedLocales, $primaryLocale);
+        $errors = Query::announcement()->validate(Query::VALIDATE_ADD, $params, $allowedLocales, $primaryLocale);
 
         if (!empty($errors)) {
             return $response->withStatus(400)->withJson($errors);
@@ -215,12 +211,10 @@ class PKPAnnouncementHandler extends APIHandler
         $announcement = DAORegistry::getDao('AnnouncementDAO')->newDataObject();
         $announcement->setAllData($params);
         $announcement = Command::announcement()->add($announcement, $request);
-        $announcementProps = Services::get('announcement')->getFullProperties($announcement, [
-            'request' => $request,
-            'announcementContext' => $request->getContext(),
-        ]);
 
-        return $response->withJson($announcementProps, 200);
+        $items = Map::announcementToSchema()->map(collect([$announcement]), $request->getContext(), $request);
+
+        return $response->withJson($items->first(), 200);
     }
 
     /**
@@ -257,20 +251,16 @@ class PKPAnnouncementHandler extends APIHandler
         $context = $request->getContext();
         $primaryLocale = $context->getPrimaryLocale();
         $allowedLocales = $context->getSupportedFormLocales();
-
-        $errors = Query::announcement()->validate(VALIDATE_ACTION_EDIT, $params, $allowedLocales, $primaryLocale);
+        $errors = Query::announcement()->validate(Query::VALIDATE_EDIT, $params, $allowedLocales, $primaryLocale);
         if (!empty($errors)) {
             return $response->withStatus(400)->withJson($errors);
         }
 
         $announcement = Command::announcement()->edit($announcement, $params, $request);
 
-        $announcementProps = Services::get('announcement')->getFullProperties($announcement, [
-            'request' => $request,
-            'announcementContext' => $context,
-        ]);
+        $items = Map::announcementToSchema()->map(collect([$announcement]), $request->getContext(), $request);
 
-        return $response->withJson($announcementProps, 200);
+        return $response->withJson($items->first(), 200);
     }
 
     /**
@@ -301,13 +291,10 @@ class PKPAnnouncementHandler extends APIHandler
             return $response->withStatus(403)->withJsonError('api.announcements.400.contextsNotMatched');
         }
 
-        $announcementProps = Services::get('announcement')->getSummaryProperties($announcement, [
-            'request' => $request,
-            'announcementContext' => $request->getContext(),
-        ]);
+        $items = Map::announcementToSchema()->map(collect([$announcement]), $request->getContext(), $request);
 
         Command::announcement()->delete($announcement);
 
-        return $response->withJson($announcementProps, 200);
+        return $response->withJson($items->first(), 200);
     }
 }

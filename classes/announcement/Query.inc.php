@@ -17,6 +17,7 @@ use Announcement;
 use AppLocale;
 use HookRegistry;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use Services;
 use ValidatorFactory;
 
@@ -37,7 +38,7 @@ class Query
         return DAO::getIds($query);
     }
 
-    public function getMany(Collector $query): Collection
+    public function getMany(Collector $query): LazyCollection
     {
         return DAO::getMany($query);
     }
@@ -49,6 +50,8 @@ class Query
 
     public function validate(string $action, array $props, array $allowedLocales, string $primaryLocale): array
     {
+        $errors = [];
+
         AppLocale::requireComponents(
             LOCALE_COMPONENT_PKP_MANAGER,
             LOCALE_COMPONENT_APP_MANAGER

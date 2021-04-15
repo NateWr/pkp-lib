@@ -18,6 +18,9 @@ use PKP\Announcement\Query as Announcement;
 
 class Query
 {
+    const VALIDATE_ADD = 'add';
+    const VALIDATE_EDIT = 'edit';
+
     public static function announcement(): Announcement
     {
         return new Announcement();

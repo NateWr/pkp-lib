@@ -101,7 +101,8 @@ abstract class EntityDAOBase
             throw new \Exception('Tried to insert ' . get_class($object) . ' without any properties for the ' . static::TABLE . ' table.');
         }
 
-        $object->setId(Capsule::table(static::TABLE)->insertGetId($primaryDbProps));
+        Capsule::table(static::TABLE)->insert($primaryDbProps);
+        $object->setId((int) Capsule::getPdo()->lastInsertId());
 
         // Add additional properties to settings table if they exist
         if (count($sanitizedProps) !== count($primaryDbProps)) {
@@ -205,9 +206,9 @@ abstract class EntityDAOBase
      * Delete an object from the database
      *
      */
-    protected static function _delete(DataObject $object): bool
+    protected static function _delete(DataObject $object): void
     {
-        return static::deleteById($object->getId());
+        static::deleteById($object->getId());
     }
 
     /**
@@ -215,7 +216,7 @@ abstract class EntityDAOBase
      *
      * @param integer $id
      */
-    protected static function _deleteById(int $id): bool
+    protected static function _deleteById(int $id): void
     {
         Capsule::table(static::TABLE)
             ->where(static::PRIMARY_KEY_COLUMN, '=', $id)
@@ -340,8 +341,8 @@ abstract class EntityDAOBase
      */
     protected static function getPrimaryDbProps($object)
     {
-        $schema = Services::get('schema')->get(static::schemaName);
-        $sanitizedProps = Services::get('schema')->sanitize(static::schemaName, $object->_data);
+        $schema = Services::get('schema')->get(static::SCHEMA);
+        $sanitizedProps = Services::get('schema')->sanitize(static::SCHEMA, $object->_data);
 
         $primaryDbProps = [];
         foreach (static::PRIMARY_TABLE_COLUMNS as $propName => $columnName) {

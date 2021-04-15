@@ -15,6 +15,7 @@ namespace PKP\Announcement;
 
 use Announcement;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use PKP\Core\EntityDAOBase;
 use stdClass;
 
@@ -77,17 +78,18 @@ class DAO extends EntityDAOBase
     /**
      * Get a collection of announcements matching the configured query
      */
-    public static function getMany(Collector $query): Collection
+    public static function getMany(Collector $query): LazyCollection
     {
         $rows = $query
             ->getQueryBuilder()
             ->select(['a.*'])
             ->get();
 
-        // TODO: This should return an iterator or generator, not the array itself
-        return empty($rows)
-            ? []
-            : $rows->map([static::class, 'fromRow']);
+        return LazyCollection::make(function() use ($rows) {
+            foreach ($rows as $row) {
+                yield static::fromRow($row);
+            }
+		});
     }
 
     /**
@@ -119,14 +121,22 @@ class DAO extends EntityDAOBase
      */
     public static function update(Announcement $announcement)
     {
-        return parent::_update($announcement);
+        parent::_update($announcement);
     }
 
     /**
      * @copydoc EntityDAOBase::_delete()
      */
-    public static function delete(Announcement $announcement): bool
+    public static function delete(Announcement $announcement): void
     {
-        return parent::_delete($announcement);
+        parent::_delete($announcement);
+    }
+
+    /**
+     * @copydoc EntityDAOBase::_deleteById()
+     */
+    public static function deleteById(int $announcementId): void
+    {
+        parent::_deleteById($announcementId);
     }
 }

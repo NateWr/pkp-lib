@@ -15,6 +15,7 @@
 namespace PKP\Announcement;
 
 use Announcement;
+use App\Facade\Query;
 use Core;
 use HookRegistry;
 use Request;
