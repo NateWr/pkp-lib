@@ -40,6 +40,11 @@ class PKPAnnouncementHandler extends APIHandler
                     'handler' => [$this, 'get'],
                     'roles' => [ROLE_ID_MANAGER],
                 ],
+                [
+                    'pattern' => $this->getEndpointPattern() . '/{announcementId:\d+}/oai',
+                    'handler' => [$this, 'getOAI'],
+                    'roles' => [ROLE_ID_MANAGER],
+                ],
             ],
             'POST' => [
                 [
@@ -84,7 +89,7 @@ class PKPAnnouncementHandler extends APIHandler
     }
 
     /**
-     * Get a single submission
+     * Get a single announcement
      *
      * @param $slimRequest Request Slim request object
      * @param $response Response object
@@ -109,6 +114,44 @@ class PKPAnnouncementHandler extends APIHandler
         $items = Map::announcementToSchema()->map(collect([$announcement]), $request->getContext(), $request);
 
         return $response->withJson($items->first(), 200);
+    }
+
+    /**
+     * Get a single OAI record for an announcement
+     *
+     * @param $slimRequest Request Slim request object
+     * @param $response Response object
+     * @param array $args arguments
+     *
+     * @return Response
+     */
+    public function getOAI($slimRequest, \APIResponse $response, $args)
+    {
+        $request = $this->getRequest();
+        $announcement = Query::announcement()->get($args['announcementId']);
+
+        if (!$announcement) {
+            return $response->withStatus(404)->withJsonError('api.announcements.404.announcementNotFound');
+        }
+
+        // The assocId in announcements should always point to the contextId
+        if ($announcement->getData('assocId') !== $request->getContext()->getId()) {
+            return $response->withStatus(404)->withJsonError('api.announcements.400.contextsNotMatched');
+        }
+
+        $xml = new DOMDocument('1.0');
+        $xml->preserveWhiteSpace = false;
+        $xml->formatOutput = true;
+
+        $nodes = Map::announcementToOAI()->map(collect([$announcement]), $xml, $request->getContext(), $request);
+        foreach ($nodes as $node) {
+            $xml->appendChild($node);
+        }
+
+        $body = $response->getBody();
+        $body->write($xml->saveXml());
+
+        return $response->withHeader('Content-Type','application/xml');
     }
 
     /**

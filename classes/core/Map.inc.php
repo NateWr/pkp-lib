@@ -19,7 +19,7 @@ use Illuminate\Support\Enumerable;
 class Map
 {
 
-    protected Enumerable $collection;
+    public Enumerable $collection;
 
     protected array $extensions = [];
 

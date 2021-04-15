@@ -16,10 +16,21 @@ namespace PKP\Facade;
 
 use PKP\Core\Map as BaseMap;
 use PKP\Announcement\Maps\Schema as AnnouncementSchema;
+use PKP\Announcement\Maps\OAI as AnnouncementOAI;
 
 class Map
 {
     public static array $extensions = [];
+
+    public static function announcementToSchema(): AnnouncementSchema
+    {
+        return self::withExtensions(new AnnouncementSchema());
+    }
+
+    public static function announcementToOAI(): AnnouncementOAI
+    {
+        return self::withExtensions(new AnnouncementOAI());
+    }
 
     public static function extend(string $map, callable $callback)
     {
@@ -27,11 +38,6 @@ class Map
             self::$extensions[$map][] = $callback;
         }
         self::$extensions[$map] = [$callback];
-    }
-
-    public static function announcementToSchema(): AnnouncementSchema
-    {
-        return self::withExtensions(new AnnouncementSchema());
     }
 
     public static function withExtensions(BaseMap $map) : BaseMap
