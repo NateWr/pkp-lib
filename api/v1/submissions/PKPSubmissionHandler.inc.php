@@ -24,8 +24,11 @@ use APP\submission\Collector;
 use PKP\db\DAORegistry;
 
 use PKP\handler\APIHandler;
+use PKP\mail\Mail;
+use PKP\note\NoteDAO;
 use PKP\notification\PKPNotification;
 use PKP\plugins\HookRegistry;
+use PKP\query\QueryDAO;
 use PKP\security\authorization\ContextAccessPolicy;
 use PKP\security\authorization\PublicationWritePolicy;
 use PKP\security\authorization\StageRolePolicy;
@@ -35,6 +38,8 @@ use PKP\services\PKPSchemaService;
 use PKP\submission\PKPSubmission;
 
 use PKP\submission\reviewAssignment\ReviewAssignment;
+use PKP\user\User;
+use PKP\user\UserDAO;
 
 class PKPSubmissionHandler extends APIHandler
 {
@@ -51,6 +56,7 @@ class PKPSubmissionHandler extends APIHandler
         'delete',
         'getGalleys',
         'getParticipants',
+        'addDiscussion',
         'getPublications',
         'getPublication',
         'addPublication',
@@ -126,6 +132,11 @@ class PKPSubmissionHandler extends APIHandler
                     'pattern' => $this->getEndpointPattern(),
                     'handler' => [$this, 'add'],
                     'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR],
+                ],
+                [
+                    'pattern' => $this->getEndpointPattern() . '/{submissionId:\d+}/discussions',
+                    'handler' => [$this, 'addDiscussion'],
+                    'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR],
                 ],
                 [
                     'pattern' => $this->getEndpointPattern() . '/{submissionId:\d+}/publications',
@@ -521,6 +532,82 @@ class PKPSubmissionHandler extends APIHandler
         }
 
         return $response->withJson($data, 200);
+    }
+
+    /**
+     * Add a new discussion to this submission
+     *
+     * @param $slimRequest Request Slim request object
+     * @param $response Response object
+     * @param array $args arguments
+     *
+     * @return Response
+     */
+    public function addDiscussion($slimRequest, $response, $args)
+    {
+        $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
+        $sender = $this->getRequest()->getUser();
+        $queryDao = DAORegistry::getDAO('QueryDAO'); /** @var QueryDAO */
+        $noteDao = DAORegistry::getDAO('NoteDAO'); /** @var NoteDAO */
+        $userDao = DAORegistry::getDAO('UserDAO'); /** @var UserDAO */
+        $params = $slimRequest->getParsedBody();
+
+        if (empty($params['to'])) {
+            return $response->withStatus(403)->withJsonError('no.recipients.defined');
+        }
+
+        if (empty($params['subject']) || empty($params['body'])) {
+            return $response->withStatus(403)->withJsonError('no.message.defined');
+        }
+
+        // TODO: check if users are assigned to submission
+        $recipientIds = array_map(function ($userId) {
+            return (int) $userId;
+        }, (array) $params['to']);
+
+        // TODO: validate any CC email addresses
+
+        $query = $queryDao->newDataObject();
+        $query->setAssocType(Application::ASSOC_TYPE_SUBMISSION);
+        $query->setAssocId($submission->getId());
+        $query->setStageId(WORKFLOW_STAGE_ID_EDITING); // TODO: require stage ID as part of params and validate user can create discussion in stage
+
+        $queryDao->insertObject($query);
+
+        $queryDao->insertParticipant($query->getId(), $sender->getId());
+        foreach ($recipientIds as $recipientId) {
+            $queryDao->insertParticipant($query->getId(), $recipientId);
+        }
+
+        $note = $noteDao->newDataObject();
+        $note->setUserId($sender->getId());
+        $note->setTitle($params['subject']);
+        $note->setContents($params['body']);
+        $note->setAssocType(Application::ASSOC_TYPE_QUERY);
+        $note->setAssocId($query->getId());
+
+        $noteDao->insertObject($note);
+
+        $mail = new Mail();
+        $mail->setFrom($sender->getEmail(), $sender->getFullName());
+        foreach ($recipientIds as $recipientId) {
+            $recipient = $userDao->getById($recipientId); /** @var User */
+            $mail->addRecipient($recipient->getEmail(), $recipient->getFullName());
+        }
+        if (!empty($params['cc'])) {
+            $ccs = explode(',', $params['cc']);
+            foreach ($ccs as $cc) {
+                $mail->addCC(trim($cc));
+            }
+        }
+        $mail->setSubject($params['subject']);
+        $mail->setBody($params['body']);
+        $mail->send();
+
+        return $response->withJson(
+            (object) [],
+            200
+        );
     }
 
 
