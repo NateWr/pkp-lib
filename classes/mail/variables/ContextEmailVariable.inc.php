@@ -77,7 +77,7 @@ class ContextEmailVariable extends Variable
     protected function getPrincipalContactSignature(string $locale): string
     {
         return $this->context->getData('contactName')
-            . "\n"
+            . "<br>\n"
             . $this->context->getLocalizedData('name', $locale);
     }
 

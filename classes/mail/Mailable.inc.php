@@ -84,7 +84,7 @@ class Mailable extends IlluminateMailable
      *
      * @param array<Variable>
      */
-    public array $variables = [];
+    protected array $variables = [];
 
     /**
      * One or more groups this mailable should be included in
