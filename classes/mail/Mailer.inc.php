@@ -33,18 +33,16 @@ use Symfony\Component\Finder\Finder;
 
 class Mailer extends IlluminateMailer
 {
-    const OPEN_TAG = '{';
-    const CLOSING_TAG = '}';
-    const DOLLAR_SIGN_TAG = '$';
-
     /**
      * Don't bind Laravel View Service, as it's not implemented
+     *
      * @var null
      */
     protected $views = null;
 
     /**
      * Creates new Mailer instance without binding with View
+     *
      * @copydoc \Illuminate\Mail\Mailer::__construct()
      */
     public function __construct(string $name, Swift_Mailer $swift, Dispatcher $events = null)
@@ -56,12 +54,15 @@ class Mailer extends IlluminateMailer
 
     /**
      * Renders email content into HTML string
+     *
      * @param string $view
      * @param array $data variable => value, 'message' is reserved for the Laravel's Swift Message (Illuminate\Mail\Message)
+     *
      * @throws Exception
+     *
      * @see \Illuminate\Mail\Mailer::renderView()
      */
-    protected function renderView($view, $data) : string
+    protected function renderView($view, $data): string
     {
         if ($view instanceof Htmlable) {
             // return HTML without data compiling
@@ -77,11 +78,13 @@ class Mailer extends IlluminateMailer
 
     /**
      * Compiles email templates by substituting variables with their real values
+     *
      * @param string $view text or HTML string
      * @param array $data variables with their values passes ['variable' => value]
-     * @throws Exception
+     *
+     * @return string compiled string with substitute variables
      */
-    public function compileParams(string $view, array $data) : string
+    public function compileParams(string $view, array $data): string
     {
         // Remove pre-set message template variable assigned by Illuminate Mailer
         unset($data[Mailable::DATA_KEY_MESSAGE]);
@@ -112,8 +115,10 @@ class Mailer extends IlluminateMailer
 
     /**
      * Overrides Illuminate Mailer method to provide additional parameters to the event
+     *
      * @param Swift_Message $message
      * @param array $data
+     *
      * @return bool
      */
     protected function shouldSendMessage($message, $data = [])

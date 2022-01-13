@@ -17,9 +17,11 @@ namespace PKP\core;
 
 use APP\facades\Repo;
 use PKP\config\Config;
+use PKP\context\Context;
 use PKP\db\DAORegistry;
 use PKP\plugins\HookRegistry;
 use PKP\session\SessionManager;
+use PKP\site\Site;
 
 class PKPRequest
 {
@@ -561,9 +563,8 @@ class PKPRequest
     /**
      * Get site data.
      *
-     * @return Site
      */
-    public function &getSite()
+    public function &getSite(): Site
     {
         $site = & Registry::get('site', true, null);
         if ($site === null) {
@@ -772,11 +773,9 @@ class PKPRequest
     /**
      * Get the current "context" (press/journal/etc) object.
      *
-     * @return Context
-     *
      * @see PKPPageRouter::getContext()
      */
-    public function &getContext()
+    public function &getContext(): ?Context
     {
         return $this->_delegateToRouter('getContext');
     }

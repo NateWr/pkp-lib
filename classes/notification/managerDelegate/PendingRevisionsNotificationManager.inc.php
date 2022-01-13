@@ -15,11 +15,11 @@
 
 namespace PKP\notification\managerDelegate;
 
+use APP\decision\Decision;
 use APP\facades\Repo;
 use APP\i18n\AppLocale;
 use APP\notification\Notification;
 
-use APP\workflow\EditorDecisionActionsManager;
 use PKP\db\DAORegistry;
 use PKP\notification\NotificationManagerDelegate;
 use PKP\notification\PKPNotification;
@@ -109,12 +109,11 @@ class PendingRevisionsNotificationManager extends NotificationManagerDelegate
         }
         $expectedStageId = $stageData['id'];
 
-        $editDecisionDao = DAORegistry::getDAO('EditDecisionDAO'); /** @var EditDecisionDAO $editDecisionDao */
-        $pendingRevisionDecision = $editDecisionDao->findValidPendingRevisionsDecision($submissionId, $expectedStageId, EditorDecisionActionsManager::SUBMISSION_EDITOR_DECISION_PENDING_REVISIONS);
+        $pendingRevisionDecision = Repo::decision()->getActivePendingRevisionsDecision($submissionId, $expectedStageId, Decision::PENDING_REVISIONS);
         $removeNotifications = false;
 
         if ($pendingRevisionDecision) {
-            if ($editDecisionDao->responseExists($pendingRevisionDecision, $submissionId)) {
+            if (Repo::decision()->revisionsUploadedSinceDecision($pendingRevisionDecision, $submissionId)) {
                 // Some user already uploaded a revision. Flag to delete any existing notification.
                 $removeNotifications = true;
             } else {

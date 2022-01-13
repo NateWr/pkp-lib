@@ -144,7 +144,7 @@ class Repository
 
         $errors = [];
         if ($validator->fails()) {
-            $errors = $schemaService->formatValidationErrors($validator->errors(), $schemaService->get(PKPSchemaService::SCHEMA_AUTHOR), $allowedLocales);
+            $errors = $schemaService->formatValidationErrors($validator->errors());
         }
 
         HookRegistry::call('Author::validate', [$errors, $author, $props, $allowedLocales, $primaryLocale]);

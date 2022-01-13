@@ -20,7 +20,6 @@ import('lib.pkp.controllers.grid.users.stageParticipant.StageParticipantGridCate
 use APP\facades\Repo;
 use APP\log\SubmissionEventLogEntry;
 use APP\notification\NotificationManager;
-use APP\workflow\EditorDecisionActionsManager;
 use PKP\controllers\grid\CategoryGridHandler;
 use PKP\controllers\grid\GridColumn;
 use PKP\core\JSONMessage;
@@ -356,7 +355,7 @@ class StageParticipantGridHandler extends CategoryGridHandler
             if ($userGroup->getRoleId() == Role::ROLE_ID_MANAGER) {
                 $notificationMgr->updateNotification(
                     $request,
-                    (new EditorDecisionActionsManager())->getStageNotifications(),
+                    $notificationMgr->getDecisionStageNotifications(),
                     null,
                     ASSOC_TYPE_SUBMISSION,
                     $submission->getId()
@@ -419,7 +418,7 @@ class StageParticipantGridHandler extends CategoryGridHandler
         $notificationMgr = new NotificationManager();
         $notificationMgr->updateNotification(
             $request,
-            (new EditorDecisionActionsManager())->getStageNotifications(),
+            $notificationMgr->getDecisionStageNotifications(),
             null,
             ASSOC_TYPE_SUBMISSION,
             $submission->getId()

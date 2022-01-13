@@ -22,8 +22,9 @@ use PKP\handler\APIHandler;
 use PKP\plugins\HookRegistry;
 
 use PKP\security\authorization\ContextAccessPolicy;
-
+use PKP\security\authorization\SubmissionAccessPolicy;
 use PKP\security\Role;
+use Slim\Http\Response;
 
 abstract class PKPBackendSubmissionsHandler extends APIHandler
 {
@@ -50,6 +51,15 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler
                         Role::ROLE_ID_ASSISTANT,
                     ],
                 ],
+                [
+                    'pattern' => "{$rootPattern}/{submissionId:\d+}/reviewRound",
+                    'handler' => [$this, 'getReviewRound'],
+                    'roles' => [
+                        Role::ROLE_ID_SITE_ADMIN,
+                        Role::ROLE_ID_MANAGER,
+                        Role::ROLE_ID_SUB_EDITOR,
+                    ],
+                ],
             ],
             'DELETE' => [
                 [
@@ -72,6 +82,12 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler
     public function authorize($request, &$args, $roleAssignments)
     {
         $this->addPolicy(new ContextAccessPolicy($request, $roleAssignments));
+
+        $routeName = $this->getSlimRequest()->getAttribute('route')->getName();
+        if (in_array($routeName, ['delete', 'getReviewRound'])) {
+            $this->addPolicy(new SubmissionAccessPolicy($request, $args, $roleAssignments));
+        }
+
         return parent::authorize($request, $args, $roleAssignments);
     }
 
@@ -114,9 +130,13 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler
         $userGroupDao = DAORegistry::getDAO('UserGroupDAO'); /** @var UserGroupDAO $userGroupDao */
         $userGroups = $userGroupDao->getByContextId($context->getId())->toArray();
 
+        /** @var GenreDAO $genreDao */
+        $genreDao = DAORegistry::getDAO('GenreDAO');
+        $genres = $genreDao->getByContextId($context->getId())->toArray();
+
         return $response->withJson([
             'itemsMax' => Repo::submission()->getCount($collector->limit(null)->offset(null)),
-            'items' => Repo::submission()->getSchemaMap()->mapManyToSubmissionsList($submissions, $userGroups),
+            'items' => Repo::submission()->getSchemaMap()->mapManyToSubmissionsList($submissions, $userGroups, $genres),
         ], 200);
     }
 
@@ -231,5 +251,42 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler
         Repo::submission()->delete($submission);
 
         return $response->withJson(true);
+    }
+
+    /**
+     * Get the current review round for this submission
+     *
+     * @param $slimRequest Request Slim request object
+     * @param $response Response object
+     * @param array $args arguments
+     */
+    public function getReviewRound($slimRequest, $response, $args): Response
+    {
+        $request = $this->getRequest();
+        $context = $request->getContext();
+        $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
+
+        if (!$submission) {
+            return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
+        }
+
+        if ($context->getId() != $submission->getContextId()) {
+            return $response->withStatus(403)->withJsonError('api.submissions.400.wrongContext');
+        }
+
+        /** @var ReviewRoundDAO */
+        $reviewRoundDao = DAORegistry::getDAO('ReviewRoundDAO');
+        $reviewRound = $reviewRoundDao->getLastReviewRoundBySubmissionId($submission->getId());
+        if (!$reviewRound) {
+            return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
+        }
+
+        return $response->withJson([
+            'id' => $reviewRound->getId(),
+            'submissionId' => $reviewRound->getSubmissionId(),
+            'stageId' => $reviewRound->getStageId(),
+            'round' => $reviewRound->getRound(),
+            'status' => $reviewRound->getStatus(),
+        ], 200);
     }
 }

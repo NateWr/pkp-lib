@@ -15,12 +15,13 @@ namespace PKP\emailTemplate;
 
 use APP\emailTemplate\DAO;
 use APP\i18n\AppLocale;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\LazyCollection;
 use PKP\core\PKPRequest;
+use PKP\facades\Repo;
 use PKP\plugins\HookRegistry;
 use PKP\services\PKPSchemaService;
 use PKP\validation\ValidatorFactory;
-use PKP\facades\Repo;
 
 class Repository
 {
@@ -57,7 +58,7 @@ class Repository
     }
 
     /** @copydoc DAO::getMany() */
-    public function getMany(Collector $query):  LazyCollection
+    public function getMany(Collector $query): LazyCollection
     {
         return $this->dao->getMany($query);
     }
@@ -143,7 +144,7 @@ class Repository
         ValidatorFactory::allowedLocales($validator, $this->schemaService->getMultilingualProps($this->dao->schema), $allowedLocales);
 
         if ($validator->fails()) {
-            $errors = $this->schemaService->formatValidationErrors($validator->errors(), $this->schemaService->get($this->dao->schema), $allowedLocales);
+            $errors = $this->schemaService->formatValidationErrors($validator->errors());
         }
 
         HookRegistry::call('EmailTemplate::validate', [&$errors, $object, $props, $allowedLocales, $primaryLocale]);

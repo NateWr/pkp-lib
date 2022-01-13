@@ -256,7 +256,7 @@ abstract class Context extends \PKP\core\DataObject
      *
      * @return array
      */
-    public function getSupportedFormLocales()
+    public function getSupportedFormLocales(): ?array
     {
         return $this->getData('supportedFormLocales');
     }

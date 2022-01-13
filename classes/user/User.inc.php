@@ -416,11 +416,14 @@ class User extends Identity
         $this->setData('inlineHelp', $inlineHelp);
     }
 
-    public function getContactSignature()
+    public function getContactSignature(?string $locale = null)
     {
+        if ($this->getSignature($locale)) {
+            return $this->getSignature($locale);
+        }
         $signature = htmlspecialchars($this->getFullName());
         AppLocale::requireComponents(LOCALE_COMPONENT_PKP_USER);
-        if ($a = $this->getLocalizedAffiliation()) {
+        if ($a = $this->$this->getLocalizedData('affiliation', $locale)) {
             $signature .= '<br/>' . htmlspecialchars($a);
         }
         if ($p = $this->getPhone()) {

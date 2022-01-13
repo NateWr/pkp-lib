@@ -20,9 +20,9 @@ use PKP\emailTemplate\EmailTemplate;
 use PKP\facades\Repo;
 use PKP\mail\Configurable;
 use PKP\mail\Mailable;
+use PKP\mail\traits\Recipient;
+use PKP\mail\traits\Sender;
 use PKP\submission\PKPSubmission;
-use PKP\mail\Recipient;
-use PKP\mail\Sender;
 
 class MailDiscussionMessage extends Mailable
 {
@@ -43,7 +43,8 @@ class MailDiscussionMessage extends Mailable
         parent::__construct(func_get_args());
     }
 
-    public function getTemplate(int $contextId) : EmailTemplate {
+    public function getTemplate(int $contextId): EmailTemplate
+    {
         return Repo::emailTemplate()->getByKey($contextId, self::EMAIL_KEY);
     }
 }

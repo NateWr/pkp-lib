@@ -15,10 +15,13 @@
 
 namespace PKP\mail\variables;
 
+use APP\facades\Repo;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use PKP\author\Author;
 use PKP\core\PKPApplication;
+use PKP\db\DAORegistry;
+use PKP\security\Role;
 
 class SubmissionEmailVariable extends Variable
 {
@@ -27,6 +30,7 @@ class SubmissionEmailVariable extends Variable
     public const SUBMISSION_ABSTRACT = 'submissionAbstract';
     public const AUTHORS_SHORT = 'authorsShort';
     public const AUTHORS = 'authors';
+    public const SUBMITTING_AUTHOR_NAME = 'submittingAuthorName';
     public const SUBMISSION_URL = 'submissionUrl';
 
     protected Submission $submission;
@@ -42,9 +46,9 @@ class SubmissionEmailVariable extends Variable
     }
 
     /**
-     * @copydoc Variable::description()
+     * @copydoc Variable::descriptions()
      */
-    protected static function description(): array
+    public static function descriptions(): array
     {
         return
         [
@@ -53,6 +57,7 @@ class SubmissionEmailVariable extends Variable
             self::SUBMISSION_ABSTRACT => __('emailTemplate.variable.submission.submissionAbstract'),
             self::AUTHORS_SHORT => __('emailTemplate.variable.submission.authorsShort'),
             self::AUTHORS => __('emailTemplate.variable.submission.authors'),
+            self::SUBMITTING_AUTHOR_NAME => __('emailTemplate.variable.submission.submittingAuthorName'),
             self::SUBMISSION_URL => __('emailTemplate.variable.submission.submissionUrl'),
         ];
     }
@@ -65,10 +70,11 @@ class SubmissionEmailVariable extends Variable
         return
         [
             self::SUBMISSION_TITLE => $this->currentPublication->getLocalizedFullTitle($locale),
-            self::SUBMISSION_ID => $this->submission->getId(),
+            self::SUBMISSION_ID => (string) $this->submission->getId(),
             self::SUBMISSION_ABSTRACT => $this->currentPublication->getLocalizedData('abstract', $locale),
             self::AUTHORS_SHORT => $this->currentPublication->getShortAuthorString($locale),
             self::AUTHORS => $this->getAuthorsFull($locale),
+            self::SUBMITTING_AUTHOR_NAME => $this->getSubmittingAuthorName($locale),
             self::SUBMISSION_URL => $this->getSubmissionUrl(),
         ];
     }
@@ -83,7 +89,7 @@ class SubmissionEmailVariable extends Variable
             return $author->getFullName(true, false, $locale);
         }, iterator_to_array($authors));
 
-         return join(__('common.commaListSeparator'), $fullNames);
+        return join(__('common.commaListSeparator'), $fullNames);
     }
 
     /**
@@ -98,8 +104,38 @@ class SubmissionEmailVariable extends Variable
             null,
             'workflow',
             'index',
-            [$this->submission->getId(),
-            $this->submission->getData('stageId')]
+            [
+                $this->submission->getId(),
+                $this->submission->getData('stageId'),
+            ]
         );
+    }
+
+    /**
+     * The name(s) of authors assigned as participants to the
+     * submission workflow.
+     *
+     * Usually this is the submitting author.
+     */
+    protected function getSubmittingAuthorName(string $locale): string
+    {
+        $authorNames = [];
+        $alreadyCollected = []; // Prevent duplicate names for each stage assignment
+        /** @var StageAssignmentDAO $stageAssignmentDao */
+        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
+        $result = $stageAssignmentDao->getBySubmissionAndRoleId($this->submission->getId(), Role::ROLE_ID_AUTHOR);
+        /** @var StageAssignment $stageAssignment */
+        while ($stageAssignment = $result->next()) {
+            $userId = (int) $stageAssignment->getUserId();
+            if (in_array($userId, $alreadyCollected)) {
+                continue;
+            }
+            $alreadyCollected[] = $userId;
+            $user = Repo::user()->get($userId);
+            if ($user) {
+                $authorNames[] = $user->getFullName(true, false, $locale);
+            }
+        }
+        return join(__('common.commaListSeparator'), $authorNames);
     }
 }
