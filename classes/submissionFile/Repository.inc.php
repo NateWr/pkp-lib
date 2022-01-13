@@ -510,7 +510,7 @@ class Repository
             $newSubmissionFile->setData('assocId', $reviewRoundId);
         }
 
-        return Repo::submissionFiles()->add($newSubmissionFile);
+        return Repo::submissionFile()->add($newSubmissionFile);
     }
 
     /** @copydoc DAO::delete() */

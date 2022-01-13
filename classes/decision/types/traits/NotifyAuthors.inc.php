@@ -126,8 +126,8 @@ trait NotifyAuthors
             return;
         }
 
-        $reviewAttachmentIds = Repo::submissionFiles()->getIds(
-            Repo::submissionFiles()
+        $reviewAttachmentIds = Repo::submissionFile()->getIds(
+            Repo::submissionFile()
                 ->getCollector()
                 ->filterBySubmissionIds([$submission->getId()])
                 ->filterByReviewRoundIds([$reviewRoundId])
@@ -135,8 +135,8 @@ trait NotifyAuthors
         );
 
         foreach ($reviewAttachmentIds->intersect($submissionFileIds) as $sharedFileId) {
-            $submissionFile = Repo::submissionFiles()->get($sharedFileId);
-            Repo::submissionFiles()->edit(
+            $submissionFile = Repo::submissionFile()->get($sharedFileId);
+            Repo::submissionFile()->edit(
                 $submissionFile,
                 ['viewable' => true],
                 Application::get()->getRequest()

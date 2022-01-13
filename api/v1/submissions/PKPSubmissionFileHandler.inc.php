@@ -469,14 +469,14 @@ class PKPSubmissionFileHandler extends APIHandler
 
         $toFileStage = (int) $params['toFileStage'];
 
-        if (!in_array($toFileStage, Repo::submissionFiles()->getFileStages())) {
+        if (!in_array($toFileStage, Repo::submissionFile()->getFileStages())) {
             return $response->withStatus(400)->withJsonError('api.submissionFiles.400.invalidFileStage');
         }
 
         // Expect a review round id when copying to a review stage, or use the latest
         // round in that stage by default
         $reviewRoundId = null;
-        if (in_array($toFileStage, Repo::submissionFiles()->reviewFileStages)) {
+        if (in_array($toFileStage, Repo::submissionFile()->reviewFileStages)) {
             if (!empty($params['reviewRoundId'])) {
                 $reviewRoundId = (int) $params['reviewRoundId'];
                 /** @var ReviewRoundDAO $reviewRoundDao */
@@ -502,15 +502,15 @@ class PKPSubmissionFileHandler extends APIHandler
             }
         }
 
-        $newSubmissionFileId = Repo::submissionFiles()->copy(
+        $newSubmissionFileId = Repo::submissionFile()->copy(
             $submissionFile,
             $toFileStage,
             $reviewRoundId
         );
 
-        $newSubmissionFile = Repo::submissionFiles()->get($newSubmissionFileId);
+        $newSubmissionFile = Repo::submissionFile()->get($newSubmissionFileId);
 
-        $data = Repo::submissionFiles()
+        $data = Repo::submissionFile()
             ->getSchemaMap()
             ->map($newSubmissionFile, $this->getFileGenres());
 

@@ -360,7 +360,7 @@ abstract class Type
      */
     protected function validateSubmissionFileAttachment(int $submissionFileId, Submission $submission, array $allowedFileStages): bool
     {
-        $submissionFile = Repo::submissionFiles()->get($submissionFileId);
+        $submissionFile = Repo::submissionFile()->get($submissionFileId);
         return $submissionFile
             && $submissionFile->getData('submissionId') === $submission->getId()
             && in_array($submissionFile->getData('fileStage'), $allowedFileStages);

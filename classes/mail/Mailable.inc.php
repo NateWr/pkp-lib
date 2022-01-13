@@ -362,7 +362,7 @@ class Mailable extends IlluminateMailable
      */
     public function attachSubmissionFile(int $id, string $name): self
     {
-        $submissionFile = Repo::submissionFiles()->get($id);
+        $submissionFile = Repo::submissionFile()->get($id);
         if (!$submissionFile) {
             throw new Exception('Tried to attach submission file ' . $id . ' that does not exist.');
         }

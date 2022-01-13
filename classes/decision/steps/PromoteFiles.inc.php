@@ -49,9 +49,9 @@ class PromoteFiles extends Step
      */
     public function addFileList(string $name, Collector $collector): self
     {
-        $files = Repo::submissionFiles()
+        $files = Repo::submissionFile()
             ->getSchemaMap()
-            ->summarizeMany(Repo::submissionFiles()->getMany($collector), $this->genres);
+            ->summarizeMany(Repo::submissionFile()->getMany($collector), $this->genres);
 
         $this->lists[] = [
             'name' => $name,

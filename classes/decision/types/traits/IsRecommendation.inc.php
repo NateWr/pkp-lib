@@ -138,7 +138,7 @@ trait IsRecommendation
                     $context
                 );
             } elseif (isset($attachment[Mailable::ATTACHMENT_SUBMISSION_FILE])) {
-                $submissionFile = Repo::submissionFiles()->get($attachment[Mailable::ATTACHMENT_SUBMISSION_FILE]);
+                $submissionFile = Repo::submissionFile()->get($attachment[Mailable::ATTACHMENT_SUBMISSION_FILE]);
                 if (!$submissionFile || $submissionFile->getData('submissionId') !== $submission->getId()) {
                     throw new Exception('Could not find submission file ' . $attachment[Mailable::ATTACHMENT_SUBMISSION_FILE] . ' to attach to the query note.');
                 }
@@ -147,7 +147,7 @@ trait IsRecommendation
                 $newSubmissionFile->setData('sourceSubmissionFileId', $submissionFile->getId());
                 $newSubmissionFile->setData('assocType', Application::ASSOC_TYPE_NOTE);
                 $newSubmissionFile->setData('assocId', $note->getId());
-                Repo::submissionFiles()->add($newSubmissionFile);
+                Repo::submissionFile()->add($newSubmissionFile);
             } elseif (isset($attachment[Mailable::ATTACHMENT_LIBRARY_FILE])) {
                 /** @var LibraryFileDAO $libraryFileDao */
                 $libraryFileDao = DAORegistry::getDAO('LibraryFileDAO');
@@ -175,7 +175,7 @@ trait IsRecommendation
     protected function addSubmissionFileToNoteFromFilePath(string $filepath, string $filename, Note $note, User $uploader, Submission $submission, Context $context)
     {
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        $submissionDir = Repo::submissionFiles()->getSubmissionDir($context->getId(), $submission->getId());
+        $submissionDir = Repo::submissionFile()->getSubmissionDir($context->getId(), $submission->getId());
         $fileId = Services::get('file')->add(
             $filepath,
             $submissionDir . '/' . uniqid() . '.' . $extension
@@ -194,6 +194,6 @@ trait IsRecommendation
             'assocType' => Application::ASSOC_TYPE_NOTE,
             'assocId' => $note->getId(),
         ]);
-        Repo::submissionFiles()->add($submissionFile);
+        Repo::submissionFile()->add($submissionFile);
     }
 }

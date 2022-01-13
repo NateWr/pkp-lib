@@ -197,7 +197,7 @@ class Accept extends Type
             $this->getFileGenres($context->getId())
         ))->addFileList(
             __('editor.submission.revisions'),
-            Repo::submissionFiles()
+            Repo::submissionFile()
                 ->getCollector()
                 ->filterBySubmissionIds([$submission->getId()])
                 ->filterByFileStages([SubmissionFile::SUBMISSION_FILE_REVIEW_REVISION])

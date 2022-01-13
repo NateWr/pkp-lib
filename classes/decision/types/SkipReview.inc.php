@@ -165,7 +165,7 @@ class SkipReview extends Type
             $this->getFileGenres($context->getId())
         ))->addFileList(
             __('submission.submit.submissionFiles'),
-            Repo::submissionFiles()
+            Repo::submissionFile()
                 ->getCollector()
                 ->filterBySubmissionIds([$submission->getId()])
                 ->filterByFileStages([SubmissionFile::SUBMISSION_FILE_SUBMISSION])

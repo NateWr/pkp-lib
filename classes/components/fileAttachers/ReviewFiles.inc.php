@@ -85,7 +85,7 @@ class ReviewFiles extends BaseAttacher
                     [
                         'submissionFileId' => $file->getId(),
                         'submissionId' => $file->getData('submissionId'),
-                        'stageId' => Repo::submissionFiles()->getWorkflowStageId($file),
+                        'stageId' => Repo::submissionFile()->getWorkflowStageId($file),
                     ]
                 ),
             ];

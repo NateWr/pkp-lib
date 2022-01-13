@@ -94,8 +94,8 @@ trait InExternalReviewRound
             $reviewAssignments = $reviewAssignmentDAO->getByReviewRoundId($reviewRound->getId());
             $reviewerFiles = [];
             if (!empty($reviewAssignments)) {
-                $reviewerFiles = Repo::submissionFiles()->getMany(
-                    Repo::submissionFiles()
+                $reviewerFiles = Repo::submissionFile()->getMany(
+                    Repo::submissionFile()
                         ->getCollector()
                         ->filterBySubmissionIds([$submission->getId()])
                         ->filterByAssoc(Application::ASSOC_TYPE_REVIEW_ASSIGNMENT, array_keys($reviewAssignments))

@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
 use PKP\core\EntityDAO;
-use stdClass;
 
 class DAO extends EntityDAO
 {
@@ -104,7 +103,7 @@ class DAO extends EntityDAO
     /**
      * @copydoc EntityDAO::fromRow()
      */
-    public function fromRow(stdClass $row): Decision
+    public function fromRow(object $row): Decision
     {
         return parent::fromRow($row);
     }
