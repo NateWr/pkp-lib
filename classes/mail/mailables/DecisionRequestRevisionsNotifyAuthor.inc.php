@@ -30,14 +30,10 @@ class DecisionRequestRevisionsNotifyAuthor extends Mailable
     use ReviewerComments;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_REVISIONS';
-
     protected static ?string $name = 'mailable.decision.requestRevisions.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.requestRevisions.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_REVISIONS';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
 
     /**

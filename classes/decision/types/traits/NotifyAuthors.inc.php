@@ -82,7 +82,7 @@ trait NotifyAuthors
                 return $user->getEmail();
             }, $recipients);
             $mailable = new DecisionNotifyOtherAuthors($context, $submission);
-            $emailTemplate = Repo::emailTemplate()->getByKey($context->getId(), $mailable::EMAIL_KEY);
+            $emailTemplate = Repo::emailTemplate()->getByKey($context->getId(), $mailable::getEmailTemplateKey());
             $mailable
                 ->sender($editor)
                 ->subject($email->subject)

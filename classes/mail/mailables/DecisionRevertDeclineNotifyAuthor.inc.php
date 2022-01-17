@@ -27,14 +27,10 @@ class DecisionRevertDeclineNotifyAuthor extends Mailable
     use Recipient;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_REVERT_DECLINE';
-
     protected static ?string $name = 'mailable.decision.revertDecline.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.revertDecline.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_REVERT_DECLINE';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
 
     public function __construct(Context $context, Submission $submission, Decision $decision)

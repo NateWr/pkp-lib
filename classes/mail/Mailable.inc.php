@@ -62,11 +62,7 @@ use ReflectionParameter;
 
 class Mailable extends IlluminateMailable
 {
-    /**
-     * Name of the variable representing a message object assigned to email templates by Illuminate Mailer by default
-     *
-     * @var string
-     */
+    /** Used internally by Illuminate Mailer. Do not touch. */
     public const DATA_KEY_MESSAGE = 'message';
 
     public const GROUP_OTHER = 'other';
@@ -79,35 +75,71 @@ class Mailable extends IlluminateMailable
     public const ATTACHMENT_SUBMISSION_FILE = 'submissionFileId';
     public const ATTACHMENT_LIBRARY_FILE = 'libraryFileId';
 
-    /**
-     * The email variables handled by this mailable
-     *
-     * @param array<Variable>
-     */
-    protected array $variables = [];
-
-    /**
-     * One or more groups this mailable should be included in
-     *
-     * Mailables are assigned to one or more groups so that they
-     * can be organized when shown in the UI.
-     */
-    protected static array $groupIds = [self::GROUP_OTHER];
-
-    // Locale key, name of the Mailable displayed in the UI
+    /** @var string|null Locale key for the name of this Mailable */
     protected static ?string $name = null;
 
-    // Locale key, description of the Mailable displayed in the UI
+    /** @var string|null Locale key for the description of this Mailable */
     protected static ?string $description = null;
 
-    // Whether Mailable supports additional templates, besides the default
+    /** @var string|null Key of the default email template key to use with this Mailable */
+    protected static ?string $emailTemplateKey = null;
+
+    /** @var bool Whether users can assign extra email templates to this Mailable */
     protected static bool $supportsTemplates = false;
+
+    /** @var int[] Mailables are organized into one or more self::GROUP_ */
+    protected static array $groupIds = [self::GROUP_OTHER];
+
+    /** @var Variable[] The email variables supported by this mailable */
+    protected array $variables = [];
 
     public function __construct(array $variables = [])
     {
         if (!empty($variables)) {
             $this->setupVariables($variables);
         }
+    }
+
+    /**
+     * Get the name of this Mailable
+     */
+    public static function getName(): string
+    {
+        return static::$name ? __(static::$name) : '';
+    }
+
+    /**
+     * Get the description of this Mailable
+     */
+    public static function getDescription(): string
+    {
+        return static::$description ? __(static::$description) : '';
+    }
+
+    /**
+     * Get the description of this Mailable
+     */
+    public static function getEmailTemplateKey(): string
+    {
+        return static::$emailTemplateKey ? static::$emailTemplateKey : '';
+    }
+
+    /**
+     * Get whether or not this Mailable supports extra email templates
+     */
+    public function getSupportsTemplates(): bool
+    {
+        return $this->supportsTemplates;
+    }
+
+    /**
+     * Get the groups this Mailable is in
+     *
+     * @return string[]
+     */
+    public static function getGroupIds(): array
+    {
+        return static::$groupIds;
     }
 
     /**
@@ -173,14 +205,6 @@ class Mailable extends IlluminateMailable
     public function markdown($view, array $data = []): self
     {
         throw new BadMethodCallException('Markdown isn\'t supported');
-    }
-
-    /**
-     * @return array [self::GROUP_...] workflow stages associated with a mailable
-     */
-    public static function getGroupIds(): array
-    {
-        return static::$groupIds;
     }
 
     /**
@@ -386,6 +410,9 @@ class Mailable extends IlluminateMailable
         $libraryFileDao = DAORegistry::getDAO('LibraryFileDAO');
         /** @var LibraryFile $file */
         $file = $libraryFileDao->getById($id);
+        if (!$file) {
+            throw new Exception('Tried to attach library file ' . $id . ' that does not exist.');
+        }
         $this->attach($file->getFilePath(), ['as' => $name]);
         return $this;
     }

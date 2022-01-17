@@ -73,7 +73,7 @@ class Email extends Step
         $config->canChangeTo = $this->canChangeTo;
         $config->canSkip = $this->canSkip;
         $config->emailTemplates = $this->getEmailTemplates();
-        $config->initialTemplateKey = $this->mailable->defaultEmailTemplateKey;
+        $config->initialTemplateKey = $this->mailable::getEmailTemplateKey();
         $config->toOptions = $this->getToOptions();
 
         $config->variables = [];
@@ -108,8 +108,8 @@ class Email extends Step
         $context = $request->getContext();
 
         $emailTemplates = collect();
-        if (property_exists($this->mailable, 'defaultEmailTemplateKey')) {
-            $emailTemplate = Repo::emailTemplate()->getByKey($context->getId(), $this->mailable->defaultEmailTemplateKey);
+        if ($this->mailable::getEmailTemplateKey()) {
+            $emailTemplate = Repo::emailTemplate()->getByKey($context->getId(), $this->mailable::getEmailTemplateKey());
             if ($emailTemplate) {
                 $emailTemplates->add($emailTemplate);
             }

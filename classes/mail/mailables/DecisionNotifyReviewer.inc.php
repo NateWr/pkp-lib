@@ -27,12 +27,13 @@ class DecisionNotifyReviewer extends Mailable
     use Recipient;
     use Sender;
 
+    /** @var string An email variable that contains a description of the editorial decision */
     public const DECISION_DESCRIPTION = 'decisionDescription';
 
-    public $defaultEmailTemplateKey = 'REVIEW_ACK';
     protected static ?string $name = 'mailable.decision.notifyReviewer.name';
     protected static ?string $description = 'mailable.decision.notifyReviewer.description';
-    public static bool $supportsTemplates = true;
+    protected static ?string $emailTemplateKey = 'REVIEW_ACK';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
     protected Decision $decision;
 

@@ -645,7 +645,7 @@ class QueriesGridHandler extends GridHandler
             }
 
             $mailable = new MailDiscussionMessage($request->getContext(), $this->getSubmission());
-            $emailTemplate = $mailable->getTemplate($request->getContext()->getId());
+            $emailTemplate = Repo::emailTemplate()->getByKey($request->getContext()->getId(), $mailable::getEmailTemplateKey());
             $mailable
                 ->body($emailTemplate->getLocalizedData('body'))
                 ->subject($emailTemplate->getLocalizedData('subject'))

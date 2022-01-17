@@ -9,8 +9,7 @@
  *
  * @class DecisionBackToSubmissionNotifyAuthor
  *
- * @brief Email sent to the author(s) when a one of the following decisions is made:
- *   SUBMISSION_EDITOR_DECISION_BACK_TO_SUBMISSION
+ * @brief Email sent to the author(s) when the following decision is made:
  *   SUBMISSION_EDITOR_DECISION_BACK_TO_SUBMISSION_FROM_COPYEDITING
  */
 
@@ -28,15 +27,11 @@ class DecisionBackToSubmissionNotifyAuthor extends Mailable
     use Recipient;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_BACK_TO_SUBMISSION';
-
     protected static ?string $name = 'mailable.decision.backToSubmission.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.backToSubmission.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
-    protected static array $groupIds = [self::GROUP_REVIEW];
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_BACK_TO_SUBMISSION';
+    protected static bool $supportsTemplates = true;
+    protected static array $groupIds = [self::GROUP_COPYEDITING];
 
     public function __construct(Context $context, Submission $submission, Decision $decision)
     {

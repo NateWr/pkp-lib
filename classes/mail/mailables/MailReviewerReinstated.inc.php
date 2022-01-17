@@ -30,11 +30,8 @@ class MailReviewerReinstated extends Mailable
     use Configurable;
 
     protected static ?string $name = 'mailable.mailReviewerReinstate.name';
-
     protected static ?string $description = 'mailable.mailReviewerReinstate.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
 
     public function __construct(Context $context, PKPSubmission $submission, ReviewAssignment $reviewAssignment)

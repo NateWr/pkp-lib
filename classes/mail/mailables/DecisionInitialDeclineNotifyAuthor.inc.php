@@ -27,14 +27,10 @@ class DecisionInitialDeclineNotifyAuthor extends Mailable
     use Recipient;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_INITIAL_DECLINE';
-
     protected static ?string $name = 'mailable.decision.initialDecline.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.initialDecline.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_INITIAL_DECLINE';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_SUBMISSION];
 
     public function __construct(Context $context, Submission $submission, Decision $decision)

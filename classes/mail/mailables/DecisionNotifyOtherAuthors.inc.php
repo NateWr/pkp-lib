@@ -25,17 +25,19 @@ class DecisionNotifyOtherAuthors extends Mailable
 {
     use Sender;
 
-    public const EMAIL_KEY = 'DECISION_NOTIFY_OTHER_AUTHORS';
-
+    /** @var string An email variable that contains the message that was sent to the submitting author */
     public const MESSAGE_TO_SUBMITTING_AUTHOR = 'messageToSubmittingAuthor';
 
     protected static ?string $name = 'mailable.decision.notifyOtherAuthors.name';
-
     protected static ?string $description = 'mailable.decision.notifyOtherAuthors.description';
-
-    public static bool $supportsTemplates = true;
-
-    protected static array $groupIds = [self::GROUP_SUBMISSION, self::GROUP_REVIEW, self::GROUP_COPYEDITING];
+    protected static ?string $emailTemplateKey = 'DECISION_NOTIFY_OTHER_AUTHORS';
+    protected static bool $supportsTemplates = true;
+    protected static array $groupIds = [
+        self::GROUP_SUBMISSION,
+        self::GROUP_REVIEW,
+        self::GROUP_COPYEDITING,
+        self::GROUP_PRODUCTION,
+    ];
 
     public function __construct(Context $context, Submission $submission)
     {

@@ -29,14 +29,10 @@ class RecommendationNotifyEditors extends Mailable
     use ReviewerComments;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_RECOMMENDATION';
-
     protected static ?string $name = 'mailable.decision.recommendation.notifyEditors.name';
-
     protected static ?string $description = 'mailable.decision.recommendation.notifyEditors.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_RECOMMENDATION';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
 
     /**

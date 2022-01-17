@@ -27,14 +27,10 @@ class DecisionNewReviewRoundNotifyAuthor extends Mailable
     use Recipient;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_NEW_ROUND';
-
     protected static ?string $name = 'mailable.decision.newReviewRound.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.newReviewRound.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_NEW_ROUND';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
 
     public function __construct(Context $context, Submission $submission, Decision $decision)

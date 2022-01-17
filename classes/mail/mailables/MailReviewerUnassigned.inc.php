@@ -30,11 +30,8 @@ class MailReviewerUnassigned extends Mailable
     use Configurable;
 
     protected static ?string $name = 'mailable.mailReviewerUnassigned.name';
-
     protected static ?string $description = 'mailable.mailReviewerUnassigned.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
 
     public function __construct(Context $context, PKPSubmission $submission, ReviewAssignment $reviewAssignment)

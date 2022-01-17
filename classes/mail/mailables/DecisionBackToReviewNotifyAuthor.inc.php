@@ -27,14 +27,10 @@ class DecisionBackToReviewNotifyAuthor extends Mailable
     use Recipient;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_BACK_TO_REVIEW';
-
     protected static ?string $name = 'mailable.decision.backToReview.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.backToReview.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_BACK_TO_REVIEW';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_COPYEDITING];
 
     public function __construct(Context $context, Submission $submission, Decision $decision)

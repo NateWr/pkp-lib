@@ -16,8 +16,6 @@
 namespace PKP\mail\mailables;
 
 use PKP\context\Context;
-use PKP\emailTemplate\EmailTemplate;
-use PKP\facades\Repo;
 use PKP\mail\Mailable;
 use PKP\mail\traits\Recipient;
 
@@ -25,19 +23,12 @@ class ValidateEmailContext extends Mailable
 {
     use Recipient;
 
-    public const EMAIL_KEY = 'USER_VALIDATE_CONTEXT';
-
     protected static ?string $name = 'mailable.validateEmailContext.name';
-
     protected static ?string $description = 'mailable.validateEmailContext.description';
+    protected static ?string $emailTemplateKey = 'USER_VALIDATE_CONTEXT';
 
     public function __construct(Context $context)
     {
         parent::__construct(func_get_args());
-    }
-
-    public function getTemplate(int $contextId): EmailTemplate
-    {
-        return Repo::emailTemplate()->getByKey($contextId, self::EMAIL_KEY);
     }
 }

@@ -29,14 +29,10 @@ class DecisionDeclineNotifyAuthor extends Mailable
     use ReviewerComments;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_DECLINE';
-
     protected static ?string $name = 'mailable.decision.decline.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.decline.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_DECLINE';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_REVIEW];
 
     /**

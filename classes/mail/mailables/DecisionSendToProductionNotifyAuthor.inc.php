@@ -27,14 +27,10 @@ class DecisionSendToProductionNotifyAuthor extends Mailable
     use Recipient;
     use Sender;
 
-    public $defaultEmailTemplateKey = 'EDITOR_DECISION_SEND_TO_PRODUCTION';
-
     protected static ?string $name = 'mailable.decision.sendToProduction.notifyAuthor.name';
-
     protected static ?string $description = 'mailable.decision.sendToProduction.notifyAuthor.description';
-
-    public static bool $supportsTemplates = true;
-
+    protected static ?string $emailTemplateKey = 'EDITOR_DECISION_SEND_TO_PRODUCTION';
+    protected static bool $supportsTemplates = true;
     protected static array $groupIds = [self::GROUP_COPYEDITING];
 
     public function __construct(Context $context, Submission $submission, Decision $decision)

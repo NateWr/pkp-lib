@@ -22,6 +22,7 @@ use PKP\db\DAORegistry;
 use PKP\plugins\HookRegistry;
 use PKP\session\SessionManager;
 use PKP\site\Site;
+use PKP\user\User;
 
 class PKPRequest
 {
