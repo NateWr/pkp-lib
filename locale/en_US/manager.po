@@ -2172,6 +2172,9 @@ msgstr "Author names in a form of a shortened string"
 msgid "emailTemplate.variable.submission.authors"
 msgstr "The full names of the authors"
 
+msgid "emailTemplate.variable.submission.authorSubmissionUrl"
+msgstr "The author's URL to the submission"
+
 msgid "emailTemplate.variable.submission.submissionUrl"
 msgstr "The URL to the submission in the editorial backend"
 
