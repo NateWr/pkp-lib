@@ -27,7 +27,7 @@ use PKP\decision\Workflow;
 use PKP\mail\mailables\DecisionBackToCopyeditingNotifyAuthor;
 use PKP\security\Role;
 use PKP\submission\reviewRound\ReviewRound;
-use PKP\submissionFile\submissionFile;
+use PKP\submissionFile\SubmissionFile;
 use PKP\user\User;
 
 class BackToCopyediting extends Type

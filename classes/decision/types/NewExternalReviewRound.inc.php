@@ -29,7 +29,7 @@ use PKP\mail\mailables\DecisionNewReviewRoundNotifyAuthor;
 use PKP\security\Role;
 use PKP\submission\reviewRound\ReviewRound;
 use PKP\submission\reviewRound\ReviewRoundDAO;
-use PKP\submissionFile\submissionFile;
+use PKP\submissionFile\SubmissionFile;
 use PKP\user\User;
 
 class NewExternalReviewRound extends Type
