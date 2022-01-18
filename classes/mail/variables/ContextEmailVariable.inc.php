@@ -61,9 +61,9 @@ class ContextEmailVariable extends Variable
     {
         return
         [
-            self::CONTACT_NAME => $this->context->getData('contactName'),
+            self::CONTACT_NAME => (string) $this->context->getData('contactName'),
             self::PRINCIPAL_CONTACT_SIGNATURE => $this->getPrincipalContactSignature($locale),
-            self::CONTACT_EMAIL => $this->context->getData('contactEmail'),
+            self::CONTACT_EMAIL => (string) $this->context->getData('contactEmail'),
             self::PASSWORD_LOST_URL => $this->getPasswordLostUrl(),
             self::SUBMISSIONS_URL => $this->getSubmissionsUrl(),
         ];
