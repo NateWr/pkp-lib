@@ -24,12 +24,14 @@ use PKP\submission\reviewAssignment\ReviewAssignment;
 
 trait ReviewerComments
 {
+    public static string $allReviewerComments = 'allReviewerComments';
+
     /**
      * Add the reviewer comments to the list of registered variables
      */
     protected static function addReviewerCommentsDescription(array $variables): array
     {
-        $variables['allReviewersComments'] = __('emailTemplate.variable.allReviewersComments');
+        $variables[static::$allReviewerComments] = __('emailTemplate.variable.allReviewersComments');
         return $variables;
     }
 
@@ -54,10 +56,6 @@ trait ReviewerComments
                 $reviewAssignment->getId(),
                 true
             );
-
-            if ($submissionComments->wasEmpty()) {
-                continue;
-            }
 
             $reviewerIdentity = $reviewAssignment->getReviewMethod() == ReviewAssignment::SUBMISSION_REVIEW_METHOD_OPEN
                 ? $reviewAssignment->getReviewerFullName()
@@ -84,7 +82,7 @@ trait ReviewerComments
         }
 
         $this->addData([
-            'allReviewersComments' => join('', $comments),
+            static::$allReviewerComments => join('', $comments),
         ]);
     }
 
