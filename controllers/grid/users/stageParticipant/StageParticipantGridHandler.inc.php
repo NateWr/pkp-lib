@@ -18,6 +18,7 @@ import('lib.pkp.controllers.grid.users.stageParticipant.StageParticipantGridRow'
 import('lib.pkp.controllers.grid.users.stageParticipant.StageParticipantGridCategoryRow');
 
 use APP\facades\Repo;
+use APP\i18n\AppLocale;
 use APP\log\SubmissionEventLogEntry;
 use APP\notification\NotificationManager;
 use PKP\controllers\grid\CategoryGridHandler;
@@ -566,11 +567,11 @@ class StageParticipantGridHandler extends CategoryGridHandler
     public function fetchTemplateBody($args, $request)
     {
         $templateKey = $request->getUserVar('template');
-        $template = new SubmissionMailTemplate($this->getSubmission(), $templateKey);
+        $template = new SubmissionMailTemplate($this->getSubmission(), $templateKey, null, null, false);
         if ($template) {
             $user = $request->getUser();
             $template->assignParams([
-                'signature' => $user->getContactSignature(),
+                'signature' => $user->getContactSignature(AppLocale::getLocale()),
                 'senderName' => $user->getFullname(),
             ]);
             $template->replaceParams();
