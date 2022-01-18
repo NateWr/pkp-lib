@@ -134,11 +134,13 @@ class Schema extends BaseSchema
             }
 
             if ($prop === 'genreIsPrimary') {
-                $array = array_filter($this->genres, function ($genre) {
-                    /** @var Genre $genre */
-                    return !$genre->getSupplementary() && !$genre->getDependent();
-                });
-                $output[$prop] = !empty($array);
+                $output[$prop] = false;
+                foreach ($this->genres as $genre) {
+                    if ($genre->getId() === $item->getData('genreId')) {
+                        $output[$prop] = !$genre->getSupplementary() && !$genre->getDependent();
+                        break;
+                    }
+                }
                 continue;
             }
 
