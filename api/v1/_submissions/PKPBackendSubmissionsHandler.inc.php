@@ -51,15 +51,6 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler
                         Role::ROLE_ID_ASSISTANT,
                     ],
                 ],
-                [
-                    'pattern' => "{$rootPattern}/{submissionId:\d+}/reviewRound",
-                    'handler' => [$this, 'getReviewRound'],
-                    'roles' => [
-                        Role::ROLE_ID_SITE_ADMIN,
-                        Role::ROLE_ID_MANAGER,
-                        Role::ROLE_ID_SUB_EDITOR,
-                    ],
-                ],
             ],
             'DELETE' => [
                 [
@@ -84,7 +75,7 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler
         $this->addPolicy(new ContextAccessPolicy($request, $roleAssignments));
 
         $routeName = $this->getSlimRequest()->getAttribute('route')->getName();
-        if (in_array($routeName, ['delete', 'getReviewRound'])) {
+        if (in_array($routeName, ['delete'])) {
             $this->addPolicy(new SubmissionAccessPolicy($request, $args, $roleAssignments));
         }
 
@@ -251,42 +242,5 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler
         Repo::submission()->delete($submission);
 
         return $response->withJson(true);
-    }
-
-    /**
-     * Get the current review round for this submission
-     *
-     * @param $slimRequest Request Slim request object
-     * @param $response Response object
-     * @param array $args arguments
-     */
-    public function getReviewRound($slimRequest, $response, $args): Response
-    {
-        $request = $this->getRequest();
-        $context = $request->getContext();
-        $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
-
-        if (!$submission) {
-            return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
-        }
-
-        if ($context->getId() != $submission->getContextId()) {
-            return $response->withStatus(403)->withJsonError('api.submissions.400.wrongContext');
-        }
-
-        /** @var ReviewRoundDAO */
-        $reviewRoundDao = DAORegistry::getDAO('ReviewRoundDAO');
-        $reviewRound = $reviewRoundDao->getLastReviewRoundBySubmissionId($submission->getId());
-        if (!$reviewRound) {
-            return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
-        }
-
-        return $response->withJson([
-            'id' => $reviewRound->getId(),
-            'submissionId' => $reviewRound->getSubmissionId(),
-            'stageId' => $reviewRound->getStageId(),
-            'round' => $reviewRound->getRound(),
-            'status' => $reviewRound->getStatus(),
-        ], 200);
     }
 }
