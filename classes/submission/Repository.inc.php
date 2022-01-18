@@ -428,8 +428,6 @@ abstract class Repository
 
         HookRegistry::call('Submission::updateStatus', [&$newStatus, $status, $submission]);
 
-        $updateParams = [];
-
         if ($status !== $newStatus) {
             $submission->setData('status', $newStatus);
         }
@@ -440,9 +438,9 @@ abstract class Repository
             $submission->setData('currentPublicationId', $newCurrentPublicationId);
         }
 
-        if (!empty($updateParams)) {
-            $this->dao->update($submission);
-        }
+        // Use the DAO instead of the Repository to prevent
+        // calling this method over and over again.
+        $this->dao->update($submission);
     }
 
     /**
