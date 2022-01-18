@@ -18,7 +18,7 @@ use PKP\components\fileAttachers\FileStage;
 use PKP\components\fileAttachers\Library;
 use PKP\components\fileAttachers\Upload;
 use PKP\context\Context;
-use PKP\submissionFile\submissionFile;
+use PKP\submissionFile\SubmissionFile;
 
 trait InSubmissionStage
 {
