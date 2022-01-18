@@ -23,7 +23,7 @@ use PKP\log\SubmissionEmailLogEntry;
 use PKP\security\authorization\AuthorDashboardAccessPolicy;
 
 use PKP\security\Role;
-
+use PKP\submission\GenreDAO;
 use PKP\submission\PKPSubmission;
 use PKP\submissionFile\SubmissionFile;
 use PKP\workflow\WorkflowStageDAO;
@@ -159,6 +159,8 @@ abstract class PKPAuthorDashboardHandler extends Handler
 
         $userGroupDao = DAORegistry::getDAO('UserGroupDAO'); /** @var UserGroupDAO $userGroupDao */
         $contextUserGroups = $userGroupDao->getByRoleId($submission->getData('contextId'), Role::ROLE_ID_AUTHOR)->toArray();
+        $genreDao = DAORegistry::getDAO('GenreDAO'); /** @var GenreDAO $genreDao */
+        $contextGenres = $genreDao->getEnabledByContextId($submission->getData('contextId'))->toArray();
         $workflowStages = WorkflowStageDAO::getWorkflowStageKeysAndPaths();
 
         $stageNotifications = [];
@@ -275,7 +277,7 @@ abstract class PKPAuthorDashboardHandler extends Handler
         });
 
         // Get full details of the working publication and the current publication
-        $mapper = Repo::publication()->getSchemaMap($submission, $contextUserGroups);
+        $mapper = Repo::publication()->getSchemaMap($submission, $contextUserGroups, $contextGenres);
         $workingPublicationProps = $mapper->map($submission->getLatestPublication());
         $currentPublicationProps = $submission->getLatestPublication()->getId() === $submission->getCurrentPublication()->getId()
             ? $workingPublicationProps
