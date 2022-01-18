@@ -65,6 +65,6 @@ class SenderEmailVariable extends Variable
         $signature = $this->sender->getSignature($locale);
         return $signature
             ? PKPString::stripUnsafeHtml($signature)
-            : $this->sender->getFullName(true, false, $locale);
+            : '<p>' . $this->sender->getFullName(true, false, $locale) . '</p>';
     }
 }
