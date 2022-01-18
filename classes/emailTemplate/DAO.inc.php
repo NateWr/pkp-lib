@@ -13,7 +13,6 @@
 
 namespace PKP\emailTemplate;
 
-use APP\i18n\AppLocale;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
@@ -256,7 +255,6 @@ class DAO extends EntityDAO
         ?string $emailKey = null,
         bool $skipExisting = false
     ): bool {
-        AppLocale::registerLocaleFile(LOCALE_COMPONENT_APP_MANAGER, LOCALE_COMPONENT_PKP_MANAGER);
         $xmlDao = new XMLDAO();
         $data = $xmlDao->parseStruct($templatesFile, ['email']);
         if (!isset($data['email'])) {
