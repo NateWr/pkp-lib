@@ -172,8 +172,6 @@ class PKPToolsHandler extends ManagementHandler
     {
         $this->setupTemplate($request, true);
 
-        Queue::push('test', []);
-
         $templateMgr = TemplateManager::getManager($request);
 
         $templateMgr->setState($this->getJobsTableState());
