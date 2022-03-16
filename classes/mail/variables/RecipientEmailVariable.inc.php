@@ -16,6 +16,7 @@
 namespace PKP\mail\variables;
 
 use InvalidArgumentException;
+use PKP\core\PKPString;
 use PKP\user\User;
 
 class RecipientEmailVariable extends Variable
@@ -56,7 +57,7 @@ class RecipientEmailVariable extends Variable
     {
         return
         [
-            self::RECIPIENT_FULL_NAME => $this->getRecipientsFullName($locale),
+            self::RECIPIENT_FULL_NAME => PKPString::stripUnsafeHtml($this->getRecipientsFullName($locale)),
             self::RECIPIENT_USERNAME => $this->getRecipientsUserName(),
         ];
     }

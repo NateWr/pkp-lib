@@ -20,6 +20,7 @@ use APP\publication\Publication;
 use APP\submission\Submission;
 use PKP\author\Author;
 use PKP\core\PKPApplication;
+use PKP\core\PKPString;
 use PKP\db\DAORegistry;
 use PKP\security\Role;
 
@@ -74,8 +75,8 @@ class SubmissionEmailVariable extends Variable
             self::AUTHOR_SUBMISSION_URL => $this->getAuthorSubmissionUrl(),
             self::AUTHORS => $this->getAuthorsFull($locale),
             self::AUTHORS_SHORT => $this->currentPublication->getShortAuthorString($locale),
-            self::SUBMISSION_ABSTRACT => $this->currentPublication->getLocalizedData('abstract', $locale),
-            self::SUBMITTING_AUTHOR_NAME => $this->getSubmittingAuthorName($locale),
+            self::SUBMISSION_ABSTRACT => PKPString::stripUnsafeHtml($this->currentPublication->getLocalizedData('abstract', $locale)),
+            self::SUBMITTING_AUTHOR_NAME => PKPString::stripUnsafeHtml($this->getSubmittingAuthorName($locale)),
             self::SUBMISSION_ID => (string) $this->submission->getId(),
             self::SUBMISSION_TITLE => $this->currentPublication->getLocalizedFullTitle($locale),
             self::SUBMISSION_URL => $this->getSubmissionUrl(),
