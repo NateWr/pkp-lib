@@ -16,15 +16,21 @@
 namespace PKP\pages\management;
 
 use APP\components\forms\context\DoiSetupSettingsForm;
+use APP\components\forms\context\MetadataSettingsForm;
+use APP\components\forms\context\ReviewGuidanceForm;
 use APP\core\Request;
 use APP\facades\Repo;
 use APP\file\PublicFileManager;
 use APP\handler\Handler;
 use APP\template\TemplateManager;
+use PKP\components\forms\context\PKPDisableSubmissionsForm;
+use PKP\components\forms\context\PKPEmailSetupForm;
 use PKP\components\forms\context\PKPNotifyUsersForm;
+use PKP\components\forms\context\PKPReviewSetupForm;
+use PKP\components\forms\context\PKPSubmissionsNotificationsForm;
+use PKP\components\forms\submission\SubmissionGuidanceSettings;
 use PKP\config\Config;
 use PKP\core\PKPApplication;
-use PKP\db\DAORegistry;
 use PKP\security\authorization\ContextAccessPolicy;
 use PKP\security\Role;
 use PKP\site\VersionCheck;
@@ -235,13 +241,13 @@ class ManagementHandler extends Handler
         $locales = $context->getSupportedFormLocaleNames();
         $locales = array_map(fn (string $locale, string $name) => ['key' => $locale, 'label' => $name], array_keys($locales), $locales);
 
-        $authorGuidelinesForm = new \PKP\components\forms\context\PKPAuthorGuidelinesForm($contextApiUrl, $locales, $context);
-        $metadataSettingsForm = new \APP\components\forms\context\MetadataSettingsForm($contextApiUrl, $context);
-        $disableSubmissionsForm = new \PKP\components\forms\context\PKPDisableSubmissionsForm($contextApiUrl, $locales, $context);
-        $emailSetupForm = new \PKP\components\forms\context\PKPEmailSetupForm($contextApiUrl, $locales, $context);
-        $reviewGuidanceForm = new \APP\components\forms\context\ReviewGuidanceForm($contextApiUrl, $locales, $context);
-        $reviewSetupForm = new \PKP\components\forms\context\PKPReviewSetupForm($contextApiUrl, $locales, $context);
-        $submissionsNotificationsForm = new \PKP\components\forms\context\PKPSubmissionsNotificationsForm($contextApiUrl, $locales, $context);
+        $metadataSettingsForm = new MetadataSettingsForm($contextApiUrl, $context);
+        $disableSubmissionsForm = new PKPDisableSubmissionsForm($contextApiUrl, $locales, $context);
+        $submissionGuidanceSettingsForm = new SubmissionGuidanceSettings($contextApiUrl, $locales, $context);
+        $emailSetupForm = new PKPEmailSetupForm($contextApiUrl, $locales, $context);
+        $reviewGuidanceForm = new ReviewGuidanceForm($contextApiUrl, $locales, $context);
+        $reviewSetupForm = new PKPReviewSetupForm($contextApiUrl, $locales, $context);
+        $submissionsNotificationsForm = new PKPSubmissionsNotificationsForm($contextApiUrl, $locales, $context);
 
         $emailTemplatesListPanel = new \APP\components\listPanels\EmailTemplatesListPanel(
             'emailTemplates',
@@ -258,14 +264,14 @@ class ManagementHandler extends Handler
 
         $templateMgr->setState([
             'components' => [
-                FORM_AUTHOR_GUIDELINES => $authorGuidelinesForm->getConfig(),
                 FORM_METADATA_SETTINGS => $metadataSettingsForm->getConfig(),
                 FORM_DISABLE_SUBMISSIONS => $disableSubmissionsForm->getConfig(),
                 FORM_EMAIL_SETUP => $emailSetupForm->getConfig(),
                 FORM_REVIEW_GUIDANCE => $reviewGuidanceForm->getConfig(),
                 FORM_REVIEW_SETUP => $reviewSetupForm->getConfig(),
                 FORM_SUBMISSIONS_NOTIFICATIONS => $submissionsNotificationsForm->getConfig(),
-                'emailTemplates' => $emailTemplatesListPanel->getConfig(),
+                $emailTemplatesListPanel->id => $emailTemplatesListPanel->getConfig(),
+                $submissionGuidanceSettingsForm->id => $submissionGuidanceSettingsForm->getConfig(),
             ],
         ]);
         $templateMgr->assign('pageTitle', __('manager.workflow.title'));

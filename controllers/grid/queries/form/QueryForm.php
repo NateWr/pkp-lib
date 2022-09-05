@@ -312,7 +312,7 @@ class QueryForm extends Form
                 foreach ($reviewAssignments as $reviewAssignment) {
                     if ($reviewAssignment->getReviewerId() == $user->getId()) {
                         if ($reviewAssignment->getReviewMethod() != SUBMISSION_REVIEW_METHOD_OPEN) {
-                            $authorAssignments = $stageAssignmentDao->getBySubmissionAndRoleId($query->getAssocId(), Role::ROLE_ID_AUTHOR);
+                            $authorAssignments = $stageAssignmentDao->getBySubmissionAndRoleIds($query->getAssocId(), [Role::ROLE_ID_AUTHOR]);
                             while ($assignment = $authorAssignments->next()) {
                                 $excludeUsers[] = $assignment->getUserId();
                             }

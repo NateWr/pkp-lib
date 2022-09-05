@@ -23,6 +23,7 @@ use Illuminate\Support\LazyCollection;
 use PKP\plugins\Hook;
 use PKP\services\PKPSchemaService;
 use PKP\submission\PKPSubmission;
+use PKP\user\User;
 use PKP\validation\ValidatorFactory;
 
 class Repository
@@ -178,6 +179,27 @@ class Repository
         $this->dao->resetContributorsOrder($author->getData('publicationId'));
 
         Hook::call('Author::delete', [$author]);
+    }
+
+    /**
+     * Create an Author object from a User object
+     *
+     * This does not save the author in the database.
+     */
+    public function newAuthorFromUser(User $user): Author
+    {
+        $author = Repo::author()->newDataObject();
+        $author->setGivenName($user->getGivenName(null), null);
+        $author->setFamilyName($user->getFamilyName(null), null);
+        $author->setAffiliation($user->getAffiliation(null), null);
+        $author->setCountry($user->getCountry());
+        $author->setEmail($user->getEmail());
+        $author->setUrl($user->getUrl());
+        $author->setBiography($user->getBiography(null), null);
+        $author->setIncludeInBrowse(1);
+        $author->setOrcid($user->getOrcid());
+
+        return $author;
     }
 
     /**

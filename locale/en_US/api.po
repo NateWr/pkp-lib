@@ -215,6 +215,9 @@ msgstr "Your request could not be fulfilled because it is missing required infor
 msgid "api.submissions.400.invalidIssueIdentifiers"
 msgstr "The requested volume, number or year is not valid."
 
+msgid "api.submissions.400.invalidSubmitAs"
+msgstr "You are not allowed to submit in this user role."
+
 msgid "api.submissions.403.csrfTokenFailure"
 msgstr "Your request was denied. This may be because your login has expired. Try reloading the page and trying again."
 

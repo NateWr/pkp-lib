@@ -1,15 +1,21 @@
 {
 	"title": "Submission",
-	"description": "A submission to the journal or press.",
+	"description": "A submission to the journal, press or preprint server.",
 	"required": [
-		"contextId",
-		"sectionId"
+		"contextId"
 	],
 	"properties": {
 		"_href": {
 			"type": "string",
 			"readOnly": true,
 			"apiSummary": true
+		},
+		"commentsForTheEditors": {
+			"type": "string",
+			"description": "Comments from the submitting author to the editors. This is only available for submissions that have not yet been submitted. Once submitted, the message is converted to a discussion and you can not read or write to this property.",
+			"validation": [
+				"nullable"
+			]
 		},
 		"contextId": {
 			"type": "integer",
@@ -115,11 +121,6 @@
 				}
 			}
 		},
-		"sectionId": {
-			"type": "integer",
-			"description": "The section this submission should be assigned to. This can only be passed when creating a new submission and the data is assigned to the first publication. Edit the publication to change the `sectionId`.",
-			"writeOnly": true
-		},
 		"stageId": {
 			"type": "integer",
 			"description": "The stage of the editorial workflow that this submission is currently in. One of the `WORKFLOW_STAGE_` constants. Default is `WORKFLOW_STAGE_SUBMISSION`.",
@@ -208,12 +209,12 @@
 			"apiSummary": true
 		},
 		"submissionProgress": {
-			"type": "integer",
-			"description": "This number tracks a submission's progress before it is submitted to the journal or press. After submission, it will be set to `0`, indicating it is ready for an editor's consideration.",
+			"type": "string",
+			"description": "This is sent to the current step when a submission is in progress. After it is submitted, this will be an empty string, indicating it is ready for an editor's consideration.",
 			"apiSummary": true,
-			"default": 1,
+			"default": "files",
 			"validation": [
-				"in:0,1,2,3,4"
+				"in:,files,contributors,details,editors,review"
 			]
 		},
 		"urlAuthorWorkflow": {
@@ -225,6 +226,12 @@
 		"urlEditorialWorkflow": {
 			"type": "string",
 			"description": "A URL to the editors' and assistants' editorial workflow.",
+			"apiSummary": true,
+			"readOnly": true
+		},
+		"urlSubmissionWizard": {
+			"type": "string",
+			"description": "A URL to the submission wizard for this submission. The submission wizard can not be accessed after a submission has been submitted.",
 			"apiSummary": true,
 			"readOnly": true
 		},

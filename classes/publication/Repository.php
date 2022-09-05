@@ -23,6 +23,7 @@ use APP\publication\DAO;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use Illuminate\Support\Enumerable;
+use Illuminate\Support\LazyCollection;
 use PKP\core\Core;
 use PKP\db\DAORegistry;
 use PKP\file\TemporaryFileManager;
@@ -31,12 +32,11 @@ use PKP\log\SubmissionLog;
 use PKP\observers\events\PublishedEvent;
 use PKP\observers\events\UnpublishedEvent;
 use PKP\plugins\Hook;
-use PKP\userGroup\UserGroup;
 use PKP\services\PKPSchemaService;
 use PKP\submission\Genre;
 use PKP\submission\PKPSubmission;
+use PKP\userGroup\UserGroup;
 use PKP\validation\ValidatorFactory;
-use Illuminate\Support\LazyCollection;
 
 abstract class Repository
 {
@@ -130,7 +130,7 @@ abstract class Repository
      *
      * @return array A key/value array with validation errors. Empty if no errors
      */
-    public function validate(?Publication $publication, array $props, array $allowedLocales, string $primaryLocale): array
+    public function validate(?Publication $publication, array $props, Submission $submission, array $allowedLocales, string $primaryLocale): array
     {
         $errors = [];
 
@@ -159,6 +159,19 @@ abstract class Repository
                     if (!$submission) {
                         $validator->errors()->add('submissionId', __('publication.invalidSubmission'));
                     }
+                }
+            });
+        }
+
+        // A title must be provided if the submission is not still in progress
+        if (!$submission->getData('submissionProgress')) {
+            $validator->after(function ($validator) use ($props, $publication, $primaryLocale) {
+                $requiredLocale = $publication ? $publication->getData('locale') : $primaryLocale;
+                $title = isset($props['title']) && isset($props['title'][$requiredLocale])
+                    ? $props['title'][$requiredLocale]
+                    : $publication?->getData('title', $requiredLocale);
+                if (empty($title)) {
+                    $validator->errors()->add('title.' . $requiredLocale, __('validator.required'));
                 }
             });
         }

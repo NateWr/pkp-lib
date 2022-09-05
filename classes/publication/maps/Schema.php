@@ -20,11 +20,11 @@ use APP\submission\Submission;
 
 use Illuminate\Support\Enumerable;
 
+use Illuminate\Support\LazyCollection;
 use PKP\context\Context;
 use PKP\db\DAORegistry;
 use PKP\services\PKPSchemaService;
 use PKP\submission\Genre;
-use Illuminate\Support\LazyCollection;
 
 class Schema extends \PKP\core\maps\Schema
 {
@@ -132,6 +132,9 @@ class Schema extends \PKP\core\maps\Schema
                     break;
                 case 'authorsStringShort':
                     $output[$prop] = $this->anonymize ? '' : $publication->getShortAuthorString();
+                    break;
+                case 'categoryIds':
+                    $output[$prop] = $publication->getData('categoryIds');
                     break;
                 case 'citations':
                     $citationDao = DAORegistry::getDAO('CitationDAO'); /** @var CitationDAO $citationDao */

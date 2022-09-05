@@ -2219,3 +2219,11 @@ msgid "mailable.statisticsReportNotify.description"
 msgstr ""
 "Ten email jest automatycznie wysyłany każdego miesiąca do redaktorów i "
 "menedżerów czasopisma, aby dostarczyć im przegląd stanu systemu."
+
+#, fuzzy
+msgid "manager.setup.submissionPreparationChecklist"
+msgstr "Sprawdzenie tekstu przed wysłaniem"
+
+#, fuzzy
+msgid "manager.setup.submissionPreparationChecklistDescription"
+msgstr "Na stronie przesyłania tekstu, autorzy muszą oznaczyć każdy z elementów listy."

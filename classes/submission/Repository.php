@@ -13,6 +13,7 @@
 
 namespace PKP\submission;
 
+use APP\author\Author;
 use APP\core\Application;
 use APP\core\Request;
 use APP\core\Services;
@@ -23,13 +24,17 @@ use APP\submission\DAO;
 use APP\submission\Submission;
 use Illuminate\Support\Enumerable;
 use Illuminate\Support\LazyCollection;
+use PKP\context\Context;
 use PKP\core\Core;
 use PKP\db\DAORegistry;
 use PKP\doi\exceptions\DoiActionException;
+use PKP\observers\events\SubmissionSubmitted;
 use PKP\plugins\Hook;
-use PKP\services\PKPSchemaService;
-use PKP\validation\ValidatorFactory;
+use PKP\query\QueryDAO;
 use PKP\security\Role;
+use PKP\services\PKPSchemaService;
+use PKP\stageAssignment\StageAssignmentDAO;
+use PKP\validation\ValidatorFactory;
 
 abstract class Repository
 {
@@ -165,7 +170,7 @@ abstract class Repository
 
         // Send authors, journal managers and site admins to the submission
         // wizard for incomplete submissions
-        if ($submission->getSubmissionProgress() > 0 &&
+        if ($submission->getSubmissionProgress() &&
             ($authorDashboard ||
                 $user->hasRole([ROLE_ID_MANAGER], $submissionContext->getId()) ||
                 $user->hasRole([ROLE_ID_SITE_ADMIN], Application::CONTEXT_SITE))) {
@@ -174,9 +179,9 @@ abstract class Repository
                 Application::ROUTE_PAGE,
                 $submissionContext->getPath(),
                 'submission',
-                'wizard',
-                $submission->getSubmissionProgress(),
-                ['submissionId' => $submission->getId()]
+                null,
+                null,
+                ['id' => $submission->getId()]
             );
         }
 
@@ -255,18 +260,101 @@ abstract class Repository
         // The contextId must match an existing context
         $validator->after(function ($validator) use ($props) {
             if (isset($props['contextId']) && !$validator->errors()->get('contextId')) {
-                $submissionContext = Services::get('context')->get($props['contextId']);
+                $submissionContext = Services::get('context')->exists($props['contextId']);
                 if (!$submissionContext) {
                     $validator->errors()->add('contextId', __('submission.submit.noContext'));
                 }
             }
         });
 
+        // The sectionId must match an existing section in this context
+        $validator->after(function ($validator) use ($props, $submission) {
+            $propName = Application::getSectionIdPropName();
+            if ($validator->errors()->get($propName)) {
+                return;
+            }
+            $sectionId = $props[$propName] ?? ($submission ? $submission->getCurrentPublication()->getData($propName) : null);
+            if (!$sectionId) {
+                return;
+            }
+            $contextId = $props['contextId'] ?? ($submission ? $submission->getData('contextId') : null);
+            if (!Application::getSectionDAO()->exists($sectionId, $contextId)) {
+                $validator->errors()->add($propName, __('submission.sectionNotFound'));
+                return;
+            }
+        });
+
+        // Comments for the editors are invalid after a submission has been submitted
+        if ($submission && !$submission->getData('submissionProgress')) {
+            $validator->after(function ($validator) use ($props, $submission) {
+                if (isset($props['commentsForTheEditors']) && !$validator->errors()->get('commentsForTheEditors')) {
+                    $validator->errors()->add('commentsForTheEditors', __('form.disallowedProp'));
+                }
+            });
+        }
+
         if ($validator->fails()) {
             $errors = $this->schemaService->formatValidationErrors($validator->errors());
         }
 
         Hook::call('Submission::validate', [&$errors, $submission, $props, $allowedLocales, $primaryLocale]);
+
+        return $errors;
+    }
+
+    /**
+     * Check if a submission meets all requirements to be submitted
+     *
+     * @return array A key/value array with validation errors. Empty if no errors
+     */
+    public function validateSubmit(Submission $submission, Context $context): array
+    {
+        $locale = $submission->getData('locale');
+        $publication = $submission->getCurrentPublication();
+
+        $errors = [];
+
+        // Can't submit a submission twice or a submission with the wrong status
+        if (!$submission->getData('submissionProgress') || ($submission->getData('status') !== Submission::STATUS_QUEUED)) {
+            $errors['submissionProgress'] = __(
+                'submission.wizard.alreadySubmitted',
+                [
+                    'url' => Application::get()
+                        ->getDispatcher()
+                        ->url(
+                            Application::get()->getRequest(),
+                            Application::ROUTE_PAGE,
+                            $context->getData('path'),
+                            'submissions'
+                        )
+                ]
+            );
+        }
+
+        // Title required in submission locale
+        if (!$publication->getData('title', $locale)) {
+            $errors['title'] = [$locale => [__('validator.required')]];
+        }
+
+        // Required metadata
+        $publicationSchema = $this->schemaService->get(PKPSchemaService::SCHEMA_PUBLICATION);
+        foreach ($context->getRequiredMetadata() as $metadata) {
+            $schema = $publicationSchema->properties?->{$metadata};
+            if (!$schema) {
+                continue;
+            }
+            // The `supportingAgencies` metadata is called `agencies` on the context
+            if ($metadata === 'agencies') {
+                $metadata = 'supportingAgencies';
+            }
+            if (empty($publication->getData($metadata))) {
+                $errors[$metadata] = [__('validator.required')];
+            } elseif (!empty($schema->multilingual) && empty($publication->getData($metadata, $locale))) {
+                $errors[$metadata] = [$locale => [__('validator.required')]];
+            }
+        }
+
+        Hook::call('Submission::validateSubmit', [&$errors, $submission, $context]);
 
         return $errors;
     }
@@ -291,9 +379,9 @@ abstract class Repository
         if ($currentUser->hasRole([ROLE_ID_MANAGER], $contextId) || $currentUser->hasRole([ROLE_ID_SITE_ADMIN], Application::CONTEXT_SITE)) {
             $canDelete = true;
         } else {
-            if ($submission->getData('submissionProgress') != 0) {
+            if ($submission->getData('submissionProgress')) {
                 $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO'); /** @var StageAssignmentDAO $stageAssignmentDao */
-                $assignments = $stageAssignmentDao->getBySubmissionAndRoleId($submission->getId(), ROLE_ID_AUTHOR, WORKFLOW_STAGE_ID_SUBMISSION, $currentUser->getId());
+                $assignments = $stageAssignmentDao->getBySubmissionAndRoleIds($submission->getId(), [ROLE_ID_AUTHOR], WORKFLOW_STAGE_ID_SUBMISSION, $currentUser->getId());
                 $assignment = $assignments->next();
                 if ($assignment) {
                     $canDelete = true;
@@ -326,8 +414,10 @@ abstract class Repository
         return false;
     }
 
-    /** @copydoc DAO::insert */
-    public function add(Submission $submission, Publication $publication): int
+    /**
+     * Add a new submission
+     */
+    public function add(Submission $submission, Publication $publication, Context $context): int
     {
         $submission->stampLastActivity();
         $submission->stampModified();
@@ -336,6 +426,9 @@ abstract class Repository
         }
         if (!$submission->getData('status')) {
             $submission->setData('status', Submission::STATUS_QUEUED);
+        }
+        if (!$submission->getData('locale')) {
+            $submission->setData('locale', $context->getPrimaryLocale());
         }
         $submissionId = $this->dao->insert($submission);
         $submission = Repo::submission()->get($submissionId);
@@ -365,6 +458,36 @@ abstract class Repository
         Hook::call('Submission::edit', [$newSubmission, $submission, $params]);
 
         $this->dao->update($newSubmission);
+    }
+
+    /**
+     * Submit a submission
+     *
+     * Changes the submissionProgress property, creates the comments
+     * for the editors discussion, and fires the SubmissionSubmitted
+     * event.
+     */
+    public function submit(Submission $submission, Context $context): void
+    {
+        $this->edit($submission, [
+            'submissionProgress' => '',
+            'dateSubmitted' => Core::getCurrentDate(),
+        ]);
+
+        $submission = $this->get($submission->getId());
+
+        event(
+            new SubmissionSubmitted(
+                $submission,
+                $context
+            )
+        );
+
+        if ($submission->getData('commentsForTheEditors')) {
+            /** @var QueryDAO $queryDao */
+            $queryDao = DAORegistry::getDAO('QueryDAO');
+            $queryDao->addCommentsForEditorsQuery($submission);
+        }
     }
 
     /** @copydoc DAO::delete */
@@ -470,6 +593,67 @@ abstract class Repository
     public function getDefaultSortOption(): string
     {
         return $this->getSortOption(Collector::ORDERBY_DATE_PUBLISHED, Collector::ORDER_DIR_DESC);
+    }
+
+    /**
+     * Get the URL to the API endpoint for a submission
+     */
+    public function getUrlApi(Context $context, ?int $submissionId = null): string
+    {
+        return Application::get()->getDispatcher()->url(
+            Application::get()->getRequest(),
+            Application::ROUTE_API,
+            $context->getData('urlPath'),
+            'submissions' . ($submissionId ? '/' . $submissionId : ''),
+        );
+    }
+
+    /**
+     * Get the URL to the author workflow for a submission
+     */
+    public function getUrlAuthorWorkflow(Context $context, int $submissionId): string
+    {
+        return Application::get()->getDispatcher()->url(
+            Application::get()->getRequest(),
+            Application::ROUTE_PAGE,
+            $context->getData('urlPath'),
+            'authorDashboard',
+            'submission',
+            $submissionId
+        );
+    }
+
+    /**
+     * Get the URL to the editorial workflow for a submission
+     */
+    public function getUrlEditorialWorkflow(Context $context, int $submissionId): string
+    {
+        return Application::get()->getDispatcher()->url(
+            Application::get()->getRequest(),
+            Application::ROUTE_PAGE,
+            $context->getData('urlPath'),
+            'workflow',
+            'access',
+            $submissionId
+        );
+    }
+
+    /**
+     * Get the URL to the submission wizard for a submission
+     */
+    public function getUrlSubmissionWizard(Context $context, ?int $submissionId = null): string
+    {
+        return Application::get()->getDispatcher()->url(
+            Application::get()->getRequest(),
+            Application::ROUTE_PAGE,
+            $context->getData('urlPath'),
+            'submission',
+            null,
+            null,
+            $submissionId
+                ? ['id' => $submissionId]
+                : null
+        );
     }
 
     /**

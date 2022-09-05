@@ -31,9 +31,7 @@ use APP\facades\Repo;
 use APP\statistics\StatisticsHelper;
 use Illuminate\Support\LazyCollection;
 use PKP\core\Core;
-use PKP\db\DAORegistry;
 use PKP\facades\Locale;
-use PKP\mail\Mail;
 
 abstract class PKPSubmission extends \PKP\core\DataObject
 {
@@ -513,24 +511,6 @@ abstract class PKPSubmission extends \PKP\core\DataObject
             return '';
         }
         return $publication->getShortAuthorString();
-    }
-
-    /**
-     * Return a list of author email addresses of the current publication.
-     *
-     * @return array
-     *
-     * @deprecated 3.2.0.0
-     */
-    public function getAuthorEmails()
-    {
-        $authors = Repo::author()->getSubmissionAuthors($this);
-
-        $returner = [];
-        foreach ($authors as $author) {
-            $returner[] = Mail::encodeDisplayName($author->getFullName()) . ' <' . $author->getEmail() . '>';
-        }
-        return $returner;
     }
 
     /**

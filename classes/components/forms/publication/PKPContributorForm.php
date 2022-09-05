@@ -14,14 +14,17 @@
 
 namespace PKP\components\forms\publication;
 
+use APP\facades\Repo;
+use APP\submission\Submission;
 use PKP\components\forms\FieldOptions;
 use PKP\components\forms\FieldRichTextarea;
 use PKP\components\forms\FieldSelect;
 use PKP\components\forms\FieldText;
 use PKP\components\forms\FormComponent;
+use PKP\context\Context;
 use PKP\security\Role;
+use PKP\userGroup\UserGroup;
 use Sokil\IsoCodes\IsoCodesFactory;
-use APP\facades\Repo;
 
 define('FORM_CONTRIBUTOR', 'contributor');
 
@@ -33,32 +36,25 @@ class PKPContributorForm extends FormComponent
     /** @copydoc FormComponent::$method */
     public $method = 'POST';
 
-    /**
-     * Constructor
-     *
-     * @param string $action URL to submit the form to
-     * @param array $locales Supported locales
-     * @param \Context $context The publication to change settings for
-     */
-    public function __construct($action, $locales, $context)
+    public Submission $submission;
+    public Context $context;
+
+    public function __construct(string $action, array $locales, Submission $submission, Context $context)
     {
         $this->action = $action;
         $this->locales = $locales;
+        $this->submission = $submission;
+        $this->context = $context;
 
-        $authorUserGroups = Repo::userGroup()->getByRoleIds([Role::ROLE_ID_AUTHOR], $context->getId());
-
-        $authorUserGroupsOptions = [];
-        $firstAuthorUserGroupId = null;
-        foreach ($authorUserGroups as $authorUserGroup) {
-            if (!isset($firstAuthorUserGroupId)) {
-                $firstAuthorUserGroupId = (int) $authorUserGroup->getId();
-            }
-
-            $authorUserGroupsOptions[] = [
+        $authorUserGroupsOptions = Repo::userGroup()
+            ->getCollector()
+            ->filterByRoleIds([Role::ROLE_ID_AUTHOR])
+            ->filterByContextIds([$context->getId()])
+            ->getMany()
+            ->map(fn (UserGroup $authorUserGroup) => [
                 'value' => (int) $authorUserGroup->getId(),
                 'label' => $authorUserGroup->getLocalizedName(),
-            ];
-        }
+            ]);
 
         $isoCodes = app(IsoCodesFactory::class);
         $countries = [];
@@ -112,8 +108,8 @@ class PKPContributorForm extends FormComponent
             ->addField(new FieldOptions('userGroupId', [
                 'label' => __('submission.submit.contributorRole'),
                 'type' => 'radio',
-                'value' => $firstAuthorUserGroupId,
-                'options' => $authorUserGroupsOptions,
+                'value' => $authorUserGroupsOptions->first()['value'],
+                'options' => $authorUserGroupsOptions->values(),
             ]))
             ->addField(new FieldOptions('includeInBrowse', [
                 'label' => __('submission.submit.includeInBrowse.title'),

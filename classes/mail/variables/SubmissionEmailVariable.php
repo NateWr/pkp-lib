@@ -33,6 +33,7 @@ class SubmissionEmailVariable extends Variable
     public const SUBMISSION_ID = 'submissionId';
     public const SUBMISSION_TITLE = 'submissionTitle';
     public const SUBMISSION_URL = 'submissionUrl';
+    public const SUBMISSION_WIZARD_URL = 'submissionWizardUrl';
 
     protected Submission $submission;
 
@@ -59,6 +60,7 @@ class SubmissionEmailVariable extends Variable
             self::SUBMISSION_ID => __('emailTemplate.variable.submission.submissionId'),
             self::SUBMISSION_TITLE => __('emailTemplate.variable.submission.submissionTitle'),
             self::SUBMISSION_URL => __('emailTemplate.variable.submission.submissionUrl'),
+            self::SUBMISSION_WIZARD_URL => __('emailTemplate.variable.submission.submissionWizardUrl'),
         ];
     }
 
@@ -77,6 +79,7 @@ class SubmissionEmailVariable extends Variable
             self::SUBMISSION_ID => (string) $this->submission->getId(),
             self::SUBMISSION_TITLE => $this->currentPublication->getLocalizedFullTitle($locale),
             self::SUBMISSION_URL => $this->getSubmissionUrl(),
+            self::SUBMISSION_WIZARD_URL => $this->getSubmissionWizardUrl(),
         ];
     }
 
@@ -130,6 +133,27 @@ class SubmissionEmailVariable extends Variable
     }
 
     /**
+     * URL to the submission in the submission wizard
+     */
+    protected function getSubmissionWizardUrl(): string
+    {
+        $application = PKPApplication::get();
+        $request = $application->getRequest();
+        $dispatcher = $application->getDispatcher();
+        return $dispatcher->url(
+            $request,
+            PKPApplication::ROUTE_PAGE,
+            null,
+            'submission',
+            null,
+            null,
+            [
+                'id' => $this->submission->getId(),
+            ]
+        );
+    }
+
+    /**
      * The name(s) of authors assigned as participants to the
      * submission workflow.
      *
@@ -141,7 +165,7 @@ class SubmissionEmailVariable extends Variable
         $alreadyCollected = []; // Prevent duplicate names for each stage assignment
         /** @var StageAssignmentDAO $stageAssignmentDao */
         $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
-        $result = $stageAssignmentDao->getBySubmissionAndRoleId($this->submission->getId(), Role::ROLE_ID_AUTHOR);
+        $result = $stageAssignmentDao->getBySubmissionAndRoleIds($this->submission->getId(), [Role::ROLE_ID_AUTHOR]);
         /** @var StageAssignment $stageAssignment */
         while ($stageAssignment = $result->next()) {
             $userId = (int) $stageAssignment->getUserId();

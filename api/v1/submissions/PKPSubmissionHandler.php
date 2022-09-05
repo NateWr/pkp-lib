@@ -20,16 +20,20 @@ use APP\core\Application;
 use APP\core\Request;
 use APP\core\Services;
 use APP\facades\Repo;
+use APP\journal\Section;
 use APP\notification\Notification;
 use APP\notification\NotificationManager;
 use APP\submission\Collector;
 use APP\submission\Submission;
+use Illuminate\Support\Enumerable;
 use Illuminate\Support\Facades\Mail;
+use PKP\core\APIResponse;
 use PKP\core\Core;
 use PKP\db\DAORegistry;
 use PKP\decision\DecisionType;
 use PKP\handler\APIHandler;
 use PKP\mail\mailables\PublicationVersionNotify;
+use PKP\mail\mailables\SubmissionSavedForLater;
 use PKP\notification\NotificationSubscriptionSettingsDAO;
 use PKP\notification\PKPNotification;
 use PKP\plugins\Hook;
@@ -40,8 +44,12 @@ use PKP\security\authorization\StageRolePolicy;
 use PKP\security\authorization\SubmissionAccessPolicy;
 use PKP\security\Role;
 use PKP\services\PKPSchemaService;
+use PKP\stageAssignment\StageAssignmentDAO;
 use PKP\submission\PKPSubmission;
 use PKP\submission\reviewAssignment\ReviewAssignment;
+use PKP\userGroup\UserGroup;
+use Slim\Http\Request as SlimRequest;
+use Slim\Http\Response;
 
 class PKPSubmissionHandler extends APIHandler
 {
@@ -55,6 +63,8 @@ class PKPSubmissionHandler extends APIHandler
     public $requiresSubmissionAccess = [
         'get',
         'edit',
+        'saveForLater',
+        'submit',
         'delete',
         'getGalleys',
         'getParticipants',
@@ -153,7 +163,7 @@ class PKPSubmissionHandler extends APIHandler
                 [
                     'pattern' => $this->getEndpointPattern(),
                     'handler' => [$this, 'add'],
-                    'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR],
+                    'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_AUTHOR],
                 ],
                 [
                     'pattern' => $this->getEndpointPattern() . '/{submissionId:\d+}/publications',
@@ -180,7 +190,17 @@ class PKPSubmissionHandler extends APIHandler
                 [
                     'pattern' => $this->getEndpointPattern() . '/{submissionId:\d+}',
                     'handler' => [$this, 'edit'],
-                    'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR],
+                    'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_AUTHOR],
+                ],
+                [
+                    'pattern' => $this->getEndpointPattern() . '/{submissionId:\d+}/saveForLater',
+                    'handler' => [$this, 'saveForLater'],
+                    'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_AUTHOR],
+                ],
+                [
+                    'pattern' => $this->getEndpointPattern() . '/{submissionId:\d+}/submit',
+                    'handler' => [$this, 'submit'],
+                    'roles' => [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_AUTHOR],
                 ],
                 [
                     'pattern' => $this->getEndpointPattern() . '/{submissionId:\d+}/publications/{publicationId:\d+}',
@@ -406,7 +426,7 @@ class PKPSubmissionHandler extends APIHandler
 
         $userGroups = Repo::userGroup()->getCollector()
             ->filterByContextIds([$submission->getData('contextId')])
-            ->getMany(); 
+            ->getMany();
 
         /** @var GenreDAO $genreDao */
         $genreDao = DAORegistry::getDAO('GenreDAO');
@@ -418,18 +438,21 @@ class PKPSubmissionHandler extends APIHandler
     /**
      * Add a new submission
      *
-     * @param Request $slimRequest Slim request object
-     * @param Response $response object
-     * @param array $args arguments
-     *
      * @return Response
      */
-    public function add($slimRequest, $response, $args)
+    public function add(SlimRequest $slimRequest, APIResponse $response, array $args): APIResponse
     {
         $request = $this->getRequest();
 
         if ($request->getContext()->getData('disableSubmissions')) {
             return $response->withStatus(403)->withJsonError('author.submit.notAccepting');
+        }
+
+        $submitAsUserGroup = $this->getSubmitAsUserGroup($slimRequest, $request);
+        if (!$submitAsUserGroup) {
+            return $response->withStatus(400)->withJson([
+                'userGroupId' => [__('api.submissions.400.invalidSubmitAs')]
+            ]);
         }
 
         $params = $this->convertStringsToSchema(PKPSchemaService::SCHEMA_SUBMISSION, $slimRequest->getParsedBody());
@@ -444,14 +467,58 @@ class PKPSubmissionHandler extends APIHandler
             return $response->withStatus(400)->withJson($errors);
         }
 
-        $sectionId = $params['sectionId'];
-        unset($params['sectionId']);
+        $publicationProps = [];
+        $sectionIdPropName = Application::getSectionIdPropName();
+        if (isset($params[$sectionIdPropName])) {
+            $sectionId = $params[$sectionIdPropName];
+
+            if (Application::getSectionDAO()->isInactive($sectionId)) {
+                return $response->withStatus(400)->withJson([
+                    $sectionIdPropName => [__('api.submission.400.inactiveSection')]
+                ]);
+            }
+
+            if (!in_array($submitAsUserGroup->getRoleId(), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])) {
+                /** @var Section $section */
+                $section = Application::getSectionDAO()->getById($sectionId, $request->getContext()->getId());
+                if ($section->getEditorRestricted()) {
+                    return $response->withStatus(403)->withJsonError('submission.sectionRestrictedToEditors');
+                }
+            }
+
+            $publicationProps = [$sectionIdPropName => $sectionId];
+
+            unset($params[$sectionIdPropName]);
+        }
 
         $submission = Repo::submission()->newDataObject($params);
-        $publication = Repo::publication()->newDataObject(['sectionId' => $sectionId]);
-        $submissionId = Repo::submission()->add($submission, $publication);
+        $publication = Repo::publication()->newDataObject($publicationProps);
+        $submissionId = Repo::submission()->add($submission, $publication, $request->getContext());
 
         $submission = Repo::submission()->get($submissionId);
+
+        // Assign submitter to submission
+        /** @var StageAssignmentDAO $stageAssignmentDao */
+        $stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
+        $stageAssignmentDao->build(
+            $submission->getId(),
+            $submitAsUserGroup->getId(),
+            $request->getUser()->getId(),
+            $submitAsUserGroup->getRecommendOnly(),
+            // Authors can always edit metadata before submitting
+            $submission->getData('submissionProgress')
+                ? true
+                : $submitAsUserGroup->getPermitMetadataEdit()
+        );
+
+        // Create an author record from the submitter's user account
+        if ($submitAsUserGroup->getRoleId() === Role::ROLE_ID_AUTHOR) {
+            $author = Repo::author()->newAuthorFromUser($request->getUser());
+            $author->setData('publicationId', $publication->getId());
+            $author->setUserGroupId($submitAsUserGroup->getId());
+            $authorId = Repo::author()->add($author);
+            Repo::publication()->edit($publication, ['primaryContactId' => $authorId]);
+        }
 
         $userGroups = Repo::userGroup()->getCollector()
             ->filterByContextIds([$submission->getData('contextId')])
@@ -478,10 +545,6 @@ class PKPSubmissionHandler extends APIHandler
         $request = $this->getRequest();
         $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
 
-        if (!$submission) {
-            return $response->withStatus(404)->withJsonError('api.404.resourceNotFound');
-        }
-
         $params = $this->convertStringsToSchema(PKPSchemaService::SCHEMA_SUBMISSION, $slimRequest->getParsedBody());
         $params['id'] = $submission->getId();
         $params['contextId'] = $request->getContext()->getId();
@@ -505,6 +568,92 @@ class PKPSubmissionHandler extends APIHandler
         $submission = Repo::submission()->get($submission->getId());
 
         $userGroups = Repo::userGroup()->getCollector()
+            ->filterByContextIds([$submission->getData('contextId')])
+            ->getMany();
+
+        /** @var GenreDAO $genreDao */
+        $genreDao = DAORegistry::getDAO('GenreDAO');
+        $genres = $genreDao->getByContextId($submission->getData('contextId'))->toArray();
+
+        return $response->withJson(Repo::submission()->getSchemaMap()->map($submission, $userGroups, $genres), 200);
+    }
+
+    /**
+     * Save a submission for later
+     *
+     * Saves the current step and sends the submitter an
+     * email with a link to resume their submission.
+     */
+    public function saveForLater(SlimRequest $slimRequest, APIResponse $response, array $args): APIResponse
+    {
+        $request = $this->getRequest();
+        $context = $request->getContext();
+        $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
+
+        $params = $slimRequest->getParsedBody();
+        if (!empty($params['step'])) {
+            if (!ctype_alnum(str_replace(['-', '_'], '', $params['step']))) {
+                return $response->withStatus(400)->withJson([
+                    'step' => [__('validator.alpha_dash')]
+                ]);
+            }
+
+            Repo::submission()->edit($submission, ['submissionProgress' => $params['step']]);
+        }
+
+        $emailTemplate = Repo::emailTemplate()->getByKey($context->getId(), SubmissionSavedForLater::getEmailTemplateKey());
+        $mailable = new SubmissionSavedForLater($context, $submission);
+        $mailable
+            ->from($context->getData('contactEmail'), $context->getData('contactName'))
+            ->recipients([$request->getUser()])
+            ->subject($emailTemplate->getLocalizedData('subject'))
+            ->body($emailTemplate->getLocalizedData('body'));
+
+        Mail::send($mailable);
+
+        $submission = Repo::submission()->get($submission->getId());
+
+        $userGroups = Repo::userGroup()
+            ->getCollector()
+            ->filterByContextIds([$submission->getData('contextId')])
+            ->getMany();
+
+        /** @var GenreDAO $genreDao */
+        $genreDao = DAORegistry::getDAO('GenreDAO');
+        $genres = $genreDao->getByContextId($submission->getData('contextId'))->toArray();
+
+        return $response->withJson(Repo::submission()->getSchemaMap()->map($submission, $userGroups, $genres), 200);
+    }
+
+    /**
+     * Submit a submission
+     *
+     * Submits a submission by changing its `submissionProgress` property.
+     *
+     * Pass the `_validateOnly` property to validate the submission without submitting it.
+     */
+    public function submit(SlimRequest $slimRequest, APIResponse $response, array $args): APIResponse
+    {
+        $request = $this->getRequest();
+        $context = $request->getContext();
+        $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
+
+        $errors = Repo::submission()->validateSubmit($submission, $context);
+
+        if (!empty($errors)) {
+            return $response->withStatus(400)->withJson($errors);
+        }
+
+        if ($slimRequest->getParsedBodyParam('_validateOnly')) {
+            return $response->withStatus(200);
+        }
+
+        Repo::submission()->submit($submission, $context);
+
+        $submission = Repo::submission()->get($submission->getId());
+
+        $userGroups = Repo::userGroup()
+            ->getCollector()
             ->filterByContextIds([$submission->getData('contextId')])
             ->getMany();
 
@@ -699,7 +848,7 @@ class PKPSubmissionHandler extends APIHandler
             $primaryLocale = $params['locale'];
         }
 
-        $errors = Repo::publication()->validate(null, $params, $allowedLocales, $primaryLocale);
+        $errors = Repo::publication()->validate(null, $params, $submission, $allowedLocales, $primaryLocale);
 
         if (!empty($errors)) {
             return $response->withStatus(400)->withJson($errors);
@@ -858,7 +1007,7 @@ class PKPSubmissionHandler extends APIHandler
         $primaryLocale = $publication->getData('locale');
         $allowedLocales = $submissionContext->getData('supportedSubmissionLocales');
 
-        $errors = Repo::publication()->validate($publication, $params, $allowedLocales, $primaryLocale);
+        $errors = Repo::publication()->validate($publication, $params, $submission, $allowedLocales, $primaryLocale);
 
         if (!empty($errors)) {
             return $response->withStatus(400)->withJson($errors);
@@ -1326,7 +1475,12 @@ class PKPSubmissionHandler extends APIHandler
             Repo::author()->setAuthorsOrder($publication->getId(), $authors);
         }
 
-        return $response->withJson($publication->getId());
+        $authors = Repo::author()
+            ->getCollector()
+            ->filterByPublicationIds([$publication->getId()])
+            ->getMany();
+
+        return $response->withJson(Repo::author()->getSchemaMap()->summarizeMany($authors));
     }
 
     /**
@@ -1367,5 +1521,62 @@ class PKPSubmissionHandler extends APIHandler
         $decision = Repo::decision()->get($decisionId);
 
         return $response->withJson(Repo::decision()->getSchemaMap()->map($decision), 200);
+    }
+
+    /**
+     * Get the user group that someone is creating a new submission as
+     *
+     * Validates the user group specified by the request. When no group is
+     * specified, it defaults to any assigned group or the default author
+     * group.
+     *
+     * @return ?UserGroup UserGroup or null if no valid user group found
+     */
+    protected function getSubmitAsUserGroup(SlimRequest $slimRequest, Request $request): ?UserGroup
+    {
+        $userGroups = Repo::userGroup()
+            ->getCollector()
+            ->filterByContextIds([$request->getContext()->getId()])
+            ->filterByUserIds([$request->getUser()->getId()])
+            ->getMany();
+
+        // Validate a user group specified by the request
+        $params = $slimRequest->getParsedBody();
+        if (isset($params['userGroupId'])) {
+            $submitAsUserGroupId = (int) $params['userGroupId'];
+            unset($params['userGroupId']);
+            /** @var UserGroup $userGroup */
+            foreach ($userGroups as $userGroup) {
+                if ($userGroup->getId() === $submitAsUserGroupId
+                        && in_array($userGroup->getRoleId(), [Role::ROLE_ID_AUTHOR, Role::ROLE_ID_MANAGER])) {
+                    return $userGroup;
+                }
+            }
+            return null;
+        }
+
+        // Automatically choose the best user group
+        $validUserGroup = $this->getFirstUserGroupInRole($userGroups, Role::ROLE_ID_AUTHOR)
+            ?? $this->getFirstUserGroupInRole($userGroups, Role::ROLE_ID_MANAGER);
+        if ($validUserGroup) {
+            return $validUserGroup;
+        }
+
+        $defaultAuthorGroup = Repo::userGroup()
+            ->getCollector()
+            ->filterByContextIds([$request->getUser()->getId()])
+            ->filterByRoleIds([Role::ROLE_ID_AUTHOR])
+            ->filterByIsDefault(true)
+            ->getMany()
+            ->first();
+
+        return $defaultAuthorGroup && $defaultAuthorGroup->getPermitSelfRegistration()
+            ? $defaultAuthorGroup
+            : null;
+    }
+
+    protected function getFirstUserGroupInRole(Enumerable $userGroups, int $role): ?UserGroup
+    {
+        return $userGroups->first(fn (UserGroup $userGroup) => $userGroup->getRoleId() === $role);
     }
 }

@@ -2815,6 +2815,7 @@ msgstr ""
 "Všechny komentáře z dokončených recenzí. U anonymních recenzí jsou jména "
 "recenzentů skryta"
 
+#, fuzzy
 msgid "manager.setup.notifyAllAuthors.assignedAuthors"
 msgstr ""
 "Odeslat email pouze autorům přiřazeným k pracovnímu postupu příspěvku. "
@@ -3288,3 +3289,11 @@ msgstr ""
 msgid "mailable.decision.cancelReviewRound.notifyAuthor.description"
 msgstr ""
 "Tento e-mail oznamuje autorovi, že recenzní kolo jeho příspěvku bylo zrušeno."
+
+#, fuzzy
+msgid "manager.setup.submissionPreparationChecklist"
+msgstr "Zaškrtávací seznam pro přípravu příspěvku"
+
+#, fuzzy
+msgid "manager.setup.submissionPreparationChecklistDescription"
+msgstr "V průběhu podávání příspěvku do časopisu jsou autoři nejdříve požádáni, aby zaškrtli všechny položky v Zaškrtávacím seznamu pro přípravu příspěvku a potvrdili tak jejich splnění; poté mohou postupovat dále. Zaškrtávací seznam je také zobrazen v Pokyny autorům v části O časopisu. Seznam můžete upravit níže, pamatujte ale, že aby autoři mohli pokračovat dále v odesílání svého příspěvku, budou muset zaškrtnutím potvrdit všechny položky tohoto seznamu."

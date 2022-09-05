@@ -30,6 +30,12 @@
 						@set="set"
 					/>
 				</tab>
+				<tab id="instructions" label="{translate key="manager.setup.workflow.guidance"}">
+					<pkp-form
+						v-bind="components.submissionGuidanceSettings"
+						@set="set"
+					/>
+				</tab>
 				<tab id="metadata" label="{translate key="submission.informationCenter.metadata"}">
 					<pkp-form
 						v-bind="components.{$smarty.const.FORM_METADATA_SETTINGS}"
@@ -43,12 +49,6 @@
 				<tab id="submissionChecklist" label="{translate key="manager.setup.checklist"}">
 					{capture assign=submissionChecklistGridUrl}{url router=\PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.settings.submissionChecklist.SubmissionChecklistGridHandler" op="fetchGrid" escape=false}{/capture}
 					{load_url_in_div id="submissionChecklistGridContainer" url=$submissionChecklistGridUrl}
-				</tab>
-				<tab id="authorGuidelines" label="{translate key="manager.setup.authorGuidelines"}">
-					<pkp-form
-						v-bind="components.{$smarty.const.FORM_AUTHOR_GUIDELINES}"
-						@set="set"
-					/>
 				</tab>
 				<tab id="notifications" label="{translate key="manager.setup.submissionsNotifications"}">
 					<pkp-form
