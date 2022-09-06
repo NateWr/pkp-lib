@@ -15,8 +15,6 @@
 
 namespace PKP\pages\submission;
 
-use APP\components\forms\publication\TitleAbstractForm;
-use APP\components\forms\submission\ForTheEditors;
 use APP\components\forms\submission\ReconfigureSubmission;
 use APP\core\Application;
 use APP\core\Request;
@@ -28,8 +26,10 @@ use APP\template\TemplateManager;
 use Illuminate\Support\LazyCollection;
 use PKP\components\forms\FormComponent;
 use PKP\components\forms\publication\PKPCitationsForm;
+use PKP\components\forms\publication\TitleAbstractForm;
 use PKP\components\forms\submission\CommentsForTheEditors;
 use PKP\components\forms\submission\ConfirmSubmission;
+use PKP\components\forms\submission\ForTheEditors;
 use PKP\components\forms\submission\PKPSubmissionFileForm;
 use PKP\components\listPanels\PKPContributorsListPanel;
 use PKP\context\Context;
