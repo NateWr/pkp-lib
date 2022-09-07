@@ -104,20 +104,26 @@ class PKPContributorForm extends FormComponent
             ->addField(new FieldText('affiliation', [
                 'label' => __('user.affiliation'),
                 'isMultilingual' => true,
-            ]))
-            ->addField(new FieldOptions('userGroupId', [
+            ]));
+
+        if ($authorUserGroupsOptions->count() > 1) {
+            $this->addField(new FieldOptions('userGroupId', [
                 'label' => __('submission.submit.contributorRole'),
                 'type' => 'radio',
                 'value' => $authorUserGroupsOptions->first()['value'],
                 'options' => $authorUserGroupsOptions->values(),
-            ]))
-            ->addField(new FieldOptions('includeInBrowse', [
-                'label' => __('submission.submit.includeInBrowse.title'),
-                'type' => 'checkbox',
-                'value' => true,
-                'options' => [
-                    ['value' => true, 'label' => __('submission.submit.includeInBrowse')],
-                ]
             ]));
+        } else {
+            $this->addHiddenField('userGroupId', $authorUserGroupsOptions->first()['value']);
+        }
+
+        $this->addField(new FieldOptions('includeInBrowse', [
+            'label' => __('submission.submit.includeInBrowse.title'),
+            'type' => 'checkbox',
+            'value' => true,
+            'options' => [
+                ['value' => true, 'label' => __('submission.submit.includeInBrowse')],
+            ]
+        ]));
     }
 }
