@@ -26,11 +26,13 @@ use APP\handler\Handler;
 use APP\template\TemplateManager;
 use PKP\components\forms\context\PKPDisableSubmissionsForm;
 use PKP\components\forms\context\PKPEmailSetupForm;
+use PKP\components\forms\context\PKPInformationForm;
 use PKP\components\forms\context\PKPNotifyUsersForm;
 use PKP\components\forms\context\PKPReviewSetupForm;
 use PKP\components\forms\context\PKPSubmissionsNotificationsForm;
 use PKP\components\forms\submission\SubmissionGuidanceSettings;
 use PKP\config\Config;
+use PKP\context\Context;
 use PKP\core\PKPApplication;
 use PKP\security\authorization\ContextAccessPolicy;
 use PKP\security\Role;
@@ -191,7 +193,7 @@ class ManagementHandler extends Handler
         $announcementSettingsForm = new \PKP\components\forms\context\PKPAnnouncementSettingsForm($contextApiUrl, $locales, $context);
         $appearanceAdvancedForm = new \APP\components\forms\context\AppearanceAdvancedForm($contextApiUrl, $locales, $context, $baseUrl, $temporaryFileApiUrl, $publicFileApiUrl);
         $appearanceSetupForm = new \APP\components\forms\context\AppearanceSetupForm($contextApiUrl, $locales, $context, $baseUrl, $temporaryFileApiUrl, $publicFileApiUrl);
-        $informationForm = new \PKP\components\forms\context\PKPInformationForm($contextApiUrl, $locales, $context, $publicFileApiUrl);
+        $informationForm = $this->getInformationForm($contextApiUrl, $locales, $context, $publicFileApiUrl);
         $listsForm = new \PKP\components\forms\context\PKPListsForm($contextApiUrl, $locales, $context);
         $privacyForm = new \PKP\components\forms\context\PKPPrivacyForm($contextApiUrl, $locales, $context, $publicFileApiUrl);
         $themeForm = new \PKP\components\forms\context\PKPThemeForm($themeApiUrl, $locales, $context);
@@ -201,17 +203,22 @@ class ManagementHandler extends Handler
             'FORM_ANNOUNCEMENT_SETTINGS' => FORM_ANNOUNCEMENT_SETTINGS,
         ]);
 
+        $components = [
+            FORM_ANNOUNCEMENT_SETTINGS => $announcementSettingsForm->getConfig(),
+            FORM_APPEARANCE_ADVANCED => $appearanceAdvancedForm->getConfig(),
+            FORM_APPEARANCE_SETUP => $appearanceSetupForm->getConfig(),
+            FORM_LISTS => $listsForm->getConfig(),
+            FORM_PRIVACY => $privacyForm->getConfig(),
+            FORM_THEME => $themeForm->getConfig(),
+            FORM_DATE_TIME => $dateTimeForm->getConfig(),
+        ];
+
+        if ($informationForm) {
+            $components[FORM_INFORMATION] = $informationForm->getConfig();
+        }
+
         $templateMgr->setState([
-            'components' => [
-                FORM_ANNOUNCEMENT_SETTINGS => $announcementSettingsForm->getConfig(),
-                FORM_APPEARANCE_ADVANCED => $appearanceAdvancedForm->getConfig(),
-                FORM_APPEARANCE_SETUP => $appearanceSetupForm->getConfig(),
-                FORM_INFORMATION => $informationForm->getConfig(),
-                FORM_LISTS => $listsForm->getConfig(),
-                FORM_PRIVACY => $privacyForm->getConfig(),
-                FORM_THEME => $themeForm->getConfig(),
-                FORM_DATE_TIME => $dateTimeForm->getConfig(),
-            ],
+            'components' => $components,
             'announcementsNavLink' => [
                 'name' => __('announcement.announcements'),
                 'url' => $router->url($request, null, 'management', 'settings', 'announcements'),
@@ -219,7 +226,11 @@ class ManagementHandler extends Handler
             ],
         ]);
 
-        $templateMgr->assign('pageTitle', __('manager.website.title'));
+        $templateMgr->assign([
+            'includeInformationForm' => (bool) $informationForm,
+            'pageTitle' => __('manager.website.title'),
+        ]);
+
         $templateMgr->display('management/website.tpl');
     }
 
@@ -496,6 +507,16 @@ class ManagementHandler extends Handler
                 [WORKFLOW_STAGE_ID_INTERNAL_REVIEW, WORKFLOW_STAGE_ID_EXTERNAL_REVIEW],
                 Application::get()->getApplicationStages()
             )
+        );
+    }
+
+    protected function getInformationForm(string $contextApiUrl, array $locales, Context $context, string $publicFileApiUrl): ?PKPInformationForm
+    {
+        return new PKPInformationForm(
+            $contextApiUrl,
+            $locales,
+            $context,
+            $publicFileApiUrl
         );
     }
 }
