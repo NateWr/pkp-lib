@@ -18,6 +18,7 @@ namespace PKP\pages\management;
 use APP\components\forms\context\DoiSetupSettingsForm;
 use APP\components\forms\context\MetadataSettingsForm;
 use APP\components\forms\context\ReviewGuidanceForm;
+use APP\core\Application;
 use APP\core\Request;
 use APP\facades\Repo;
 use APP\file\PublicFileManager;
@@ -274,7 +275,11 @@ class ManagementHandler extends Handler
                 $submissionGuidanceSettingsForm->id => $submissionGuidanceSettingsForm->getConfig(),
             ],
         ]);
-        $templateMgr->assign('pageTitle', __('manager.workflow.title'));
+
+        $templateMgr->assign([
+            'pageTitle' => __('manager.workflow.title'),
+            'hasReviewStage' => $this->hasReviewStage(),
+        ]);
     }
 
     /**
@@ -482,5 +487,15 @@ class ManagementHandler extends Handler
         ]);
 
         $templateMgr->display('management/access.tpl');
+    }
+
+    protected function hasReviewStage(): bool
+    {
+        return count(
+            array_intersect(
+                [WORKFLOW_STAGE_ID_INTERNAL_REVIEW, WORKFLOW_STAGE_ID_EXTERNAL_REVIEW],
+                Application::get()->getApplicationStages()
+            )
+        );
     }
 }
