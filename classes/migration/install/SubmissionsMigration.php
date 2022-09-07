@@ -21,6 +21,8 @@ use PKP\submission\PKPSubmission;
 
 class SubmissionsMigration extends \PKP\migration\Migration
 {
+    protected int $defaultStageId = WORKFLOW_STAGE_ID_SUBMISSION;
+
     /**
      * Run the migrations.
      */
@@ -34,7 +36,7 @@ class SubmissionsMigration extends \PKP\migration\Migration
             $table->datetime('date_last_activity')->nullable();
             $table->datetime('date_submitted')->nullable();
             $table->datetime('last_modified')->nullable();
-            $table->bigInteger('stage_id')->default(WORKFLOW_STAGE_ID_SUBMISSION);
+            $table->bigInteger('stage_id')->default($this->defaultStageId);
             $table->string('locale', 14)->nullable();
 
             $table->smallInteger('status')->default(PKPSubmission::STATUS_QUEUED);

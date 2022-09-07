@@ -231,7 +231,7 @@ abstract class PKPSubmissionHandler extends Handler
     /**
      * Display the submission completed screen
      */
-    public function complete(array $args, Request $request, Submission $submission): void
+    protected function complete(array $args, Request $request, Submission $submission): void
     {
         $templateMgr = TemplateManager::getManager($request);
         $templateMgr->assign([
