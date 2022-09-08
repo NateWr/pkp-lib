@@ -15,7 +15,7 @@
 
 namespace PKP\mail\mailables;
 
-use APP\decision\Decision;
+use APP\author\Author;
 use APP\submission\Submission;
 use Illuminate\Support\Enumerable;
 use PKP\context\Context;
@@ -28,6 +28,7 @@ class SubmissionAcknowledgementOtherAuthors extends Mailable
 {
     use Recipient;
 
+    protected const AUTHORS_WITH_AFFILIATION = 'authorsWithAffiliation';
     protected const SUBMITTER_NAME = 'submitterName';
 
     protected static ?string $name = 'mailable.submissionAckOtherAuthors.name';
@@ -37,23 +38,18 @@ class SubmissionAcknowledgementOtherAuthors extends Mailable
     protected static array $groupIds = [self::GROUP_SUBMISSION];
     protected static array $toRoleIds = [Role::ROLE_ID_AUTHOR];
 
-    protected Decision $decision;
+    protected Submission $submission;
     protected Enumerable $submitterUsers;
 
 
     public function __construct(Context $context, Submission $submission, Enumerable $submitterUsers)
     {
         parent::__construct([$context, $submission]);
+        $this->submission = $submission;
         $this->submitterUsers = $submitterUsers;
-        $this->addSubmitterName();
-    }
-
-    public function addSubmitterName(): void
-    {
         $this->addData([
-            self::SUBMITTER_NAME => $this->submitterUsers
-                ->map(fn (User $user) => $user->getFullName())
-                ->join(__('common.commaListSeparator')),
+            self::AUTHORS_WITH_AFFILIATION => $this->getAuthorsWithAffiliaton(),
+            self::SUBMITTER_NAME => $this->getSubmitterName(),
         ]);
     }
 
@@ -62,8 +58,29 @@ class SubmissionAcknowledgementOtherAuthors extends Mailable
         return array_merge([
             parent::getDataDescriptions(),
             [
+                self::AUTHORS_WITH_AFFILIATION => __('emailTemplate.variable.authorsWithAffiliation'),
                 self::SUBMITTER_NAME => __('emailTemplate.variable.submitterName'),
             ]
         ]);
+    }
+
+    protected function getSubmitterName(): string
+    {
+        return $this->submitterUsers
+            ->map(fn (User $user) => $user->getFullName())
+            ->join(__('common.commaListSeparator'));
+    }
+
+    protected function getAuthorsWithAffiliaton(): string
+    {
+        $authors = $this->submission->getCurrentPublication()->getData('authors');
+
+        if ($authors->empty()) {
+            return '';
+        }
+
+        return $authors
+            ->map(fn (Author $author) => join(__('common.commaListSeparator'), [$author->getFullName(), $author->getLocalizedAffiliation()]))
+            ->join('<br>');
     }
 }

@@ -1062,6 +1062,10 @@ class PKPSubmissionHandler extends APIHandler
             return $response->withStatus(403)->withJsonError('api.publication.403.alreadyPublished');
         }
 
+        if (!Repo::publication()->canUserPublish($submission->getId(), $request->getUser())) {
+            return $response->withStatus(403)->withJsonError('author.submit.authorsCanNotPublish');
+        }
+
         $submissionContext = $request->getContext();
         if (!$submissionContext || $submissionContext->getId() !== $submission->getData('contextId')) {
             $submissionContext = Services::get('context')->get($submission->getData('contextId'));

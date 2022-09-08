@@ -21,9 +21,11 @@ namespace PKP\observers\listeners;
 use APP\author\Author;
 use APP\facades\Repo;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Enumerable;
 use Illuminate\Support\Facades\Mail;
 use PKP\db\DAORegistry;
 use PKP\log\SubmissionEmailLogEntry;
+use PKP\mail\Mailable;
 use PKP\mail\mailables\SubmissionAcknowledgement;
 use PKP\mail\mailables\SubmissionAcknowledgementOtherAuthors;
 use PKP\observers\events\SubmissionSubmitted;
@@ -31,15 +33,9 @@ use PKP\security\Role;
 use PKP\stageAssignment\StageAssignmentDAO;
 use PKP\user\User;
 
-class SendSubmissionAcknowledgement
+abstract class SendSubmissionAcknowledgement
 {
-    public function subscribe(Dispatcher $events): void
-    {
-        $events->listen(
-            SubmissionSubmitted::class,
-            SendSubmissionAcknowledgement::class
-        );
-    }
+    abstract public function subscribe(Dispatcher $events): void;
 
     public function handle(SubmissionSubmitted $event)
     {
@@ -60,17 +56,7 @@ class SendSubmissionAcknowledgement
             : collect();
 
         if ($submitterUsers->count()) {
-            $emailTemplate = Repo::emailTemplate()->getByKey(
-                $event->context->getId(),
-                SubmissionAcknowledgement::getEmailTemplateKey()
-            );
-
-            $mailable = new SubmissionAcknowledgement($event->context, $event->submission);
-            $mailable
-                ->from($event->context->getData('contactEmail'), $event->context->getData('contactName'))
-                ->recipients($submitterUsers->toArray())
-                ->subject($emailTemplate->getLocalizedData('subject'))
-                ->body($emailTemplate->getLocalizedData('body'));
+            $mailable = $this->getSubmitterMailable($event, $submitterUsers);
 
             if ($event->context->getData('copySubmissionAckPrimaryContact')) {
                 $mailable->bcc($event->context->getData('contactEmail'), $event->context->getData('contactName'));
@@ -122,5 +108,19 @@ class SendSubmissionAcknowledgement
                 $event->submission
             );
         }
+    }
+
+    protected function getSubmitterMailable(SubmissionSubmitted $event, Enumerable $submitterUsers): Mailable
+    {
+        $emailTemplate = Repo::emailTemplate()->getByKey(
+            $event->context->getId(),
+            SubmissionAcknowledgement::getEmailTemplateKey()
+        );
+
+        return (new SubmissionAcknowledgement($event->context, $event->submission))
+            ->from($event->context->getData('contactEmail'), $event->context->getData('contactName'))
+            ->recipients($submitterUsers->toArray())
+            ->subject($emailTemplate->getLocalizedData('subject'))
+            ->body($emailTemplate->getLocalizedData('body'));
     }
 }

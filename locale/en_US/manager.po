@@ -2712,6 +2712,9 @@ msgstr ""
 "All comments from completed reviews. Reviewer names are hidden for anonymous "
 "reviews"
 
+msgid "emailTemplate.variable.authorsWithAffiliation"
+msgstr "The names and affiliations of the submission's authors."
+
 msgid "emailTemplate.variable.context.mailingAddress"
 msgstr "The mailing address of the journal"
 
@@ -2826,6 +2829,9 @@ msgstr "The author's URL to the submission"
 
 msgid "emailTemplate.variable.submission.submissionUrl"
 msgstr "The URL to the submission in the editorial backend"
+
+msgid "emailTemplate.variable.submission.submissionPublishedUrl"
+msgstr "The URL to the published submission"
 
 msgid "emailTemplate.variable.submission.submissionWizardUrl"
 msgstr "The URL to the submission in the submission wizard"
@@ -3187,8 +3193,8 @@ msgstr "Submission Acknowledgement"
 
 msgid "mailable.submissionAck.description"
 msgstr ""
-"This email, when enabled, is automatically sent to an author when they "
-"submit to the journal. It provides information about tracking the submission "
+"This email is automatically sent to an author when they "
+"make a submission. It provides information about tracking the submission "
 "through the editorial process and thanks the author for the submission."
 
 msgid "mailable.submissionAckNotUser.name"
@@ -3196,7 +3202,7 @@ msgstr "Submission Confirmation"
 
 msgid "mailable.submissionAckNotUser.description"
 msgstr ""
-"This email, when enabled, is automatically sent to authors named on a "
+"This email is automatically sent to authors named on a "
 "submission who are not the submitting author."
 
 msgid "mailable.discussionSubmission.name"

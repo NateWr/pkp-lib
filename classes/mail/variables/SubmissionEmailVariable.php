@@ -23,7 +23,7 @@ use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
 use PKP\security\Role;
 
-class SubmissionEmailVariable extends Variable
+abstract class SubmissionEmailVariable extends Variable
 {
     public const AUTHOR_SUBMISSION_URL = 'authorSubmissionUrl';
     public const AUTHORS = 'authors';
@@ -180,4 +180,9 @@ class SubmissionEmailVariable extends Variable
         }
         return join(__('common.commaListSeparator'), $authorNames);
     }
+
+    /**
+     * URL to the published submission
+     */
+    abstract protected function getSubmissionPublishedUrl(): string;
 }

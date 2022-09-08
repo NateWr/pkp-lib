@@ -475,6 +475,7 @@ abstract class Repository
             $staleDoiIds = Repo::doi()->getDoisForSubmission($newPublication->getData('submissionId'));
             Repo::doi()->markStale($staleDoiIds);
         }
+
         Hook::call(
             'Publication::publish',
             [
@@ -483,7 +484,12 @@ abstract class Repository
                 $submission
             ]
         );
-        event(new PublishedEvent($newPublication, $publication, $submission));
+
+        $context = $submission->getData('contextId') === Application::get()->getRequest()->getContext()->getId()
+            ? Application::get()->getRequest()->getContext()
+            : Services::get('context')->get($submission->getData('contextId'));
+
+        event(new PublishedEvent($newPublication, $publication, $submission, $context));
     }
 
     /**
@@ -560,7 +566,11 @@ abstract class Repository
             ]
         );
 
-        event(new UnpublishedEvent($newPublication, $publication, $submission));
+        $context = $submission->getData('contextId') === Application::get()->getRequest()->getContext()->getId()
+            ? Application::get()->getRequest()->getContext()
+            : Services::get('context')->get($submission->getData('contextId'));
+
+        event(new UnpublishedEvent($newPublication, $publication, $submission, $context));
     }
 
     /** @copydoc DAO::delete() */
