@@ -2206,3 +2206,12 @@ msgstr "No files have been uploaded for this submission."
 
 msgid "author.submit.confirmation"
 msgstr "Confirmation"
+
+msgid "submission.wizard.submittingInLanguage"
+msgstr "Submitting in <strong>{$language}</strong>."
+
+msgid "submission.wizard.submittingToSection"
+msgstr "Submitting to the <strong>{$section}</strong> section."
+
+msgid "submission.wizard.submittingToSectionInLanguage"
+msgstr "Submitting to the <strong>{$section}</strong> section in <strong>{$language}</strong>."
