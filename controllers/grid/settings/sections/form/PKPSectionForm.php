@@ -92,7 +92,7 @@ class PKPSectionForm extends Form
         $this->_sectionId = $sectionId;
     }
 
-    public function getSection(): PKPSection
+    public function getSection(): ?PKPSection
     {
         return $this->section;
     }
