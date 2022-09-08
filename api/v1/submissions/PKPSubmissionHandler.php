@@ -1564,7 +1564,7 @@ class PKPSubmissionHandler extends APIHandler
 
         $defaultAuthorGroup = Repo::userGroup()
             ->getCollector()
-            ->filterByContextIds([$request->getUser()->getId()])
+            ->filterByContextIds([$request->getContext()->getId()])
             ->filterByRoleIds([Role::ROLE_ID_AUTHOR])
             ->filterByIsDefault(true)
             ->getMany()
