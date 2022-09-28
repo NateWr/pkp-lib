@@ -25,26 +25,22 @@ use PKP\services\PKPSchemaService;
 use PKP\submission\PKPSubmission;
 use PKP\submission\Representation;
 use PKP\submission\RepresentationDAOInterface;
+use PKP\submissionFile\DAO as SubmissionFileDAO;
 
 class DAO extends EntityDAO implements RepresentationDAOInterface
 {
-    /** @copydoc EntityDAO::$schema */
     public $schema = PKPSchemaService::SCHEMA_GALLEY;
-
-    /** @copydoc EntityDAO::$table */
     public $table = 'publication_galleys';
-
-    /** @copydoc EntityDAO::$settingsTable */
     public $settingsTable = 'publication_galley_settings';
-
-    /** @copydoc EntityDAO::$primarykeyColumn */
     public $primaryKeyColumn = 'galley_id';
+    public SubmissionFileDAO $submissionFileDao;
 
     /** @copydoc EntityDAO::$primaryTableColumns */
     public $primaryTableColumns = [
         'submissionFileId' => 'submission_file_id',
         'id' => 'galley_id',
         'isApproved' => 'is_approved',
+        'isRemote' => 'is_remote',
         'locale' => 'locale',
         'label' => 'label',
         'publicationId' => 'publication_id',
@@ -53,6 +49,13 @@ class DAO extends EntityDAO implements RepresentationDAOInterface
         'urlRemote' => 'remote_url',
         'doiId' => 'doi_id',
     ];
+
+
+    public function __construct(PKPSchemaService $schemaService)
+    {
+        $this->submissionFileDao = new SubmissionFileDAO($schemaService);
+        parent::__construct($schemaService);
+    }
 
     public function newDataObject(): Galley
     {

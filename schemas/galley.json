@@ -1,0 +1,110 @@
+{
+	"title": "Galley",
+	"description": "A galley representing a published file, such as a PDF or HTML file.",
+	"required": [
+		"label",
+		"publicationId"
+	],
+	"properties": {
+		"_href": {
+			"type": "string",
+			"format": "uri",
+			"readOnly": true,
+			"apiSummary": true
+		},
+		"doiId": {
+			"type": "integer",
+			"description": "Reference to the DOI for this galley",
+			"writeOnly": true,
+			"validation": [
+				"nullable"
+			]
+		},
+		"doiObject": {
+			"type": "object",
+			"description": "DOI object for this galley",
+			"apiSummary": true,
+			"readOnly": true,
+			"$ref": "#/definitions/Doi"
+		},
+		"file": {
+			"type": "string",
+			"format": "binary",
+			"writeOnly": true
+		},
+		"id": {
+			"type": "integer",
+			"apiSummary": true,
+			"readOnly": true
+		},
+		"isApproved": {
+			"type": "boolean",
+			"apiSummary": true
+		},
+		"isRemote": {
+			"type": "boolean",
+			"description": "When true, this galley will point to a remote URL instead of a file.",
+			"apiSummary": true
+		},
+		"label": {
+			"type": "string",
+			"description": "A human-readable label for this galley. For the primary preprint, it is usually indicates the format like PDF, ePub or full text. For supplementary files it often indicates the content, such as source data or interview transcripts.",
+			"apiSummary": true
+		},
+		"locale": {
+			"type": "string",
+			"description": "The primary locale of this galley.",
+			"apiSummary": true,
+			"validation": [
+				"regex:/^[a-z]{2}_[A-Z]{2}(@[a-z]{0,})?$/"
+			]
+		},
+		"pub-id::publisher-id": {
+			"type": "string",
+			"description": "A unique ID provided by the publisher. This is often used to record the ID of this galley in an external database, in cases where the publisher maintains separate records.",
+			"apiSummary": true
+		},
+		"publicationId": {
+			"type": "integer",
+			"apiSummary": true
+		},
+		"seq": {
+			"type": "integer",
+			"description": "In what order this galley should appear in lists of galleys for this publication.",
+			"apiSummary": true
+		},
+		"submissionFile": {
+			"apiSummary": true,
+			"readOnly": true,
+			"$ref": "#/definitions/SubmissionFile"
+		},
+		"submissionFileId": {
+			"type": "integer",
+			"apiSummary": true,
+			"writeOnly": true
+		},
+		"urlPath": {
+			"type": "string",
+			"description": "An optional path to use in the URL instead of the ID.",
+			"validation": [
+				"nullable",
+				"regex:/^[a-zA-Z0-9]+([\\.\\-_][a-zA-Z0-9]+)*$/"
+			]
+		},
+		"urlRemote": {
+			"type": "string",
+			"description": "An optional URL where the galley can be viewed or downloaded.",
+			"apiSummary": true,
+			"validation": [
+				"url",
+				"nullable"
+			]
+		},
+		"urlPublished": {
+			"type": "string",
+			"description": "The URL where this galley can be viewed or downloaded.",
+			"apiSummary": true,
+			"readOnly": true
+		}
+	}
+}

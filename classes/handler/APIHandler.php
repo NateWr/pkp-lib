@@ -476,6 +476,30 @@ class APIHandler extends PKPHandler
 
         return true;
     }
+
+    /**
+     * Helper method to get the appropriate response when an error
+     * has occurred during a file upload
+     *
+     * @param int $error One of the UPLOAD_ERR_ constants
+     */
+    protected function getUploadErrorResponse(APIResponse $response, int $error): APIResponse
+    {
+        switch ($error) {
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                return $response->withStatus(400)->withJsonError('api.files.400.fileSize', ['maxSize' => Application::getReadableMaxFileSize()]);
+            case UPLOAD_ERR_PARTIAL:
+                return $response->withStatus(400)->withJsonError('api.files.400.uploadFailed');
+            case UPLOAD_ERR_NO_FILE:
+                return $response->withStatus(400)->withJsonError('api.files.400.noUpload');
+            case UPLOAD_ERR_NO_TMP_DIR:
+            case UPLOAD_ERR_CANT_WRITE:
+            case UPLOAD_ERR_EXTENSION:
+                return $response->withStatus(400)->withJsonError('api.files.400.config');
+        }
+        return $response->withStatus(400)->withJsonError('api.files.400.uploadFailed');
+    }
 }
 
 if (!PKP_STRICT_MODE) {

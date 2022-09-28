@@ -276,6 +276,9 @@ msgstr "Country"
 msgid "common.create"
 msgstr "Create"
 
+msgid "common.csv"
+msgstr "CSV"
+
 msgid "common.dateCompleted"
 msgstr "Date completed"
 
@@ -381,6 +384,12 @@ msgstr "Enable"
 msgid "common.enabled"
 msgstr "Enabled"
 
+msgid "common.ePub"
+msgstr "ePub"
+
+msgid "common.excel"
+msgstr "Excel"
+
 msgid "common.error.databaseError"
 msgstr "A database error has occurred: {$error}"
 
@@ -458,6 +467,9 @@ msgstr "Homepage Header Logo"
 
 msgid "common.hour"
 msgstr "Hour"
+
+msgid "common.html"
+msgstr "HTML"
 
 msgid "common.id"
 msgstr "ID"
@@ -653,6 +665,9 @@ msgstr "Previous page"
 
 msgid "common.pageNumber"
 msgstr "Page {$pageNumber}"
+
+msgid "common.pdf"
+msgstr "PDF"
 
 msgid "common.percentage"
 msgstr "{$percentage}%"
@@ -923,6 +938,9 @@ msgstr "View Profile"
 
 msgid "common.weeks"
 msgstr "weeks"
+
+msgid "common.wordDocument"
+msgstr "Word"
 
 msgid "common.width"
 msgstr "Width"
@@ -1795,6 +1813,9 @@ msgstr "Email address"
 
 msgid "user.authorization.submissionFile"
 msgstr "The current user is not authorized to access the specified submission file."
+
+msgid "user.authorization.invalidGalley"
+msgstr "Invalid galley."
 
 msgid "user.authorization.invalidPublication"
 msgstr "Invalid publication."

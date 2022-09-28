@@ -768,6 +768,15 @@ msgstr "Remote URL"
 msgid "submission.layout.galleyRemoteURLValid"
 msgstr "Please provide a valid remote URL (include http://)."
 
+msgid "galley.fileNotFound"
+msgstr "This file could not be found."
+
+msgid "galley.fileNotValid"
+msgstr "This file can not be assigned to this galley."
+
+msgid "galley.notRemote.fileRequired"
+msgstr "Please upload a file to create a local galley."
+
 msgid "submission.layout.galleyNoImages"
 msgstr "No images"
 

@@ -22,20 +22,24 @@ use PKP\context\Context;
 use PKP\core\PKPApplication;
 use PKP\galley\Galley;
 use PKP\services\PKPSchemaService;
+use PKP\submissionFile\SubmissionFile;
 
 class Schema extends \PKP\core\maps\Schema
 {
     public Enumerable $collection;
-    public array $genres = [];
+    public array $genres ;
     public Publication $publication;
     public string $schema = PKPSchemaService::SCHEMA_GALLEY;
     public Submission $submission;
+    public Enumerable $submissionFiles;
 
-    public function __construct(Submission $submission, Publication  $publication, Request $request, Context $context, PKPSchemaService $schemaService)
+    public function __construct(Submission $submission, Publication  $publication, Enumerable $submissionFiles, array $genres, Request $request, Context $context, PKPSchemaService $schemaService)
     {
         parent::__construct($request, $context, $schemaService);
+        $this->genres = $genres;
         $this->publication = $publication;
         $this->submission = $submission;
+        $this->submissionFiles = $submissionFiles;
     }
     /**
      * Map a galley
@@ -65,9 +69,7 @@ class Schema extends \PKP\core\maps\Schema
     public function mapMany(Enumerable $collection): Enumerable
     {
         $this->collection = $collection;
-        return $collection->map(function ($item) {
-            return $this->map($item);
-        });
+        return $collection->map(fn ($item) => $this->map($item));
     }
 
     /**
@@ -78,9 +80,7 @@ class Schema extends \PKP\core\maps\Schema
     public function summarizeMany(Enumerable $collection): Enumerable
     {
         $this->collection = $collection;
-        return $collection->map(function ($item) {
-            return $this->summarize($item);
-        });
+        return $collection->map(fn ($item) => $this->summarize($item));
     }
 
     /**
@@ -91,6 +91,12 @@ class Schema extends \PKP\core\maps\Schema
         $output = [];
         foreach ($props as $prop) {
             switch ($prop) {
+                case '_href':
+                    $output[$prop] = $this->getApiUrl(
+                        'submissions/' . $this->submission->getId() . '/publications/' . $this->publication->getId() . '/galleys/' . $galley->getId(),
+                        $this->context->getData('urlPath')
+                    );
+                    break;
                 case 'doiObject':
                     if ($galley->getData('doiObject')) {
                         $retVal = Repo::doi()->getSchemaMap()->summarize($galley->getData('doiObject'));
@@ -99,26 +105,19 @@ class Schema extends \PKP\core\maps\Schema
                     }
                     $output[$prop] = $retVal;
                     break;
-                case 'file':
+                case 'submissionFile':
                     $output[$prop] = null;
-                    if (is_a($galley, 'Galley')) {
-                        if (!$galley->getData('submissionFileId')) {
-                            break;
+                    if ($galley->getData('submissionFileId')) {
+                        /** @var SubmissionFile $submissionFile */
+                        $submissionFile = $this->submissionFiles->first(fn ($s) => $s->getId() === $galley->getData('submissionFileId'));
+                        if ($submissionFile) {
+                            $output[$prop] = Repo::submissionFile()
+                                ->getSchemaMap()
+                                ->map($submissionFile, $this->genres);
                         }
-
-                        $submissionFile = Repo::submissionFile()->get($galley->getData('submissionFileId'));
-
-                        if (empty($submissionFile)) {
-                            break;
-                        }
-
-                        $output[$prop] = Repo::submissionFile()
-                            ->getSchemaMap()
-                            ->map($submissionFile, $this->genres);
                     }
                     break;
                 case 'urlPublished':
-
                     $output['urlPublished'] = $this->request->getDispatcher()->url(
                         $this->request,
                         PKPApplication::ROUTE_PAGE,

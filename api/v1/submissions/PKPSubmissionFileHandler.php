@@ -19,6 +19,7 @@ namespace PKP\API\v1\submissions;
 use APP\core\Application;
 use APP\core\Services;
 use APP\facades\Repo;
+use PKP\core\APIResponse;
 use PKP\db\DAORegistry;
 use PKP\file\FileManager;
 use PKP\handler\APIHandler;
@@ -31,6 +32,7 @@ use PKP\services\PKPSchemaService;
 use PKP\submission\GenreDAO;
 use PKP\submission\reviewRound\ReviewRoundDAO;
 use PKP\submissionFile\SubmissionFile;
+use Slim\Http\Request as SlimRequest;
 
 class PKPSubmissionFileHandler extends APIHandler
 {
@@ -251,17 +253,11 @@ class PKPSubmissionFileHandler extends APIHandler
 
     /**
      * Add a new submission file
-     *
-     * @param \Slim\Http\Request $slimRequest
-     * @param APIResponse $response
-     * @param array $args arguments
-     *
-     * @return Response
      */
-    public function add($slimRequest, $response, $args)
+    public function add(SlimRequest $slimRequest, APIResponse $response, array $args): APIResponse
     {
         $request = $this->getRequest();
-        $submission = $this->getAuthorizedContextObject(ASSOC_TYPE_SUBMISSION);
+        $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
 
         if (empty($_FILES)) {
             return $response->withStatus(400)->withJsonError('api.files.400.noUpload');
@@ -297,9 +293,9 @@ class PKPSubmissionFileHandler extends APIHandler
             $params['name'][$primaryLocale] = $_FILES['file']['name'];
         }
 
-        // If no genre has been set and there is only one genre possible, set it automatically
+        // If no genre has been set and there is only one primary genre possible, set it automatically
         if (empty($params['genreId'])) {
-            $genres = DAORegistry::getDAO('GenreDAO')->getEnabledByContextId($request->getContext()->getId());
+            $genres = DAORegistry::getDAO('GenreDAO')->getPrimaryByContextId($request->getContext()->getId());
             [$firstGenre, $secondGenre] = [$genres->next(), $genres->next()];
             if ($firstGenre && !$secondGenre) {
                 $params['genreId'] = $firstGenre->getId();
@@ -552,32 +548,5 @@ class PKPSubmissionFileHandler extends APIHandler
         /** @var GenreDAO $genreDao */
         $genreDao = DAORegistry::getDAO('GenreDAO');
         return $genreDao->getByContextId($this->getRequest()->getContext()->getId())->toArray();
-    }
-
-    /**
-     * Helper method to get the appropriate response when an error
-     * has occurred during a file upload
-     *
-     * @param APIResponse $response
-     * @param int $error One of the UPLOAD_ERR_ constants
-     *
-     * @return APIResponse
-     */
-    private function getUploadErrorResponse($response, $error)
-    {
-        switch ($error) {
-            case UPLOAD_ERR_INI_SIZE:
-            case UPLOAD_ERR_FORM_SIZE:
-                return $response->withStatus(400)->withJsonError('api.files.400.fileSize', ['maxSize' => Application::getReadableMaxFileSize()]);
-            case UPLOAD_ERR_PARTIAL:
-                return $response->withStatus(400)->withJsonError('api.files.400.uploadFailed');
-            case UPLOAD_ERR_NO_FILE:
-                return $response->withStatus(400)->withJsonError('api.files.400.noUpload');
-            case UPLOAD_ERR_NO_TMP_DIR:
-            case UPLOAD_ERR_CANT_WRITE:
-            case UPLOAD_ERR_EXTENSION:
-                return $response->withStatus(400)->withJsonError('api.files.400.config');
-        }
-        return $response->withStatus(400)->withJsonError('api.files.400.uploadFailed');
     }
 }

@@ -13,11 +13,15 @@
 
 namespace PKP\galley;
 
+use APP\core\Application;
 use APP\core\Request;
 use APP\facades\Repo;
 use APP\publication\Publication;
 use APP\submission\Submission;
+use Illuminate\Support\Enumerable;
 use Illuminate\Support\Facades\App;
+use PKP\file\FileManager;
+use PKP\file\TemporaryFileManager;
 use PKP\plugins\Hook;
 use PKP\services\PKPSchemaService;
 use PKP\validation\ValidatorFactory;
@@ -74,14 +78,20 @@ class Repository
     /**
      * Get an instance of the map class for mapping
      * galleys to their schema
+     *
+     * @param Enumerable $submissionFiles All submission files might be assigned
+     *   to the galleys that will be mapped.
+     * @param array $genres All file genres in this context
      */
-    public function getSchemaMap(Submission $submission, Publication $publication): maps\Schema
+    public function getSchemaMap(Submission $submission, Publication $publication, Enumerable $submissionFiles, array $genres): maps\Schema
     {
         return app('maps')->withExtensions(
             $this->schemaMap,
             [
                 'submission' => $submission,
-                'publication' => $publication
+                'publication' => $publication,
+                'submissionFiles' => $submissionFiles,
+                'genres' => $genres,
             ]
         );
     }
@@ -135,6 +145,38 @@ class Repository
             }
         });
 
+        $isRemote = $props['isRemote'] ?? ($object ? $object->getData('isRemote') : null);
+
+        // Remote galleys must have a url
+        if ($isRemote) {
+            $validator->after(function ($validator) use ($props, $object) {
+                $urlRemote = $props['urlRemote'] ?? ($object ? $object->getData('urlRemote') : null);
+                if (!$urlRemote) {
+                    $validator->errors()->add('urlRemote', __('validator.required'));
+                }
+            });
+
+        // Local galleys must have a file
+        } else {
+            $validator->after(function ($validator) use ($props, $object) {
+                if (isset($props['temporaryFileId']) && !$validator->errors()->get('temporaryFileId')) {
+                    $currentUser = Application::get()->getRequest()->getUser();
+                    $temporaryFileManager = new TemporaryFileManager();
+                    if (!$temporaryFileManager->getFile($props['temporaryFileId'], $currentUser->getId())) {
+                        $validator->errors()->add('temporaryFileId', __('common.noTemporaryFile'));
+                    }
+                } elseif (isset($props['submissionFileId']) && !$validator->errors()->get('submissionFileId')) {
+                    $submissionFile = Repo::submissionFile()->get($props['submissionFileId']);
+                    if (!$submissionFile) {
+                        $validator->errors()->add('submissionFileId', __('galley.fileNotFound'));
+                    } elseif ($submissionFile->getData('assocType') !== Application::ASSOC_TYPE_GALLEY || $submissionFile->getData('assocId') !== $object->getId()) {
+                        $validator->errors()->add('submissionFileId', __('galley.fileNotValid'));
+                    }
+                } elseif ($object && !$object->getData('submissionFileId')) {
+                    $validator->errors()->add('isRemote', __('galley.notRemote.fileRequired'));
+                }
+            });
+        }
 
         if ($validator->fails()) {
             $errors = $this->schemaService->formatValidationErrors($validator->errors(), $this->schemaService->get($this->dao->schema), $allowedLocales);
@@ -174,8 +216,7 @@ class Repository
         // Delete related submission files
         $submissionFiles = Repo::submissionFile()
             ->getCollector()
-            ->filterByAssoc(ASSOC_TYPE_GALLEY)
-            ->filterByFileIds([$galley->getId()])
+            ->filterByAssoc(Application::ASSOC_TYPE_GALLEY, [$galley->getId()])
             ->getMany();
 
         foreach ($submissionFiles as $submissionFile) {
@@ -183,5 +224,40 @@ class Repository
         }
 
         Hook::call('Galley::delete', [$galley]);
+    }
+
+    /**
+     * Get a default galley name based on the name of
+     * the uploaded file
+     *
+     * Tries to get a recognizable name from the file extension,
+     * like PDF (.pdf), Word (.doc*), ePub (.epub), HTML (.html).
+     *
+     * Falls back on the file name itself.
+     */
+    public function getLabelFromFile(string $filename): string
+    {
+        $fileManager = new FileManager();
+        $extension = strtolower($fileManager->parseFileExtension($filename));
+
+        if ($extension === 'pdf') {
+            $label = __('common.pdf');
+        } elseif (preg_match(' /html.*/', $extension)) {
+            $label = __('common.html');
+        } elseif (preg_match(' /doc.*/', $extension)) {
+            $label = __('common.wordDocument');
+        } elseif ($extension === 'ePub') {
+            $label = __('common.ePub');
+        } elseif (preg_match(' /xls.*/', $extension)) {
+            $label = __('common.excel');
+        } elseif ($extension === 'csv') {
+            $label = __('common.csv');
+        } else {
+            $label = $filename;
+        }
+
+        Hook::call('Galley::LabelFromFile', [&$label, $filename]);
+
+        return $label;
     }
 }
