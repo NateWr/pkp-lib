@@ -52,13 +52,7 @@ fi
 # Make the files directory (this will be files_dir in config.inc.php after installation).
 mkdir --parents ${FILESDIR}
 
-# Cypress requires a CYPRESS_ prefix on environment variables
-export CYPRESS_baseUrl=${BASEURL}
-export CYPRESS_DBTYPE=${DBTYPE}
-export CYPRESS_DBUSERNAME=${DBUSERNAME}
-export CYPRESS_DBNAME=${DBNAME}
-export CYPRESS_DBPASSWORD=${DBPASSWORD}
-export CYPRESS_DBHOST=${DBHOST}
-export CYPRESS_FILESDIR=${FILESDIR}
+# Make the required environment variables available to Cypress
+cp cypress.travis.env.conf cypress.env.conf
 
 set +e
