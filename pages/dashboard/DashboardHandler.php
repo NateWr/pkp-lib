@@ -18,12 +18,14 @@ namespace PKP\pages\dashboard;
 use APP\core\Application;
 use APP\facades\Repo;
 use APP\handler\Handler;
+use APP\submission\Submission;
 use APP\template\TemplateManager;
 use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
 use PKP\security\authorization\PKPSiteAccessPolicy;
 use PKP\security\Role;
 use PKP\submission\PKPSubmission;
+use PKP\template\InertiaPKP;
 
 define('SUBMISSIONS_LIST_ACTIVE', 'active');
 define('SUBMISSIONS_LIST_ARCHIVE', 'archive');
@@ -44,7 +46,7 @@ class DashboardHandler extends Handler
 
         $this->addRoleAssignment(
             [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_AUTHOR, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_ASSISTANT],
-            ['index', 'tasks', 'myQueue', 'unassigned', 'active', 'archives']
+            ['index', 'tasks', 'myQueue', 'unassigned', 'active', 'archives', 'inertia']
         );
     }
 
@@ -55,6 +57,38 @@ class DashboardHandler extends Handler
     {
         $this->addPolicy(new PKPSiteAccessPolicy($request, null, $roleAssignments));
         return parent::authorize($request, $args, $roleAssignments);
+    }
+
+    public function inertia($args, $request)
+    {
+        $context = $request->getContext();
+        $templateMgr = TemplateManager::getManager($request);
+        $this->setupTemplate($request);
+
+        $submissions = Repo::submission()
+            ->getCollector()
+            ->filterByContextIds([$context->getId()])
+            ->filterByStatus([Submission::STATUS_QUEUED])
+            ->limit(10)
+            ->getMany()
+            ->values();
+
+        $userGroups = Repo::userGroup()
+            ->getCollector()
+            ->filterByContextIds([$context->getId()])
+            ->getMany();
+
+        /** @var GenreDAO $genreDao */
+        $genreDao = DAORegistry::getDAO('GenreDAO');
+        $genres = $genreDao->getByContextId($context->getId())->toArray();
+
+        $templateMgr->assign([
+            'example' => 'test',
+            'submissions' => Repo::submission()->getSchemaMap()->mapMany($submissions, $userGroups, $genres),
+            'user' => Repo::user()->getSchemaMap()->map($request->getUser()),
+        ]);
+
+        return InertiaPKP::render('ExamplePage');
     }
 
     /**

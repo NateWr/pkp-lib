@@ -18,6 +18,7 @@
 
 switch ($op) {
     case 'index':
+    case 'inertia':
     case 'tasks':
         define('HANDLER_CLASS', 'PKP\pages\dashboard\DashboardHandler');
         break;
