@@ -1883,7 +1883,7 @@ class PKPTemplateManager extends Smarty
 
     /**
      * Smarty modifier: json_encode_html_attribute
-     * 
+     *
      * Encodes a value to JSON with full HTML-attribute safety.
      * Escapes ", ', <, >, & as \u0022, \u0027, \u003C, \u003E, \u0026
      * so the output can be safely placed inside any HTML attribute
@@ -2631,6 +2631,7 @@ class PKPTemplateManager extends Smarty
             'id' => $params['id'],
             'ulClass' => $params['ulClass'] ?? '',
             'liClass' => $params['liClass'] ?? '',
+            'items' => $navigationMenu?->menuTree ?? [],
         ]);
 
         return $this->fetch($menuTemplatePath);
