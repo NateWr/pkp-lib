@@ -1,0 +1,48 @@
+{{--
+
+Root Layout
+
+This is the default layout provided for Blade themes to
+use in all of their layouts.
+
+--}}
+
+@props([
+    'title',
+    'description',
+])
+
+<!doctype html>
+<html lang="{{ str_replace('_', '-', $currentLocale) }}" xml:lang="{{ str_replace('_', '-', $currentLocale) }}">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ $pageTitle }}</title>
+    @if ($description)
+        <meta name="description" content="{{ strip_tags($description) }}">
+    @endif
+    @loadHeader(['context' => 'frontend'])
+    @loadStylesheet(['context' => 'frontend'])
+    @if ($head && !$head->isEmpty())
+        {{ $head }}
+    @endif
+</head>
+
+<body
+    {{
+        $attributes->merge([
+            'class' => join(' ', [
+                $bodyClasses,
+            ]),
+            'dir' => $currentLocaleLangDir ?? 'ltr',
+        ])
+    }}
+>
+
+    {{ $slot }}
+
+    @loadScript(['context' => 'frontend'])
+</body>
+
+</html>

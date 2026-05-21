@@ -13,7 +13,7 @@ use PKP\facades\Locale;
 use PKP\i18n\LocaleMetadata;
 use PKP\plugins\ThemePlugin;
 
-abstract class Layout extends Component
+abstract class PKPLayout extends Component
 {
     public Request $request;
     public ThemePlugin $theme;
@@ -22,8 +22,6 @@ abstract class Layout extends Component
     public function __construct(
         public string $title,
         public string $description = '',
-        public string $bodyClass = '',
-        public string $head = '',
     ) {
         $this->request = Application::get()->getRequest();
         $this->templateMgr = TemplateManager::getManager($this->request);
@@ -49,6 +47,7 @@ abstract class Layout extends Component
     {
         view()->share('contextName', $this->contextName());
         view()->share('locales', $this->getLocales());
+        view()->share('pageTitle', $this->getPageTitle());
 
         if ($this->isPublicationPage()) {
             view()->share('metadata', [$this, 'getMetadataBlocks']);
@@ -71,7 +70,7 @@ abstract class Layout extends Component
      * Get the <title> by combining the current page title
      * with the context or site name.
      */
-    public function pageTitle() : string
+    public function getPageTitle() : string
     {
         $page = $this->request->getRequestedPage();
 
