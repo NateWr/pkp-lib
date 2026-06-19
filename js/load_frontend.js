@@ -57,6 +57,7 @@ import PkpTabRoot from '@/frontend/components/PkpTab/PkpTabRoot.vue';
 import PkpTabList from '@/frontend/components/PkpTab/PkpTabList.vue';
 import PkpTabTrigger from '@/frontend/components/PkpTab/PkpTabTrigger.vue';
 import PkpTabContent from '@/frontend/components/PkpTab/PkpTabContent.vue';
+import PkpTabMenu from '@/frontend/components/PkpTab/PkpTabMenu.vue';
 
 // PkpAccordion Components
 import PkpAccordionRoot from '@/frontend/components/PkpAccordion/PkpAccordionRoot.vue';
@@ -77,6 +78,31 @@ import PkpScrollToCommentsAllComments from '@/frontend/components/PkpComments/Pk
 import PkpScrollToCommentsLogInto from '@/frontend/components/PkpComments/PkpScrollToCommentsLogInto.vue';
 import PkpCommentReportDialogAuthor from '@/frontend/components/PkpComments/PkpCommentReportDialogAuthor.vue';
 import PkpCommentReportDialogReasonInput from '@/frontend/components/PkpComments/PkpCommentReportDialogReasonInput.vue';
+
+// Reka Popover
+import {
+	PopoverAnchor,
+	PopoverArrow,
+	PopoverClose,
+	PopoverContent,
+	PopoverPortal,
+	PopoverRoot,
+	PopoverTrigger,
+	NavigationMenuContent,
+	NavigationMenuIndicator,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	NavigationMenuRoot,
+	NavigationMenuSub,
+	NavigationMenuTrigger,
+	NavigationMenuViewport,
+	TabsContent,
+	TabsIndicator,
+	TabsList,
+	TabsRoot,
+	TabsTrigger,
+} from 'reka-ui'
 
 // Helper for initializing and tracking Vue controllers
 import VueRegistry from './classes/VueRegistry.js';
@@ -112,6 +138,7 @@ VueRegistry.registerComponent('PkpTabRoot', PkpTabRoot);
 VueRegistry.registerComponent('PkpTabList', PkpTabList);
 VueRegistry.registerComponent('PkpTabTrigger', PkpTabTrigger);
 VueRegistry.registerComponent('PkpTabContent', PkpTabContent);
+VueRegistry.registerComponent('PkpTabMenu', PkpTabMenu);
 
 // Register PkpAccordion Components
 VueRegistry.registerComponent('PkpAccordionRoot', PkpAccordionRoot);
@@ -153,6 +180,29 @@ VueRegistry.registerComponent(
 	PkpCommentReportDialogReasonInput,
 );
 VueRegistry.registerComponent('PkpCommentsShowMore', PkpCommentsShowMore);
+
+// Register Reka UI components
+VueRegistry.registerComponent('PopoverAnchor', PopoverAnchor);
+VueRegistry.registerComponent('PopoverArrow', PopoverArrow);
+VueRegistry.registerComponent('PopoverClose', PopoverClose);
+VueRegistry.registerComponent('PopoverContent', PopoverContent);
+VueRegistry.registerComponent('PopoverPortal', PopoverPortal);
+VueRegistry.registerComponent('PopoverRoot', PopoverRoot);
+VueRegistry.registerComponent('PopoverTrigger', PopoverTrigger);
+VueRegistry.registerComponent('NavigationMenuContent', NavigationMenuContent);
+VueRegistry.registerComponent('NavigationMenuIndicator', NavigationMenuIndicator);
+VueRegistry.registerComponent('NavigationMenuItem', NavigationMenuItem);
+VueRegistry.registerComponent('NavigationMenuLink', NavigationMenuLink);
+VueRegistry.registerComponent('NavigationMenuList', NavigationMenuList);
+VueRegistry.registerComponent('NavigationMenuRoot', NavigationMenuRoot);
+VueRegistry.registerComponent('NavigationMenuSub', NavigationMenuSub);
+VueRegistry.registerComponent('NavigationMenuTrigger', NavigationMenuTrigger);
+VueRegistry.registerComponent('NavigationMenuViewport', NavigationMenuViewport);
+VueRegistry.registerComponent('TabsContent', TabsContent);
+VueRegistry.registerComponent('TabsIndicator', TabsIndicator);
+VueRegistry.registerComponent('TabsList', TabsList);
+VueRegistry.registerComponent('TabsRoot', TabsRoot);
+VueRegistry.registerComponent('TabsTrigger', TabsTrigger);
 
 const pinia = createPinia();
 

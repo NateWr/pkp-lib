@@ -28,6 +28,20 @@ class ViewHelper
         return PKPTemplateManager::getManager()->smartyUrl($parameters);
     }
 
+    public static function urlArray(array $parameters): string
+    {
+        $page = $parameters[0] ?? '';
+        $op = $parameters[1] ?? '';
+        $path = $parameters[2] ?? '';
+        $anchor = $parameters[3] ?? '';
+        return PKPTemplateManager::getManager()->smartyUrl([
+            'page' => $page,
+            'op' => $op,
+            'path' => $path,
+            'anchor' => $anchor,
+        ]);
+    }
+
     /**
      * Format a date with locale-aware formatting
      * Delegates to PKPTemplateManager::smartyDateFormat() for consistency
@@ -48,9 +62,18 @@ class ViewHelper
      * @param string $configKey The configuration key for allowed HTML tags
      * @return string The sanitized HTML
      */
-    public static function sanitizeHtml(string $input, string $configKey = 'allowed_html'): string
+    public static function sanitizeHtml(?string $input, string $configKey = 'allowed_html'): string
     {
         $result = PKPString::stripUnsafeHtml($input, $configKey);
+        return self::escapeVueDelimiters($result);
+    }
+
+    /**
+     * Convert HTML to plain text
+     */
+    public static function html2Text(?string $html): string
+    {
+        $result = PKPString::html2text($html);
         return self::escapeVueDelimiters($result);
     }
 

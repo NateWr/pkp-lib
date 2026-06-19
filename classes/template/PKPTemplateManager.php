@@ -30,6 +30,8 @@ use APP\file\PublicFileManager;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
+use APP\view\HomepageBlocksRegistry;
+use APP\view\MetadataBlocksRegistry;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -140,6 +142,12 @@ class PKPTemplateManager extends Smarty
     /** @var bool Track whether vue runtime is included */
     private bool $isVueRuntimeIncluded = false;
 
+    /** @var MetadataBlocksRegistry Register and load metadata blocks for the reader facing UI */
+    public MetadataBlocksRegistry $metadataBlocks;
+
+    /** @var HomepageBlocksRegistry Register and load metadata blocks for the reader facing UI */
+    public HomepageBlocksRegistry $homepageBlocks;
+
     /**
      * Constructor.
      * Initialize template engine and assign basic template variables.
@@ -174,6 +182,9 @@ class PKPTemplateManager extends Smarty
         // This routes {include} directives through Laravel's FileViewFinder
         // for unified template resolution and hook firing
         $this->template_class = \PKP\core\blade\SmartyTemplate::class;
+
+        $this->metadataBlocks = new MetadataBlocksRegistry();
+        $this->homepageBlocks = new HomepageBlocksRegistry();
     }
 
     /**
@@ -257,17 +268,7 @@ class PKPTemplateManager extends Smarty
                 ['contexts' => ['frontend', 'backend']]
             );
 
-            $activeTheme = null;
-            $contextOrSite = $currentContext ? $currentContext : $request->getSite();
-            $allThemes = PluginRegistry::getPlugins('themes');
-            foreach ($allThemes as $theme) { /** @var \PKP\plugins\Plugin|\PKP\plugins\ThemePlugin $theme */
-                if ($contextOrSite->getData('themePluginPath') === $theme->getDirName()) {
-                    $activeTheme = $theme;
-                    break;
-                }
-            }
-
-            $this->assign(['activeTheme' => $activeTheme]);
+            $this->assign(['activeTheme' => $this->getActiveTheme($request, $currentContext)]);
         }
 
         if ($router instanceof \PKP\core\PKPPageRouter) {
@@ -1884,7 +1885,7 @@ class PKPTemplateManager extends Smarty
 
     /**
      * Smarty modifier: json_encode_html_attribute
-     * 
+     *
      * Encodes a value to JSON with full HTML-attribute safety.
      * Escapes ", ', <, >, & as \u0022, \u0027, \u003C, \u003E, \u0026
      * so the output can be safely placed inside any HTML attribute
@@ -2632,6 +2633,7 @@ class PKPTemplateManager extends Smarty
             'id' => $params['id'],
             'ulClass' => $params['ulClass'] ?? '',
             'liClass' => $params['liClass'] ?? '',
+            'items' => $navigationMenu?->menuTree ?? [],
         ]);
 
         return $this->fetch($menuTemplatePath);
@@ -2880,5 +2882,23 @@ class PKPTemplateManager extends Smarty
     public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    /**
+     * Get the active theme for a context or site
+     */
+    public function getActiveTheme(Request $request, ?Context $context = null): ?ThemePlugin
+    {
+        $activeTheme = null;
+        $contextOrSite = $context ? $context : $request->getSite();
+        $allThemes = PluginRegistry::getPlugins('themes');
+        foreach ($allThemes as $theme) { /** @var \PKP\plugins\Plugin|\PKP\plugins\ThemePlugin $theme */
+            if ($contextOrSite->getData('themePluginPath') === $theme->getDirName()) {
+                $activeTheme = $theme;
+                break;
+            }
+        }
+
+        return $activeTheme;
     }
 }
