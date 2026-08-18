@@ -240,6 +240,12 @@ msgstr "In progress since {$date}"
 msgid "openReview.statusCompleted"
 msgstr "Completed on {$date}."
 
+msgid "openReview.peerReviewNotComplete"
+msgstr "Peer review has not been completed yet."
+
+msgid "openReview.peerReviewViewFull"
+msgstr "View the full <a href='{$url}'>peer review record</a>."
+
 msgid "openReview.roundStatusCompleted"
 msgstr "Completed"
 

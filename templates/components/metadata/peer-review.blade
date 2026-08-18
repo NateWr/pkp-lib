@@ -69,11 +69,11 @@
             @if ($openReviewConfig['submissionPeerReviewSummary']['reviewStatus']['status'] === 'complete')
                 {{ __('openReview.statusCompleted', ['date' => ViewHelper::dateFormat($openReviewConfig['reviewStatus']['dateCompleted'], $dateFormatLong)]) }}
             @else
-                {{ __('plugins.themes.eidos.peerReviewNotComplete') }}
+                {{ __('openReview.peerReviewNotComplete') }}
             @endif
             @php
                 $link = ViewHelper::sanitizeHtml(
-                    __('plugins.themes.eidos.peerReviewViewFull', ['url' => '?section=peer-review'])
+                    __('openReview.peerReviewViewFull', ['url' => '?section=peer-review'])
                 );
                 $link = str_replace('href', 'data-tab-group="section" data-tab="peer-review" href', $link);
             @endphp
