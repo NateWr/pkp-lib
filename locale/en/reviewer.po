@@ -238,7 +238,7 @@ msgid "openReview.statusInProgress"
 msgstr "In progress since {$date}"
 
 msgid "openReview.statusCompleted"
-msgstr "Completed on {$date}"
+msgstr "Completed on {$date}."
 
 msgid "openReview.roundStatusCompleted"
 msgstr "Completed"

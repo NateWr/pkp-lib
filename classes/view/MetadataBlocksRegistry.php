@@ -141,6 +141,12 @@ class MetadataBlocksRegistry extends BlocksRegistry
                 title: __('submission.license'),
             )
         );
+        $this->register(
+            new MetadataBlock(
+                component: 'metadata.peer-review',
+                title: __('submission.peerReview'),
+            )
+        );
     }
 
     protected function registerPubIdBlocks(): void
