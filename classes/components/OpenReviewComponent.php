@@ -53,6 +53,7 @@ class OpenReviewComponent
             'openReview.readResponse',
             'openReview.hideResponse',
             'openReview.sortByReviewRound',
+            'openReview.citeDoi',
             'common.pagination.previous',
             'common.pagination.next',
             'submission.reviewRound.authorResponse',
