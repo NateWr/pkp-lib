@@ -2,7 +2,10 @@
     @php $announcement = $announcements[0]; @endphp
     <x-homepage.default slug="announcement">
         <x-notice>
-            <x-announcement-summary :announcement="$announcement" />
+            <x-announcement-summary
+                :announcement="$announcement"
+                heading="h2"
+            />
         </x-notice>
     </x-homepage.default>
 @endif
