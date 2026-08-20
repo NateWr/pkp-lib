@@ -53,8 +53,6 @@ abstract class Layout extends Component
     {
         view()->share('contextName', $this->contextName());
         view()->share('locales', $this->getLocales());
-        view()->share('filterGalleys', [$this, 'filterGalleys']);
-        view()->share('primaryFileGenreIds', [$this, 'primaryFileGenreIds']);
     }
 
     /**
@@ -124,53 +122,5 @@ abstract class Layout extends Component
         );
 
         return $locales;
-    }
-
-    /**
-     * Filter a list of galleys by genreId and remote URL
-     *
-     * @param Galley[] $galleys List of galleys to filter
-     * @param int[] $genreIds List of genres to include in result
-     * @param bool $remotes Whether to include galleys with remote urls
-     */
-    public function filterGalleys(LazyCollection|array $galleys, array $genreIds, bool $remotes) : array
-    {
-        $filteredGalleys = collect([]);
-
-        foreach ($galleys as $galley) {
-            if ($galley->getData('urlRemote') &&  $remotes) {
-                $filteredGalleys->push($galley);
-                continue;
-            }
-            $file = $galley->getFile();
-            if (!$file) {
-                continue;
-            }
-            if (!count($genreIds) || in_array($file->getGenreId(), $genreIds)) {
-                $filteredGalleys->push($galley);
-                continue;
-            }
-        }
-
-        return $filteredGalleys->toArray();
-    }
-
-    /**
-     * Get the primary file genre ids for a context
-     */
-    public function primaryFileGenreIds(int $contextId): array
-    {
-        /** @var TemplateManager */
-        $templateMgr = TemplateManager::getManager(Application::get()->getRequest());
-        $primaryFileGenreIds = $templateMgr->getTemplateVars('primaryFileGenreIds');
-        if (!$primaryFileGenreIds) {
-            /** @var GenreDAO $genreDao */
-            $genreDao = DAORegistry::getDAO('GenreDAO');
-            $primaryGenres = $genreDao->getPrimaryByContextId($contextId)->toArray();
-            $primaryFileGenreIds = array_map(fn($genre) => $genre->getId(), $primaryGenres);
-            $templateMgr->assign('primaryFileGenreIds', $primaryFileGenreIds);
-        }
-
-        return $primaryFileGenreIds;
     }
 }
