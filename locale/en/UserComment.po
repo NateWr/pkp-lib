@@ -55,6 +55,9 @@ msgstr "The comments below respond to earlier versions of this article."
 msgid "userComment.login"
 msgstr "Sign in to leave a comment"
 
+msgid "userComment.commentsOnThisPublication"
+msgstr "Comments on this publication"
+
 msgid "userComment.addCommentPrompt"
 msgstr "Do you want to contribute to the scholarly discussion of this publication?"
 
