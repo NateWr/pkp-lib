@@ -98,7 +98,7 @@
 		},
 		"id": {
 			"type": "integer",
-			"description": "The id of the event log.",
+			"description": "The ID of the event log.",
 			"readOnly": true,
 			"apiSummary": true
 		},
@@ -210,7 +210,7 @@
 		},
 		"submissionFileId": {
 			"type": "integer",
-			"description": "The ID of the submission file associates with the logged event.",
+			"description": "The ID of the submission file associated with the logged event.",
 			"validation": [
 				"nullable",
 				"min:1"
@@ -218,7 +218,7 @@
 		},
 		"submissionId": {
 			"type": "integer",
-			"description": "The ID of the submission associates with the logged event.",
+			"description": "The ID of the submission associated with the logged event.",
 			"validation": [
 				"nullable",
 				"min:1"
@@ -304,9 +304,17 @@
 				"nullable"
 			]
 		},
+		"userGroupName": {
+			"type": "string",
+			"description": "The name of the role the user was assigned or unassigned to",
+			"multilingual": true,
+			"validation": [
+				"nullable"
+			]
+		},
 		"userGroupNames": {
 			"type": "array",
-			"description": "The names of the role the user is in separated by a comma.",
+			"description": "The names of the roles the user is in, separated by a comma.",
 			"multilingual": true,
 			"items": {
 				"type": "string"
@@ -323,12 +331,71 @@
 				"min:1"
 			]
 		},
+		"impersonatedUserId": {
+			"type": "integer",
+			"description": "The ID of the user that was impersonated via the \"Login as\" mechanism when the event was performed.",
+			"validation": [
+				"nullable",
+				"min:1"
+			]
+		},
 		"username": {
 			"type": "string",
 			"description": "The username of the user/author associated with the event.",
 			"validation": [
 				"nullable"
 			]
+		},
+		"reviewerRecommendationOldId": {
+			"type": "integer",
+				"description": "The ID of the previous reviewer recommendation, if the reviewer recommendation was changed.",
+				"validation": [
+					"nullable",
+					"min:1"
+				]
+		},
+		"reviewerRecommendationNewId": {
+			"type": "integer",
+			"description": "The ID of the new reviewer recommendation, if the reviewer recommendation was changed.",
+			"validation": [
+				"nullable",
+				"min:1"
+			]
+		},
+		"reviewerCommentsOld": {
+			"type": "string",
+			"description": "The previous comments of the reviewer, if the reviewer comments were changed.",
+			"validation": [
+				"nullable"
+			]
+		},
+		"reviewerCommentsNew": {
+			"type": "string",
+			"description": "The new comments of the reviewer, if the reviewer comments were changed.",
+			"validation": [
+				"nullable"
+			]
+		},
+		"fieldNameKey": {
+			"type": "string",
+				"description": "Locale key for the name of the field that was changed.",
+				"validation": [
+					"nullable"
+				]
+		},
+		"reviewFormResponseOld": {
+			"type": "string",
+				"description": "JSON representation of the previous review form response, if any responses on the review form were changed.",
+				"validation": [
+					"nullable"
+				]
+		},
+		"reviewFormResponseNew": {
+			  "type": "string",
+				"description": "JSON representation of the new review form response, if any responses on the review form were changed.",
+				"validation": [
+					"nullable"
+				]
 		}
 	}
 }

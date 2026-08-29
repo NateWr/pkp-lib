@@ -3,19 +3,19 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-12-02T16:17:18-08:00\n"
-"PO-Revision-Date: 2020-07-17 07:47+0000\n"
-"Last-Translator: Manolis Saldaris <omanos@gmail.com>\n"
-"Language-Team: Greek <http://translate.pkp.sfu.ca/projects/ojs/emails/el/>\n"
-"Language: el_GR\n"
+"PO-Revision-Date: 2026-06-30 07:54+0000\n"
+"Last-Translator: Theodoros Theodoropoulos <bujam1@yahoo.com>\n"
+"Language-Team: Greek <http://translate.pkp.sfu.ca/projects/pkp-lib/emails/el/"
+">\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.9.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
-#, fuzzy
 msgid "emails.submissionAck.subject"
-msgstr "Επιβεβαίωση υποβολής"
+msgstr "Σας ευχαριστούμε για την υποβολή σας στο {$contextName}"
 
 #, fuzzy
 msgid "emails.submissionAck.body"
@@ -27,7 +27,7 @@ msgstr ""
 "μπορείτε να παρακολουθείτε στην πλατφόρμα την πρόοδό της υποβολής σας:<br /"
 ">\n"
 "<br />\n"
-"Σύνδεσμος υποβολής: {$submissionUrl}<br />\n"
+"Σύνδεσμος υποβολής: <a href=\"{$authorSubmissionUrl}\">{$authorSubmissionUrl}</a><br />\n"
 "Όνομα χρήστη: {$recipientUsername}<br />\n"
 "<br />\n"
 "Εάν έχετε ερωτήσεις, παρακαλούμε επικοινωνήστε μαζί μας. Σας ευχαριστούμε "
@@ -38,10 +38,11 @@ msgstr ""
 
 msgid "emails.submissionAck.description"
 msgstr ""
+"Αυτό το email στέλνεται αυτοματοποιημένα στους συγγραφείς όταν ολοκληρώσουν "
+"την υποβολή τους."
 
-#, fuzzy
 msgid "emails.reviewAck.subject"
-msgstr "Επιβεβαίωση υποβολής αξιολόγησης"
+msgstr "Σας ευχαριστούμε για την αξιολόγηση σας"
 
 #, fuzzy
 msgid "emails.reviewAck.body"
@@ -53,20 +54,19 @@ msgstr ""
 "σας στην ποιότητα του περιεχομένου που δημοσιεύουμε."
 
 msgid "emails.decision.notifyReviewers.subject"
-msgstr ""
+msgstr "Σας ευχαριστούμε για την αξιολόγηση σας"
 
 msgid "emails.decision.notifyReviewers.body"
 msgstr ""
 
 msgid "emails.decision.notifyOtherAuthors.subject"
-msgstr ""
+msgstr "Ενημέρωση σχετικά με την υποβολή σας"
 
 msgid "emails.decision.notifyOtherAuthors.body"
 msgstr ""
 
-#, fuzzy
 msgid "emails.editorDecisionSendToExternal.subject"
-msgstr "Απόφαση Επιμελητή"
+msgstr "Η υποβολή σας έχει αποσταλεί για αξιολόγηση"
 
 #, fuzzy
 msgid "emails.editorDecisionSendToExternal.body"
@@ -94,9 +94,10 @@ msgstr ""
 "<br />\n"
 "Σύνδεσμος υποβολής: {$submissionUrl}"
 
-#, fuzzy
 msgid "emails.editorDecisionRevisions.subject"
-msgstr "Απόφαση Επιμελητή"
+msgstr ""
+"Η υποβολή σας έχει εξεταστεί και σας προτρέπουμε να υποβάλετε τις διορθώσεις "
+"σας"
 
 #, fuzzy
 msgid "emails.editorDecisionRevisions.body"
@@ -108,9 +109,10 @@ msgstr ""
 "<br />\n"
 "Η απόφασή μας είναι: Απαιτούνται αναθεωρήσεις"
 
-#, fuzzy
 msgid "emails.editorDecisionResubmit.subject"
-msgstr "Απόφαση Επιμελητή"
+msgstr ""
+"Η υποβολή σας έχει εξεταστεί και σας παρακαλούμε να την αναθεωρήσετε και να "
+"την υποβάλετε εκ νέου"
 
 #, fuzzy
 msgid "emails.editorDecisionResubmit.body"
@@ -122,9 +124,8 @@ msgstr ""
 "<br />\n"
 "Η απόφασή μας είναι: Επανυποβολή για αξιολόγηση"
 
-#, fuzzy
 msgid "emails.editorDecisionDecline.subject"
-msgstr "Απόφαση Επιμελητή"
+msgstr "Η υποβολή σας δεν έγινε δεκτή"
 
 #, fuzzy
 msgid "emails.editorDecisionDecline.body"
@@ -136,7 +137,6 @@ msgstr ""
 "<br />\n"
 "Η απόφασή μας είναι: Απόρριψη της Υποβολής"
 
-#, fuzzy
 msgid "emails.editorRecommendation.subject"
 msgstr "Σύσταση Επιμελητή"
 
@@ -169,12 +169,12 @@ msgstr ""
 "4. Ειδοποιήστε τον Επιμελητή ότι όλα τα αρχεία είναι έτοιμα και μπορεί να "
 "ξεκινήσει η διαδικασία παραγωγής.<br />\n"
 "<br />\n"
-"Σύνδεσμος περιοδικού {$contextName}: {$contextUrl}<br />\n"
-"Σύνδεσμος υποβολής: {$submissionUrl}<br />\n"
+"Σύνδεσμος περιοδικού {$contextName}: <a href=\"{$contextUrl}\">{$contextUrl}</a><br />\n"
+"Σύνδεσμος υποβολής: <a href=\"{$submissionUrl}\">{$submissionUrl}</a><br />\n"
 "Όνομα Χρήστη: {$recipientUsername}"
 
 msgid "emails.editorDecisionNewReviewRound.subject"
-msgstr ""
+msgstr "Η υποβολή σας έχει σταλεί για έναν ακόμη γύρο αξιολόγησης"
 
 msgid "emails.editorDecisionNewReviewRound.body"
 msgstr ""
@@ -381,3 +381,73 @@ msgstr ""
 
 msgid "emails.orcidRequestAuthorAuthorization.description"
 msgstr "Αυτό το μήνυμα χρησιμοποιείται ως αίτημα πρόσβασης στο μητρώο ORCID των συγγραφέων."
+
+msgid "emails.userRoleAssignmentInvitationNotify.newlyAssignedRoles"
+msgstr "<p><h2>Νέοι ρόλοι που ανατέθηκαν</h2></p>"
+
+msgid "emails.userRoleAssignmentInvitationNotify.alreadyAssignedRoles"
+msgstr "<p><h2>Ρόλοι που έχουν ήδη ανατεθεί</h2></p>"
+
+msgid "emailTemplate.variable.invitation.recipientName"
+msgstr "Αυτό είναι το όνομα του παραλήπτη της πρόσκλησης"
+
+msgid "emailTemplate.variable.invitation.inviterRole"
+msgstr "Αυτός είναι ο ρόλος του αποστολέα της πρόσκλησης"
+
+msgid "emailTemplate.variable.invitation.acceptUrl"
+msgstr "Αυτό είναι το URL για την αποδοχή της πρόσκλησης"
+
+msgid "emailTemplate.variable.invitation.declineUrl"
+msgstr "Αυτό είναι το URL για την απόρριψη της πρόσκλησης"
+
+msgid "emails.changeProfileEmailInvitationNotify.body"
+msgstr ""
+"<p>Αγαπητέ/ή {$recipientName},</p>\n"
+"<p>Λαμβάνετε αυτό το email επειδή κάποιος ζήτησε την αλλαγή της διεύθυνσης "
+"email σας σε {$newEmail}.\n"
+"</p>\n"
+"<p>Εάν έχετε υποβάλει εσείς αυτό το αίτημα, παρακαλώ<a href=\""
+"{$acceptInvitationUrl}\">επιβεβαιώστε</a> την αλλαγή της διεύθυνσης email.\n"
+"</p>\n"
+"<p>Μπορείτε πάντα<a href=\"{$declineInvitationUrl}\">να απορρίψετε</a> αυτή "
+"την αλλαγή διεύθυνσης ηλεκτρονικού ταχυδρομείου.\n"
+"</p>\n"
+"<p>Μη διστάσετε να επικοινωνήσετε μαζί μας για οποιαδήποτε ερώτηση σχετικά "
+"με την υποβολή ή τη διαδικασία εξέτασης.</p>\n"
+"<p>Με εκτίμηση,\n"
+"</p>{$siteContactName}"
+
+msgid "emailTemplate.variable.invitation.inviterName"
+msgstr "Αυτό είναι το όνομα του αποστολέα της πρόσκλησης"
+
+msgid "emailTemplate.variable.invitation.rolesAdded"
+msgstr ""
+"Σε αυτή την ενότητα περιγράφονται οι ρόλοι που θα προστεθούν στον χρήστη "
+"μετά την αποδοχή της πρόσκλησης"
+
+msgid "emailTemplate.variable.invitation.existingRoles"
+msgstr "Σε αυτή την ενότητα περιγράφονται οι ρόλοι που έχει ήδη ο χρήστης."
+
+msgid "emails.changeProfileEmailInvitationNotify.subject"
+msgstr ""
+"Επιβεβαίωση αιτήματος αλλαγής διεύθυνσης ηλεκτρονικού ταχυδρομείου "
+"επικοινωνίας του λογαριασμού"
+
+msgid "emails.changeProfileEmailInvitationNotify.description"
+msgstr ""
+"Αυτό το email αποστέλλεται στους χρήστες που ζητούν αλλαγή της διεύθυνσης "
+"email τους."
+
+msgid "mailable.userRoleAssignmentInvitationNotify.description"
+msgstr ""
+"Αυτό το email αποστέλλεται σε χρήστες που έχουν προσκληθεί να αναλάβουν "
+"συγκεκριμένους ρόλους"
+
+msgid "mailable.userRoleAssignmentInvitationNotify.name"
+msgstr "Ειδοποίηση για πρόσκληση χρήστη σε ρόλο"
+
+msgid "emails.userRoleAssignmentInvitationNotify.subject"
+msgstr "Σας προσκαλούμε να αναλάβετε νέους ρόλους"
+
+msgid "emails.userRoleAssignmentInvitationNotify.userGroupSectionEndingDate"
+msgstr "Τελειώνει στις {$dateEnd}"

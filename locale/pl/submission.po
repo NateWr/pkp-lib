@@ -2034,6 +2034,7 @@ msgstr ""
 "Radaktor {$editorName} potwierdził przyjęcie recenzji dla rundy {$round} w "
 "zgłoszeniu {$submissionid}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "Recenzent {$reviewerName} zakończył swoją pracę w rundzie {$round} dla "
@@ -2995,3 +2996,6 @@ msgstr "Zgłoszenie zostało przekazane do kolejnej rundy oceny"
 
 msgid "workflow.submissionInFutureStage"
 msgstr "Zgłoszenie znajduje się obecnie na etapie {$stage}."
+
+msgid "reviewer.competingInterests"
+msgstr "Zainteresowania badawcze"

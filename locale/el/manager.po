@@ -1,12 +1,13 @@
 # Manolis Saldaris <omanos@gmail.com>, 2022, 2023.
 # Martin Brändle <martin.braendle@uzh.ch>, 2023.
+# Theodoros Theodoropoulos <bujam1@yahoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:44+00:00\n"
-"PO-Revision-Date: 2023-05-06 11:49+0000\n"
-"Last-Translator: Manolis Saldaris <omanos@gmail.com>\n"
+"PO-Revision-Date: 2026-07-03 17:30+0000\n"
+"Last-Translator: Theodoros Theodoropoulos <bujam1@yahoo.com>\n"
 "Language-Team: Greek <http://translate.pkp.sfu.ca/projects/pkp-lib/manager/"
 "el/>\n"
 "Language: el\n"
@@ -14,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.13.1\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "manager.website.information"
 msgstr "Πληροφορίες"
@@ -157,199 +158,247 @@ msgid "manager.announcementTypes.typeName"
 msgstr "Τύπος ανακοίνωσης"
 
 msgid "manager.dois.actions.deposit.all"
-msgstr ""
+msgstr "Υποβολή Όλων"
 
 msgid "manager.dois.actions.deposit.label"
-msgstr ""
+msgstr "Υποβολή DOIs"
 
 msgid "manager.dois.actions.deposit.prompt"
 msgstr ""
+"Πρόκειται να στείλετε εγγραφές μεταδεδομένων DOI για {$count} στοιχεία στην "
+"{$registrationAgency}. Θέλετε σίγουρα να στείλετε αυτές τις εγγραφές;"
 
 msgid "manager.dois.actions.markRegistered.label"
-msgstr ""
+msgstr "Επισήμανση των DOI ως Καταχωρημένων"
 
 msgid "manager.dois.actions.markRegistered.prompt"
 msgstr ""
+"Πρόκειται να επισημάνετε τις εγγραφές μεταδεδομένων DOI για {$count} "
+"στοιχεία ως καταχωρημένες. Θέλετε σίγουρα να επισημάνετε αυτές τις εγγραφές "
+"ως καταχωρημένες;"
 
 msgid "manager.dois.actions.markUnregistered.label"
-msgstr ""
+msgstr "Επισήμανση των DOI ως Μη Καταχωρημένων"
 
 msgid "manager.dois.actions.markUnregistered.prompt"
 msgstr ""
+"Πρόκειται να επισημάνετε τις εγγραφές μεταδεδομένων DOI για {$count} "
+"στοιχεία ως μη καταχωρημένες. Θέλετε σίγουρα να επισημάνετε αυτές τις "
+"εγγραφές ως μη καταχωρημένες;"
 
 msgid "manager.dois.actions.markStale.label"
-msgstr ""
+msgstr "Επισήμανση των DOIs ότι Χρειάζονται Συγχρονισμό"
 
 msgid "manager.dois.actions.markStale.prompt"
 msgstr ""
+"Πρόκειται να επισημάνετε ότι τα μεταδεδομένα των DOIs για {$count} στοιχεία "
+"χρειάζονται συγχρονισμό. Αυτό μπορεί να γίνει μόνο για DOIs που έχουν "
+"υποβληθεί ήδη. Θέλετε σίγουρα να επισημάνετε αυτές τις εγγραφές ως μη "
+"ενημερωμένες;"
 
 msgid "manager.dois.actions.export.label"
-msgstr ""
+msgstr "Εξαγωγή DOIs"
 
 msgid "manager.dois.actions.export.prompt"
 msgstr ""
+"Πρόκειται να εξάγετε εγγραφές μεταδεδομένων DOIs για {$count} στοιχεία στην "
+"{$registrationAgency}. Θέλετε σίγουρα να εξάγετε αυτές τις εγγραφές;"
 
 msgid "manager.dois.actions.assign.label"
-msgstr ""
+msgstr "Εκχώρηση DOIs"
 
 msgid "manager.dois.actions.assign.prompt"
 msgstr ""
+"Πρόκειται να εκχωρήσετε νέα DOIs σε {$count} στοιχείο(α), για κάθε επιλέξιμο "
+"στοιχείο στο οποίο δεν έχει ήδη εκχωρηθεί DOI. Σίγουρα θέλετε να εκχωρήσετε "
+"κωδικούς DOI σε αυτά τα στοιχεία;"
 
 msgid "manager.dois.actions.depositAll.label"
-msgstr ""
+msgstr "Υποβολή όλων των DOIs"
 
 msgid "manager.dois.actions.depositAll.prompt"
 msgstr ""
+"Πρόκειται να προγραμματίσετε την υποβολή όλων των εκκρεμών DOIs στην "
+"{$registrationAgency}. Θα υποβληθούν μόνο οι δημοσιευμένα στοιχεία που "
+"διαθέτουν DOI. Η κατάσταση κάθε εγγραφής θα ενημερωθεί μόλις ληφθεί "
+"απάντηση. Σίγουρα θέλετε να προγραμματίσετε την υποβολή όλων αυτών των "
+"στοιχείων;"
 
 msgid "manager.dois.actions.description"
-msgstr ""
+msgstr "Εκτελέστε ενέργεια στα {$count} επιλεγμένα στοιχεία."
 
 msgid "manager.dois.actions.bulkActions"
-msgstr ""
+msgstr "Μαζικές Ενέργειες"
 
 msgid "manager.dois.depositStatus"
-msgstr ""
+msgstr "Κατάσταση Υποβολής"
 
 msgid "manager.dois.publicationStatus"
-msgstr ""
+msgstr "Κατάσταση Δημοσίευσης"
 
 msgid "manager.dois.registration.submittedDescription"
 msgstr ""
+"Τα μεταδεδομένα αυτού του στοιχείου υποβλήθηκαν στην {$registrationAgency}."
 
 msgid "manager.dois.registration.manuallyMarkedRegistered"
 msgstr ""
+"Αυτό το στοιχείο έχει καταχωριστεί χειροκίνητα σε μια υπηρεσία καταχώρισης."
 
 msgid "manager.dois.registration.notSubmittedDescription"
 msgstr ""
+"Τα μεταδεδομένα αυτού του στοιχείου δεν υποβλήθηκαν στην "
+"{$registrationAgency}."
 
 msgid "manager.dois.registration.notPublishedDescription"
-msgstr ""
+msgstr "Αυτό το στοιχείο δεν μπορεί να κατατεθεί μέχρι να δημοσιευτεί."
 
 msgid "manager.dois.registration.viewError"
-msgstr ""
+msgstr "Προβολή Σφάλματος"
 
 msgid "manager.dois.registration.viewError.title"
-msgstr ""
+msgstr "Μήνυμα Εσφαλμένης Καταχώρησης"
 
 msgid "manager.dois.registration.viewRecord"
-msgstr ""
+msgstr "Εμφάνιση Εγγραφής"
 
 msgid "manager.dois.registration.viewRecord.title"
-msgstr ""
+msgstr "Μήνυμα Επιτυχούς Καταχώρησης"
 
 msgid "manager.dois.update.success"
-msgstr ""
+msgstr "Τα DOI(s) ενημερώθηκαν επιτυχώς"
 
 msgid "manager.dois.registration.depositDois"
-msgstr ""
+msgstr "Υποβολή DOI(s)"
 
 msgid "manager.dois.status.needsDoi"
-msgstr ""
+msgstr "Χρειάζεται DOI"
 
 msgid "manager.dois.status.unregistered"
-msgstr ""
+msgstr "Μη Καταχωρημένο"
 
 msgid "manager.dois.status.submitted"
-msgstr ""
+msgstr "Υποβληθέν"
 
 msgid "manager.dois.status.registered"
-msgstr ""
+msgstr "Καταχωρημένο"
 
 msgid "manager.dois.status.error"
-msgstr ""
+msgstr "Σφάλμα"
 
 msgid "manager.dois.status.error.filterTitle"
-msgstr ""
+msgstr "Έχει Σφάλμα"
 
 msgid "manager.dois.status.stale"
-msgstr ""
+msgstr "Χρειάζεται Συγχρονισμό"
 
 msgid "manager.dois.filters.doiAssigned"
-msgstr ""
+msgstr "Ανατέθηκε DOI"
 
 msgid "manager.dois.status.needsDoi.description"
-msgstr ""
+msgstr "Όλα τα στοιχεία που δεν έχουν DOI."
 
 msgid "manager.dois.filters.doiAssigned.description"
-msgstr ""
+msgstr "Όλα τα στοιχεία που έχουν DOI."
 
 msgid "manager.dois.status.unregistered.description"
 msgstr ""
+"Όλα τα στοιχεία με DOI που έχουν δημοσιευτεί αλλά δεν έχουν ακόμη κατατεθεί "
+"σε φορέα καταχώρισης."
 
 msgid "manager.dois.status.submitted.description"
-msgstr ""
+msgstr "Όλα τα στοιχεία που έχουν κατατεθεί σε φορέα καταχώρισης."
 
 msgid "manager.dois.status.registered.description"
 msgstr ""
+"Όλα τα στοιχεία που έχουν καταχωριστεί σε φορέα καταχώρισης ή έχουν "
+"επισημανθεί χειροκίνητα ως καταχωρισμένα."
 
 msgid "manager.dois.status.error.description"
 msgstr ""
+"Όλα τα στοιχεία στα οποία εντοπίστηκε σφάλμα κατά την διαδικασία καταχώρισης."
 
 msgid "manager.dois.status.stale.description"
 msgstr ""
+"Όλα τα στοιχεία που έχουν αναδημοσιευτεί μετά την κατάθεσή τους σε φορέα "
+"καταχώρισης. Πρέπει να υποβληθούν εκ νέου στον φορέα καταχώρισης, "
+"προκειμένου να ενημερωθούν τα αρχεία μεταδεδομένων τους."
 
 msgid "manager.dois.update.failedCreation"
-msgstr ""
+msgstr "Οι Ενημερώσεις των DOI Απέτυχαν"
 
 msgid "manager.dois.update.partialFailure"
-msgstr ""
+msgstr "Ορισμένα DOI(s) δεν μπόρεσαν να ενημερωθούν"
 
 msgid "manager.dois.notification.exportSuccess"
-msgstr ""
+msgstr "Τα στοιχεία εξήχθησαν επιτυχώς"
 
 msgid "manager.dois.notification.markRegisteredSuccess"
-msgstr ""
+msgstr "Τα στοιχεία καταχωρήθηκαν επιτυχώς"
 
 msgid "manager.dois.notification.markUnregisteredSuccess"
-msgstr ""
+msgstr "Τα στοιχεία επισημάνθηκαν επιτυχώς ως μη καταχωρημένα"
 
 msgid "manager.dois.notification.markStaleSuccess"
-msgstr ""
+msgstr "Τα στοιχεία επισημάνθηκαν επιτυχώς ότι χρειάζονται ενημέρωση"
 
 msgid "manager.dois.notification.assignDoisSuccess"
-msgstr ""
+msgstr "Στα στοιχεία αποδόθηκαν επιτυχώς νέα DOIs"
 
 msgid "manager.dois.notification.depositQueuedSuccess"
-msgstr ""
+msgstr "Στοιχεία που υποβλήθηκαν επιτυχώς προς κατάθεση"
 
 msgid "manager.dois.help.statuses.title"
-msgstr ""
+msgstr "Καταστάσεις DOI"
 
 msgid "manager.dois.settings.relocated"
 msgstr ""
+"Η διαχείριση των DOI έχει μεταφερθεί. Παρακαλούμε ανατρέξτε στις σελίδες <a "
+"href=\"{$doiManagementUrl}\">Διαχείριση DOI</a> και<a href=\""
+"{$doiSettingsUrl}\">Ρυθμίσεις DOI</a>."
 
 msgid "manager.dois.settings.prefixRequired"
 msgstr ""
+"Δεν είναι δυνατή η εκχώρηση DOI, μέχρι να δηλώσετε το πρόθεμα DOI που σας "
+"έχει αποδοθεί. <a href=\"{$doiSettingsUrl}\">Προσθήκη προθέματος DOI</a>."
 
 msgid "doi.exceptions.missingPrefix"
 msgstr ""
+"Έγινε προσπάθεια για δημιουργία DOI, αλλά απαιτείται το πρόθεμα DOI για να "
+"μπορέσει να δημιουργήσει ένα το σύστημα."
 
 msgid "manager.genres.alertDelete"
 msgstr ""
+"Προκειμένου να διαγραφεί αυτό το στοιχείο, θα πρέπει πρώτα να αντιστοιχίσετε "
+"όλα τα συσχετιζόμενα αρχεία υποβολής με ένα διαφορετικό στοιχείο."
 
 msgid "manager.institutions.edit"
-msgstr ""
+msgstr "Επεξεργασία Ιδρύματος"
 
 msgid "manager.institutions.form.ror"
-msgstr ""
+msgstr "ROR"
 
 msgid "manager.institutions.form.ror.description"
 msgstr ""
+"Αριθμός μητρώου ερευνητικού οργανισμού (ROR ID) για το συγκεκριμένο ίδρυμα."
 
 msgid "manager.institutions.form.ipRanges"
-msgstr ""
+msgstr "Εύρος δ/νσεων IP"
 
 msgid "manager.institutions.form.ipRangesInstructions"
 msgstr ""
+"Οι έγκυρες τιμές περιλαμβάνουν μια διεύθυνση IP (π.χ. 142.58.103.1), ένα "
+"εύρος διευθύνσεων IP (π.χ. 142.58.103.1 - 142.58.103.4), ένα εύρος "
+"διευθύνσεων IP με τον χαρακτήρα μπαλαντέρ «*» (π.χ. 142.58.*.*), καθώς και "
+"ένα εύρος διευθύνσεων IP με CIDR (π.χ. 142.58.100.0/24)."
 
 msgid "manager.institutions.deleteInstitution"
-msgstr ""
+msgstr "Διαγραφή Ιδρύματος"
 
 msgid "manager.institutions.confirmDelete"
-msgstr ""
+msgstr "Θέλετε σίγουρα να προχωρήσετε στην διαγραφή αυτού του Ιδρύματος;"
 
 msgid "manager.institutions.invalidIPRange"
-msgstr ""
+msgstr "Μη έγκυρο εύρος δ/νσεων IP"
 
 msgid "manager.publication.submissionStage"
 msgstr "Υποβολή"
@@ -377,9 +426,13 @@ msgstr ""
 
 msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
+"Το παρακάτω σφάλμα επιστράφηκε από την {$registrationAgency} και περιέχει "
+"λεπτομέρειες σχετικά με την αιτία του σφάλματος:"
 
 msgid "manager.dois.registrationAgency.registeredMessagePreamble"
 msgstr ""
+"Το παρακάτω μήνυμα επιστράφηκε από την {$registrationAgency} και περιέχει "
+"λεπτομέρειες σχετικά με την εγγραφή:"
 
 msgid "manager.emails.addEmail"
 msgstr "Προσθήκη προτύπου"
@@ -412,7 +465,7 @@ msgid "manager.emails.emailTemplates"
 msgstr "Πρότυπα μηνυμάτων email"
 
 msgid "manager.emails.otherTemplates"
-msgstr ""
+msgstr "Λοιπά Πρότυπα"
 
 msgid "manager.emails.emailTemplate.contextRequired"
 msgstr ""
@@ -466,10 +519,10 @@ msgid "manager.emails.sentTo"
 msgstr "Παραλήπτης"
 
 msgid "manager.export.usersToCsv.label"
-msgstr ""
+msgstr "Εξαγωγή σε Excel/CSV"
 
 msgid "manager.export.usersToCsv.description"
-msgstr ""
+msgstr "Επιλέξτε τους χρήστες που θα γίνουν εξαγωγή σε αρχείο τύπου Excel/CSV."
 
 msgid "manager.filesBrowser"
 msgstr "Ευρετήριο Αρχείων"
@@ -675,7 +728,7 @@ msgid "manager.people.saveAndCreateAnotherUser"
 msgstr "Αποθήκευση και δημιουργία νέου"
 
 msgid "manager.people.signedInAs"
-msgstr ""
+msgstr "Αυτή τη στιγμή έχετε συνδεθεί ως {$username}"
 
 msgid "manager.people.signInAs"
 msgstr "Σύνδεση ως"
@@ -723,11 +776,11 @@ msgstr "Εργαλεία Ανάγνωσης"
 msgid "manager.userSearch.searchByName"
 msgstr "Αναζήτηση χρήστη κατά Όνομα"
 
-#, fuzzy
 msgid "manager.representative.inUse"
 msgstr ""
-"Δεν μπορείτε να διαγράψετε αυτόν τον εκπρόσωπο επειδή έχει εκχωρηθεί στα "
-"μεταδεδομένα για μία ή περισσότερες μορφές δημοσίευσης για αυτήν την υποβολή."
+"Δεν μπορείτε να διαγράψετε αυτόν τον εκπρόσωπο επειδή έχει αντιστοιχιστεί "
+"στα μεταδεδομένα για μία ή περισσότερες μορφές δημοσίευσης για αυτήν την "
+"υποβολή."
 
 msgid "manager.reviewerSearch.change"
 msgstr "Αλλαγή"
@@ -751,43 +804,55 @@ msgid "manager.roles"
 msgstr "Ρόλοι"
 
 msgid "manager.setup.statistics"
-msgstr ""
+msgstr "Στατιστικά"
 
 msgid "manager.settings.statistics.geoUsageStats"
-msgstr ""
+msgstr "Γεωγραφικά Στατιστικά Στοιχεία"
 
 msgid "manager.settings.statistics.geoUsageStats.description"
 msgstr ""
+"Επιλέξτε τον τύπο των γεωγραφικών στατιστικών χρήσης που θέλετε να "
+"συλλέξετε. Τα πιο λεπτομερή γεωγραφικά στατιστικά ενδέχεται να αυξήσουν "
+"σημαντικά το μέγεθος της βάσης δεδομένων σας και, σε ορισμένες σπάνιες "
+"περιπτώσεις, να υπονομεύσουν την ανωνυμία των επισκεπτών σας."
 
 msgid "manager.settings.statistics.geoUsageStats.disabled"
-msgstr ""
+msgstr "Να μην γίνεται καθόλου συλλογή γεωγραφικών δεδομένων"
 
 msgid "manager.settings.statistics.geoUsageStats.countryLevel"
-msgstr ""
+msgstr "Να γίνεται συλλογή της χώρας προέλευσης του επισκέπτη"
 
 msgid "manager.settings.statistics.geoUsageStats.regionLevel"
-msgstr ""
+msgstr "Να γίνεται συλλογή της χώρας προέλευσης και της περιοχής του επισκέπτη"
 
 msgid "manager.settings.statistics.geoUsageStats.cityLevel"
 msgstr ""
+"Να γίνεται συλλογή της χώρας προέλευσης, της περιοχής και της πόλης του "
+"επισκέπτη"
 
 msgid "manager.settings.statistics.institutionUsageStats"
-msgstr ""
+msgstr "Ιδρυματικά Στατιστικά"
 
 msgid "manager.settings.statistics.institutionUsageStats.description"
 msgstr ""
+"Ενεργοποιήστε τα Ιδρυματικά Στατιστικά αν επιθυμείτε να συλλέγετε στατιστικά "
+"στοιχεία χρήσης ανά ίδρυμα. Εάν ενεργοποιηθεί αυτή η λειτουργία, θα πρέπει "
+"να ρυθμίσετε το εύρος των IP για κάθε ίδρυμα που θέλετε να παρακολουθείτε."
 
 msgid "manager.settings.statistics.institutionUsageStats.enable"
-msgstr ""
+msgstr "Ενεργοποίηση Ιδρυματικών Στατιστικών"
 
 msgid "manager.settings.statistics.publicSushiApi"
-msgstr ""
+msgstr "Δημόσιο API"
 
 msgid "manager.settings.statistics.publicSushiApi.description"
 msgstr ""
+"Εάν θα περιοριστεί ή όχι η πρόσβαση στα API endpoints για τα στατιστικά του "
+"COUNTER SUSHI. Εάν δεν είναι επιλεγμένο, το API θα είναι προσβάσιμο μόνο σε "
+"χρήστες με ρόλους διαχειριστή ή υπεύθυνου."
 
 msgid "manager.settings.statistics.publicSushiApi.public"
-msgstr ""
+msgstr "Να γίνουν τα στατιστικά του COUNTER SUSHI δημόσια διαθέσιμα"
 
 msgid "manager.statistics.reports"
 msgstr "Αναφορές"
@@ -809,118 +874,141 @@ msgid "manager.affiliationAndSupport"
 msgstr "Χορηγοί"
 
 msgid "manager.setup.dois"
-msgstr ""
+msgstr "DOIs"
 
 msgid "manager.setup.dois.setup"
-msgstr ""
+msgstr "Διαμόρφωση"
 
 msgid "manager.setup.dois.registration"
-msgstr ""
+msgstr "Εγγραφή"
 
 msgid "doi.manager.settings.doiPrefix"
-msgstr ""
+msgstr "Πρόθεμα DOI"
 
 msgid "doi.manager.setup.automaticDeposit"
-msgstr ""
+msgstr "Αυτόματη Κατάθεση"
 
 msgid "doi.manager.setup.automaticDeposit.enable"
-msgstr ""
+msgstr "Ενεργοποίηση αυτόματης κατάθεσης"
 
 msgid "doi.manager.setup.automaticDeposit.description"
 msgstr ""
+"Η καταχώριση του DOI και τα μεταδεδομένα μπορούν να κατατίθενται αυτόματα "
+"στον επιλεγμένο φορέα καταχώρισης κάθε φορά που δημοσιεύεται ένα τεκμήριο με "
+"DOI. Η αυτόματη κατάθεση θα πραγματοποιείται σε προγραμματισμένα χρονικά "
+"διαστήματα και η κατάσταση καταχώρισης κάθε DOI μπορεί να παρακολουθείται "
+"από τη σελίδα διαχείρισης του DOI."
 
 msgid "doi.manager.settings.doiPrefix.description"
 msgstr ""
+"Το πρόθεμα DOI εκχωρείται από έναν οργανισμό καταχώρισης, όπως η <a href="
+"\"https://www.crossref.org\" target=\"_new\">Crossref</a> ή η<a href=\"https"
+"://datacite.org/\" target=\"new\">DataCite</a>. Παράδειγμα: 10.xxxx"
 
 msgid "doi.manager.settings.doiPrefixPattern"
 msgstr ""
+"Το πρόθεμα DOI είναι υποχρεωτικό και πρέπει να έχει την ακόλουθη μορφή: 10."
+"xxxx."
 
 msgid "doi.manager.settings.doiCreationTime.label"
-msgstr ""
+msgstr "Αυτόματη εκχώρηση DOI"
 
 msgid "doi.manager.settings.doiCreationTime.description"
-msgstr ""
+msgstr "Πότε πρέπει να αποδίδεται ένας κωδικός DOI σε μια δημοσίευση;"
 
 msgid "doi.manager.settings.doiCreationTime.publication"
-msgstr ""
+msgstr "Κατά την δημοσίευση"
 
 msgid "doi.manager.settings.doiCreationTime.never"
-msgstr ""
+msgstr "Ποτέ"
 
 msgid "manager.setup.doiPrefix"
-msgstr ""
+msgstr "Πρόθεμα DOI"
 
 msgid "doi.manager.settings.doiObjects"
-msgstr ""
+msgstr "Στοιχεία με DOIs"
 
 msgid "doi.manager.settings.doiPrefix.required"
-msgstr ""
+msgstr "Απαιτείται πρόθεμα DOI"
 
 msgid "doi.manager.settings.doiSuffix"
-msgstr ""
+msgstr "Μορφή DOI"
 
 msgid "doi.manager.settings.doiSuffix.pattern"
-msgstr ""
+msgstr "Κατάληξη DOI"
 
 msgid "doi.manager.settings.doiSuffix.custom"
-msgstr ""
+msgstr "Προσαρμοσμένο πρότυπο κατάληξης DOI"
 
 msgid "doi.manager.settings.enabledDoiTypes.error"
 msgstr ""
+"Ένας ή περισσότεροι από τους επιλεγμένους τύπους DOI δεν επιτρέπονται στον "
+"φορέα καταχώρισης DOI."
 
 msgid "doi.manager.settings.doiSuffix.description"
 msgstr ""
+"Επιλέξτε τη μορφή που θα χρησιμοποιείται όταν η εφαρμογή δημιουργεί ένα DOI."
 
 msgid "doi.manager.settings.doiSuffixDefault"
 msgstr ""
+"Προεπιλογή - Δημιουργείται αυτόματα ένα μοναδικό επίθεμα οκτώ χαρακτήρων"
 
 msgid "doi.manager.settings.doiSuffixManual"
 msgstr ""
+"Κανένα – Τα επιθέματα πρέπει να εισαχθούν χειροκίνητα στη <a href=\""
+"{$doiManagementUrl}\">σελίδα διαχείρισης DOI</a> και δεν θα δημιουργούνται "
+"αυτόματα"
 
 msgid "doi.manager.settings.doiSuffixUserDefined"
-msgstr ""
+msgstr "Προσαρμοσμένο μοτίβο - (δεν συνιστάται)"
 
 msgid "doi.manager.settings.registrationAgency"
-msgstr ""
+msgstr "Φορέας Καταχώρησης"
 
 msgid "doi.manager.settings.registrationAgency.description"
 msgstr ""
+"Παρακαλώ επιλέξτε τον φορέα καταχώρισης που επιθυμείτε να χρησιμοποιήσετε "
+"κατά την κατάθεση των DOI."
 
 msgid "doi.manager.settings.registrationAgency.noPluginsEnabled.label"
-msgstr ""
+msgstr "Δεν έχει ενεργοποιηθεί κανένας φορέας καταχώρησης"
 
 msgid "doi.manager.settings.registrationAgency.noPluginsEnabled.description"
 msgstr ""
+"Τα DOI μπορούν να δημιουργούνται αυτόματα και να κατατίθενται σε έναν φορέα "
+"καταχώρισης. Για να χρησιμοποιήσετε αυτή τη λειτουργία, εντοπίστε και "
+"εγκαταστήστε ένα πρόσθετο από τον αντίστοιχο φορέα καταχώρισης."
 
 msgid "doi.manager.settings.registrationAgency.none"
-msgstr ""
+msgstr "Κανένας"
 
 msgid "doi.manager.settings.doiVersioning"
-msgstr ""
+msgstr "Διαχείριση εκδόσεων DOI"
 
 msgid "doi.authorization.enabledRequired"
 msgstr ""
+"Δεν μπορείτε να εκτελέσετε αυτή τη λειτουργία αν δεν είναι ενεργοποιημένα τα "
+"DOI."
 
 msgid "doi.manager.versions.countStatement"
-msgstr ""
+msgstr "Υπάρχουν {$count} εκδόσεις."
 
 msgid "doi.manager.versions.view"
-msgstr ""
+msgstr "Εμφάνιση όλων"
 
 msgid "doi.manager.versions.modalTitle"
-msgstr ""
+msgstr "DOIs για όλες τις εκδόσεις"
 
 msgid "doi.editor.doiSuffixInvalidCharacters"
-msgstr ""
+msgstr "Το DOI περιέχει μη έγκυρους χαρακτήρες."
 
 msgid "manager.setup.publishing"
 msgstr "Λεπτομέρειες Δημοσίευσης"
 
-#, fuzzy
 msgid "manager.setup.publishingDescription"
 msgstr ""
-"Αυτές οι λεπτομέρειες μπορεί να περιλαμβάνονται στα μεταδεδομένα που "
-"εμφανίζονται στην σελίδα \"Σχετικά με το περιοδικό\"."
+"Τα στοιχεία αυτά ενδέχεται να περιλαμβάνονται στα μεταδεδομένα που "
+"παρέχονται σε τρίτους φορείς αρχειοθέτησης."
 
 msgid "manager.setup.additionalContent"
 msgstr "Επιπλέον περιεχόμενο"
@@ -950,7 +1038,7 @@ msgstr ""
 "βιβλία."
 
 msgid "manager.setup.disableSubmissions"
-msgstr ""
+msgstr "Απενεργοποίηση Υποβολών"
 
 msgid "manager.setup.checklist"
 msgstr "Λίστα ελέγχου"
@@ -959,7 +1047,7 @@ msgid "manager.setup.competingInterests"
 msgstr "Συγκρουόμενα Συμφέροντα"
 
 msgid "manager.setup.errorDeletingItem"
-msgstr "Παρουσιάστηκε σφάλμα κατά την διαγραφή του φίλτρου."
+msgstr "Παρουσιάστηκε σφάλμα κατά την διαγραφή του στοιχείου."
 
 msgid "manager.setup.favicon"
 msgstr "Εικονίδιο ιστοτόπου"
@@ -1009,37 +1097,50 @@ msgid "manager.setup.notifications.copySpecifiedAddress"
 msgstr "Αποστολή αντιγράφου στην εξής διεύθυνση email"
 
 msgid "manager.setup.notifyAllAuthors"
-msgstr ""
+msgstr "Ειδοποίηση όλων των συγγραφέων"
 
 msgid "manager.setup.notifyAllAuthors.description"
 msgstr ""
+"Ποιος θα πρέπει να λαμβάνει ειδοποιητικό email όταν προκύπτει μια απόφαση "
+"της συντακτικής επιτροπής;"
 
 msgid "manager.setup.notifyAllAuthors.allAuthors"
 msgstr ""
+"Αποστολή ειδοποίησης μέσω ηλεκτρονικού ταχυδρομείου σε όλους τους συγγραφείς "
+"της υποβολής."
 
 msgid "manager.setup.notifyAllAuthors.assignedAuthors"
 msgstr ""
+"Αποστολή ειδοποίησης μέσω ηλεκτρονικού ταχυδρομείου στους συγγραφείς που "
+"έχουν εμπλοκή στη ροή εργασιών της υποβολής. Συνήθως, πρόκειται για τον "
+"συγγραφέα που υποβάλλει την εργασία."
 
 msgid "manager.setup.submissionsNotifications"
-msgstr ""
+msgstr "Ειδοποιήσεις"
 
 msgid "manager.setup.notifications.copySubmissionAckPrimaryContact"
-msgstr ""
+msgstr "Ειδοποίηση του κύριου υπεύθυνου επικοινωνίας"
 
 msgid "manager.setup.notifications.copySubmissionAckPrimaryContact.enabled"
-msgstr ""
+msgstr "Ναι, αποστολή αντιγράφου στο {$email}"
 
 msgid "manager.setup.notifications.copySubmissionAckPrimaryContact.disabled"
-msgstr ""
+msgstr "Όχι"
 
 msgid "manager.setup.notifications.copySubmissionAckAddress"
-msgstr ""
+msgstr "Ενημέρωση Όλων"
 
 msgid "manager.setup.notifications.copySubmissionAckAddress.description"
 msgstr ""
+"Θα σταλεί ένα αντίγραφο του μηνύματος ηλεκτρονικού ταχυδρομείου επιβεβαίωσης "
+"της υποβολής σε όλες τις διευθύνσεις ηλεκτρονικού ταχυδρομείου που "
+"καταχωρούνται εδώ. Διαχωρίστε τις πολλαπλές διευθύνσεις ηλεκτρονικού "
+"ταχυδρομείου με κόμμα. Παράδειγμα: one@example.com,two@example.com"
 
 msgid "manager.setup.notifications.copySubmissionAckAddress.invalid"
 msgstr ""
+"Μία ή περισσότερες από τις διευθύνσεις ηλεκτρονικού ταχυδρομείου δεν είναι "
+"έγκυρες."
 
 msgid "manager.setup.notifications.description"
 msgstr ""
@@ -1049,19 +1150,21 @@ msgstr ""
 "μηνύματος μπορεί να αποσταλεί ως εξής:"
 
 msgid "manager.setup.notifyUsers"
-msgstr ""
+msgstr "Ειδοποίηση"
 
 msgid "manager.setup.notifyUsers.description"
-msgstr ""
+msgstr "Επιλέξτε τους χρήστες στους οποίους θα σταλεί η ειδοποίηση μέσω email."
 
 msgid "manager.setup.notifyUsers.copyDetails"
-msgstr ""
+msgstr "Να μου σταλεί ένα αντίγραφο αυτού του email στη διεύθυνση {$email}."
 
 msgid "manager.setup.notifyUsers.send"
-msgstr ""
+msgstr "Αποστολή Email"
 
 msgid "manager.setup.notifyUsers.confirm"
 msgstr ""
+"Πρόκειται να στείλετε ένα email σε {$total} χρήστες. Σίγουρα θέλετε να "
+"στείλετε αυτό το email;"
 
 msgid "manager.setup.notifyUsers.sending"
 msgstr ""
@@ -1070,7 +1173,7 @@ msgid "manager.setup.notifyUsers.sent"
 msgstr ""
 
 msgid "manager.setup.notifyUsers.sendAnother"
-msgstr ""
+msgstr "Αποστολή άλλου email"
 
 msgid "manager.setup.openAccessPolicy"
 msgstr "Πολιτική Ανοικτής Πρόσβασης"
@@ -1195,11 +1298,10 @@ msgstr ""
 msgid "manager.setup.reviewOptions.reviewMode"
 msgstr "Προεπιλεγμένη Λειτουργία Αξιολόγησης"
 
-#, fuzzy
 msgid "manager.setup.reviewOptions.showAnonymousReviewLink"
 msgstr ""
-"Προσθέστε έναν σύνδεσμο για την <button type=\"button\">Εξασφάλιση τυφλής "
-"κρίσης</button> κατά τη μεταφόρτωση"
+"Παρουσιάστε έναν σύνδεσμο για το <button type=\"button\">πώς θα διασφαλίσετε "
+"ότι όλα τα αρχεία θα ανωνυμοποιηθούν</button> κατά το ανέβασμα"
 
 msgid "manager.setup.sponsors.note"
 msgstr "Σχέσεις Χορηγών και Περιγραφή Πολιτικής"
@@ -1228,7 +1330,7 @@ msgid "manager.setup.theme"
 msgstr "Θέμα"
 
 msgid "manager.setup.institutions"
-msgstr ""
+msgstr "Ιδρύματα"
 
 msgid "manager.setup.theme.description"
 msgstr ""
@@ -1240,59 +1342,81 @@ msgstr "Το θέμα που επιλέξατε δεν είναι εγκατεσ
 
 msgid "manager.setup.workflow.beginSubmissionHelp.description"
 msgstr ""
+"Το παρακάτω εμφανίζεται στους συγγραφείς πριν ξεκινήσουν τη διαδικασία "
+"υποβολής. Δώστε μια σύντομη εξήγηση της διαδικασίας υποβολής, ώστε ο "
+"συγγραφέας να γνωρίζει τι να περιμένει."
 
 msgid "manager.setup.workflow.uploadFilesHelp.description"
 msgstr ""
+"Το παρακάτω εμφανίζεται στους συγγραφείς κατά τη διάρκεια του σταδίου "
+"μεταφόρτωσης αρχείων. Δώστε μια σύντομη εξήγηση σχετικά με τα αρχεία που "
+"πρέπει να κοινοποιήσουν οι συγγραφείς μαζί με την υποβολή τους."
 
 msgid "manager.setup.workflow.contributorsHelp.description"
 msgstr ""
+"Το παρακάτω εμφανίζεται στους συγγραφείς κατά το βήμα των συντελεστών. Δώστε "
+"μια σύντομη εξήγηση σχετικά με τις πληροφορίες που πρέπει να παρέχει ο "
+"συγγραφέας για τον εαυτό του, τους συν-συγγραφείς και τυχόν άλλους "
+"συντελεστές."
 
 msgid "manager.setup.workflow.detailsHelp.description"
 msgstr ""
+"Το παρακάτω εμφανίζεται στους συγγραφείς κατά τη φάση των λεπτομερειών, όταν "
+"καλούνται να συμπληρώσουν τον τίτλο, την περίληψη και άλλες βασικές "
+"πληροφορίες σχετικά με την υποβολή τους."
 
 msgid "manager.setup.workflow.forTheEditorsHelp.description"
 msgstr ""
+"Το παρακάτω εμφανίζεται στους συγγραφείς κατά τη διάρκεια του σταδίου για "
+"τους επιμελητές, όταν καλούνται να παρέχουν μεταδεδομένα, όπως λέξεις-"
+"κλειδιά, σχόλια προς τον επιμελητή και άλλες λεπτομέρειες που θα βοηθήσουν "
+"στη διαδικασία της επιστημονικής αξιολόγησης."
 
 msgid "manager.setup.workflow.reviewHelp.description"
 msgstr ""
+"Το παρακάτω εμφανίζεται στους συγγραφείς κατά το τελικό στάδιο του οδηγού "
+"υποβολής, όταν καλούνται να ελέγξουν όλες τις πληροφορίες που έχουν παράσχει "
+"πριν από την υποβολή της εργασίας τους."
 
 msgid "manager.setup.workflow.guidance"
-msgstr ""
+msgstr "Καθοδήγηση Συγγραφέα"
 
 msgid "manager.setup.submissionPreparationChecklist"
 msgstr "Λίστα ελέγχου προετοιμασίας υποβολής"
 
-#, fuzzy
 msgid "manager.setup.submissionPreparationChecklistDescription"
 msgstr ""
-"Κατά την υποβολή εργασιών στο περιοδικό, ζητείται από τους Συγγραφείς να "
-"επιβεβαιώσουν ότι η υποβολή συμβαδίζει με τις υποδείξεις της λίστας ελέγχου. "
-"Η λίστα ελέγχου εμφανίζεται επίσης στις «Οδηγίες για τους Συγγραφείς», στην "
-"σελίδα «Σχετικά με το περιοδικό». Μπορείτε να επεξεργαστείτε τα στοιχεία της "
-"λίστας παρακάτω. Για την ολοκλήρωση της υποβολής από τους Συγγραφείς, "
-"απαιτείται η επιβεβαίωση όλων των στοιχείων της λίστας."
+"Το παρακάτω εμφανίζεται στους συγγραφείς όταν ξεκινούν τη διαδικασία "
+"υποβολής. Ζητείται από τους συγγραφείς να επιβεβαιώσουν ότι η υποβολή τους "
+"πληροί όλες τις απαιτήσεις που αναφέρονται εδώ, προτού ξεκινήσουν τη "
+"διαδικασία υποβολής."
 
-#, fuzzy
 msgid "manager.sections.form.deactivateSection"
 msgstr ""
+"Να μαρκαριστεί αυτή η ενότητα ως ανενεργή και μην επιτρέπονται νέες υποβολές "
+"σε αυτήν."
 
 msgid "manager.sections.confirmDeactivateSection"
-msgstr ""
+msgstr "Θέλετε σίγουρα να απενεργοποιήσετε αυτή την ενότητα;"
 
 msgid "manager.sections.confirmActivateSection"
-msgstr ""
+msgstr "Θέλετε σίγουρα να ενεργοποιήσετε αυτή την ενότητα;"
 
 msgid "manager.sections.form.assignEditors"
-msgstr ""
+msgstr "Αναθέσεις Επιμελητών"
 
 msgid "manager.sections.form.assignEditors.description"
 msgstr ""
+"Επιλέξτε τους επιμελητές που θα πρέπει να ανατεθούν αυτόματα σε όλες τις "
+"νέες υποβολές σε αυτή την ενότητα."
 
 msgid "manager.sections.form.assignEditorAs"
-msgstr ""
+msgstr "Ανάθεση του/της {$name} με ρόλο: {$role}"
 
 msgid "manager.categories.form.assignEditors.description"
 msgstr ""
+"Επιλέξτε τους επιμελητές που θα πρέπει να ανατεθούν αυτόματα σε όλες τις "
+"νέες υποβολές σε αυτή την κατηγορία."
 
 msgid "manager.siteAccessOptions.siteAccessOptions"
 msgstr "Επιλογές Πρόσβασης στον Ιστότοπο"
@@ -1394,16 +1518,16 @@ msgid "manager.plugins.delete"
 msgstr "Διαγραφή Πρόσθετου"
 
 msgid "manager.plugins.installConfirm"
-msgstr "Επιβεβαιώστε ότι θέλετε να διαγράψετε αυτό το Πρόσθετο."
+msgstr "Θέλετε σίγουρα να εγκαταστήσετε αυτό το πρόσθετο;"
 
 msgid "manager.plugins.upgradeConfirm"
-msgstr "Επιβεβαιώστε ότι θέλετε να αναβαθμίσετε αυτό το Πρόσθετο."
+msgstr "Θέλετε σίγουρα να αναβαθμίσετε αυτό το πρόσθετο;"
 
 msgid "grid.action.installPlugin"
 msgstr "Εγκατάσταση ή αναβάθμιση αυτού του Πρόσθετου"
 
 msgid "manager.plugins.deleteConfirm"
-msgstr "Επιβεβαιώστε ότι θέλετε να διαγράψετε αυτό το Πρόσθετο από το σύστημα."
+msgstr "Θέλετε σίγουρα να διαγράψετε αυτό το πρόσθετο από το σύστημα;"
 
 msgid "manager.plugins.deleteDescription"
 msgstr ""
@@ -1419,7 +1543,7 @@ msgstr ""
 "τον φάκελο μετά το πέρας της διαδικασίας."
 
 msgid "manager.plugins.deleteSuccess"
-msgstr "Το πρόσθετο  \"{$pluginName}\" διαγράφτηκε με επιτυχία"
+msgstr "Το πρόσθετο \"{$pluginName}\" διαγράφτηκε με επιτυχία"
 
 msgid "manager.plugins.description"
 msgstr ""
@@ -1613,6 +1737,8 @@ msgstr "Οι ρυθμίσεις γλώσσας αποθηκεύτηκαν."
 
 msgid "notification.localeSettingsCannotBeSaved"
 msgstr ""
+"Δεν ήταν δυνατή η αποθήκευση της ρύθμισης γλώσσας. Πρέπει να είναι "
+"ενεργοποιημένη τουλάχιστον μία γλώσσα για κάθε επιλογή"
 
 msgid "notification.editedUser"
 msgstr "Έγινε επεξεργασία του χρήστη."
@@ -1758,13 +1884,19 @@ msgid "grid.action.restoreGenres"
 msgstr "Επαναφέρετε τα στοιχεία στις προεπιλεγμένες ρυθμίσεις"
 
 msgid "manager.setup.genres.label"
-msgstr ""
+msgstr "Τύπος αρχείου"
 
 msgid "manager.setup.genres.dependent"
 msgstr ""
+"Πρόκειται για αρχεία που εξαρτώνται από άλλα, όπως εικόνες που εμφανίζονται "
+"σε ένα αρχείο HTML, και δεν θα εμφανίζονται μαζί με το δημοσιευμένο "
+"περιεχόμενο."
 
 msgid "manager.setup.genres.supplementary"
 msgstr ""
+"Πρόκειται για συμπληρωματικά αρχεία, όπως σύνολα δεδομένων και ερευνητικό "
+"υλικό, τα οποία θα εμφανίζονται ξεχωριστά από τα αρχεία της κύριας "
+"δημοσίευσης."
 
 msgid "manager.setup.genres.key"
 msgstr "Κλειδί"
@@ -1781,22 +1913,34 @@ msgstr ""
 "και παύλες και πρέπει να ξεκινά και να τελειώνει με αλφαριθμητικό χαρακτήρα."
 
 msgid "manager.setup.genres.metatadata"
-msgstr ""
+msgstr "Μεταδεδομένα Αρχείου"
 
 msgid "manager.setup.genres.metatadata.description"
 msgstr ""
+"Επιλέξτε τον τύπο των μεταδεδομένων που μπορούν να έχουν αυτά τα αρχεία. Για "
+"τα κύρια αρχεία της έκδοσης, όπως το PDF που θα είναι διαθέσιμο για λήψη, θα "
+"πρέπει να επιλεγεί η επιλογή «Έγγραφο», ώστε τα αρχεία αυτά να κληρονομούν "
+"τα μεταδεδομένα τους από την έκδοση. Διαφορετικά, επιλέξτε «Συμπληρωματικό "
+"περιεχόμενο» για τους περισσότερους τύπους αρχείων. Η επιλογή «Εικονογραφικό "
+"υλικό» είναι κατάλληλη για αρχεία που απαιτούν ξεχωριστά μεταδεδομένα "
+"σχετικά με την αναφορά πηγής, τη λεζάντα και την άδεια χρήσης."
 
 msgid "manager.setup.genres.submitRequired.label"
-msgstr ""
+msgstr "Να απαιτείται με τις Υποβολές"
 
 msgid "manager.setup.genres.submitRequired.description"
 msgstr ""
+"Θα πρέπει να απαιτείται τουλάχιστον ένα από αυτά τα αρχεία σε κάθε νέα "
+"υποβολή; Εάν επιλέξετε «Ναι», οι συγγραφείς δεν θα μπορούν να ολοκληρώσουν "
+"την υποβολή τους έως ότου ανεβάσουν τουλάχιστον ένα αρχείο αυτού του τύπου."
 
 msgid "manager.setup.genres.submitRequired.yes"
 msgstr ""
+"Ναι, να απαιτείται από τους συγγραφείς που κάνουν υποβολή να ανεβάσουν ένα ή "
+"περισσότερα από αυτά τα αρχεία."
 
 msgid "manager.setup.genres.submitRequired.no"
-msgstr ""
+msgstr "Όχι, να επιτρέπονται νέες υποβολές χωρίς αυτά τα αρχεία."
 
 msgid "manager.settings.wizard"
 msgstr "Οδηγός Ρυθμίσεων"
@@ -1894,10 +2038,10 @@ msgid "manager.reviewForms.title"
 msgstr "Τίτλος"
 
 msgid "manager.reviewFormElement.changeType"
-msgstr "Αλλάζοντας τον τύπο πεδίου της φόρμας..."
+msgstr "Αλλαγή του τύπο πεδίου της φόρμας..."
 
 msgid "manager.reviewFormElements"
-msgstr "Πεδία Φόρμας"
+msgstr "Στοιχεία Φόρμας"
 
 msgid "manager.reviewFormElements.addResponseItem"
 msgstr "Προσθήκη Επιλογής"
@@ -1906,7 +2050,7 @@ msgid "manager.reviewFormElements.checkboxes"
 msgstr "Checkboxes (επιλέξτε ένα ή περισσότερα)"
 
 msgid "manager.reviewFormElements.chooseType"
-msgstr "Επιλέξτε τύπο πεδίου"
+msgstr "Επιλέξτε τύπο στοιχείου"
 
 msgid "manager.reviewFormElements.confirmDelete"
 msgstr ""
@@ -1917,31 +2061,31 @@ msgid "manager.reviewFormElements.copyTo"
 msgstr "Αντιγραφή σε:"
 
 msgid "manager.reviewFormElements.create"
-msgstr "Δημιουργία νέου πεδίου"
+msgstr "Δημιουργία νέου στοιχείου"
 
 msgid "manager.reviewFormElements.dropdownbox"
 msgstr "Drop-down box"
 
 msgid "manager.reviewFormElements.edit"
-msgstr "Επεξεργασία Πεδίου Φόρμας"
+msgstr "Επεξεργασία Στοιχείου Φόρμας"
 
 msgid "manager.reviewFormElements.elementType"
-msgstr "Τύπος πεδίου"
+msgstr "Τύπος στοιχείου"
 
 msgid "manager.reviewFormElements.form.elementTypeRequired"
-msgstr "Απαιτείται ένα τύπος πεδίου για το πεδίο της φόρμας."
+msgstr "Απαιτείται ένα τύπος στοιχείου για το στοιχείο της φόρμας."
 
 msgid "manager.reviewFormElements.form.questionRequired"
-msgstr "Απαιτείται μια ερώτηση για το πεδίο της φόρμας."
+msgstr "Απαιτείται μια ερώτηση για το στοιχείο της φόρμας."
 
 msgid "manager.reviewFormElements.noneCreated"
-msgstr "Δεν έχει δημιουργηθεί πεδίο."
+msgstr "Δεν έχουν δημιουργηθεί στοιχεία φόρμας."
 
 msgid "manager.reviewFormElements.possibleResponse"
 msgstr "Επιλογή"
 
 msgid "manager.reviewFormElements.question"
-msgstr "Πεδίο"
+msgstr "Στοιχείο"
 
 msgid "manager.reviewFormElements.description"
 msgstr "Περιγραφή"
@@ -1950,7 +2094,7 @@ msgid "manager.reviewFormElements.radiobuttons"
 msgstr "Radio buttons (επιλέξτε ένα ή περισσότερα)"
 
 msgid "manager.reviewFormElements.required"
-msgstr "Απαιτείται οι αξιολογητές να συμπληρώσουν το πεδίο"
+msgstr "Απαιτείται οι αξιολογητές να συμπληρώσουν το στοιχείο"
 
 msgid "manager.reviewFormElements.included"
 msgstr "Περιλαμβάνεται σε μήνυμα στον συγγραφέα"
@@ -2000,7 +2144,7 @@ msgstr ""
 
 msgid "manager.setup.metadata.coverage.require"
 msgstr ""
-"Απαιτείστε από τον συγγραφέα να προτείνει μεταδεδομένα κάλυψης προτού "
+"Απαιτήστε από τον συγγραφέα να προτείνει μεταδεδομένα κάλυψης προτού "
 "αποδεχτείτε την υποβολή του."
 
 msgid "manager.setup.metadata.keywords.description"
@@ -2020,8 +2164,8 @@ msgstr ""
 
 msgid "manager.setup.metadata.keywords.require"
 msgstr ""
-"Απαιτείστε από τον συγγραφέα να προτείνει λέξεις-κλειδιά πριν αποδεχτείτε "
-"την υποβολή του."
+"Απαιτήστε από τον συγγραφέα να προτείνει λέξεις-κλειδιά πριν αποδεχτείτε την "
+"υποβολή του."
 
 msgid "manager.setup.metadata.rights.description"
 msgstr ""
@@ -2032,20 +2176,18 @@ msgstr ""
 msgid "manager.setup.metadata.rights.enable"
 msgstr "Ενεργοποίηση μεταδεδομένων των δικαιωμάτων"
 
-#, fuzzy
 msgid "manager.setup.metadata.rights.noRequest"
-msgstr "Μην ζητήσετε παράθεση δικαιωμάτων από τον συγγραφέα κατά την υποβολή."
+msgstr ""
+"Να μην ζητείται παράθεση δικαιωμάτων από τον συγγραφέα κατά την υποβολή."
 
-#, fuzzy
 msgid "manager.setup.metadata.rights.request"
 msgstr ""
 "Ζητήστε από τον συγγραφέα να παραθέσει τυχόν προηγούμενα δικαιώματα "
 "πρόσβασης κατά την υποβολή."
 
-#, fuzzy
 msgid "manager.setup.metadata.rights.require"
 msgstr ""
-"Απαιτείστε από τον συγγραφέα να παραθέσει τυχόν προηγούμενα δικαιώματα "
+"Απαιτήστε από τον συγγραφέα να παραθέσει τυχόν προηγούμενα δικαιώματα "
 "πρόσβασης κατά την υποβολή."
 
 msgid "manager.setup.metadata.source.description"
@@ -2086,7 +2228,7 @@ msgstr "Ζητήστε από τον συγγραφέα να παράσχει θ
 
 msgid "manager.setup.metadata.subjects.require"
 msgstr ""
-"Απαιτείστε από τον συγγραφέα να παρέχει θέματα πριν αποδεχτείτε την υποβολή "
+"Απαιτήστε από τον συγγραφέα να παρέχει θέματα πριν αποδεχτείτε την υποβολή "
 "τους."
 
 msgid "manager.setup.metadata.type.description"
@@ -2102,12 +2244,16 @@ msgstr "Ενεργοποίηση μεταδεδομένων τύπου"
 
 msgid "manager.setup.metadata.type.noRequest"
 msgstr ""
+"Μην ζητάτε πληροφορίες σχετικά με τον τύπο από τον συγγραφέα κατά την "
+"υποβολή."
 
 msgid "manager.setup.metadata.type.request"
-msgstr ""
+msgstr "Ζητήστε από τον συγγραφέα να αναφέρει τον τύπο κατά την υποβολή."
 
 msgid "manager.setup.metadata.type.require"
 msgstr ""
+"Απαιτήστε από τον συγγραφέα να δηλώσει τον τύπο πριν αποδεχτείτε την υποβολή "
+"του."
 
 msgid "manager.setup.metadata.disciplines.description"
 msgstr ""
@@ -2120,12 +2266,18 @@ msgstr "Ενεργοποίηση μεταδεδομένων επιστημονι
 
 msgid "manager.setup.metadata.disciplines.noRequest"
 msgstr ""
+"Μην ζητήσετε από τον συγγραφέα να προσδιορίσει τις επιστημονικές ειδικότητες "
+"κατά την υποβολή."
 
 msgid "manager.setup.metadata.disciplines.request"
 msgstr ""
+"Ζητήστε από τον συγγραφέα να προσδιορίσει τις επιστημονικές ειδικότητες κατά "
+"την υποβολή."
 
 msgid "manager.setup.metadata.disciplines.require"
 msgstr ""
+"Απαιτήστε από τον συγγραφέα να προσδιορίσει τις επιστημονικές ειδικότητες "
+"κατά την υποβολή."
 
 msgid "manager.setup.metadata.agencies.description"
 msgstr ""
@@ -2137,12 +2289,18 @@ msgstr "Ενεργοποίηση μεταδεδομένων οργανισμών
 
 msgid "manager.setup.metadata.agencies.noRequest"
 msgstr ""
+"Μην ζητήσετε από τον συγγραφέα να αναφέρει τους φορείς που υποστηρίζουν την "
+"εργασία κατά την υποβολή της."
 
 msgid "manager.setup.metadata.agencies.request"
 msgstr ""
+"Ζητήστε από τον συγγραφέα να αναφέρει τους φορείς που υποστηρίζουν την "
+"εργασία κατά την υποβολή της."
 
 msgid "manager.setup.metadata.agencies.require"
 msgstr ""
+"Απαιτήστε από τον συγγραφέα να αναφέρει τους φορείς που υποστηρίζουν την "
+"εργασία κατά την υποβολή της."
 
 msgid "manager.setup.metadata.citations.description"
 msgstr ""
@@ -2161,23 +2319,32 @@ msgstr "Ζητήστε από τον συγγραφέα να καταθέσει 
 
 msgid "manager.setup.metadata.citations.require"
 msgstr ""
-"Απαιτείστε από τον συγγραφέα να καταθέσει παραπομπές πριν αποδεχτείτε την "
+"Απαιτήστε από τον συγγραφέα να καταθέσει παραπομπές πριν αποδεχτείτε την "
 "υποβολή."
 
 msgid "manager.setup.metadata.dataAvailability.description"
 msgstr ""
+"Μια σύντομη δήλωση στην οποία αναφέρεται αν ο/οι συγγραφέας/-εις έχουν "
+"διαθέσει τα ερευνητικά τους δεδομένα και, εάν ναι, πού μπορούν να τα βρουν "
+"οι αναγνώστες."
 
 msgid "manager.setup.metadata.dataAvailability.enable"
-msgstr ""
+msgstr "Ενεργοποίηση μεταδεδομένων για δήλωση διαθεσιμότητας δεδομένων"
 
 msgid "manager.setup.metadata.dataAvailability.noRequest"
 msgstr ""
+"Μην ζητάτε από τον συγγραφέα δήλωση διαθεσιμότητας δεδομένων κατά την "
+"υποβολή."
 
 msgid "manager.setup.metadata.dataAvailability.request"
 msgstr ""
+"Να ζητείται από τον συγγραφέα δήλωση διαθεσιμότητας δεδομένων κατά την "
+"υποβολή."
 
 msgid "manager.setup.metadata.dataAvailability.require"
 msgstr ""
+"Να απαιτείται από τον συγγραφέα δήλωση διαθεσιμότητας δεδομένων κατά την "
+"υποβολή."
 
 msgid "plugins.importexport.common.validationErrors"
 msgstr "Σφάλματα επικύρωσης:"
@@ -2207,7 +2374,7 @@ msgid "plugins.importexport.common.error.unknownUserGroup"
 msgstr "Άγνωστη ομάδα χρηστών {$param}"
 
 msgid "plugins.importexport.common.error.userGroupMissing"
-msgstr ""
+msgstr "Δεν υπάρχει ομάδα χρηστών για το όνομα του συγγραφέα {$param}"
 
 msgid "plugins.importexport.common.error.missingGivenName"
 msgstr ""
@@ -2216,7 +2383,7 @@ msgstr ""
 "πληροφορία."
 
 msgid "plugins.importexport.common.error.unknownUploader"
-msgstr ""
+msgstr "Άγνωστος χρήστης που ανέβασε το αρχείο {$param}"
 
 msgid "plugins.importexport.common.error.temporaryFileFailed"
 msgstr ""
@@ -2237,24 +2404,35 @@ msgstr "Δεν ήταν δυνατή η εισαγωγή του αρχείου �
 
 msgid "plugins.importexport.native.error.submissionFileSkipped"
 msgstr ""
+"Το αρχείο υποβολής {$id} παραλείφθηκε, καθώς είναι συνημμένο σε μια εγγραφή "
+"που δεν θα εισαχθεί, όπως μια ανάθεση αξιολόγησης ή μια συζήτηση."
 
 msgid "plugins.importexport.user.importExportErrors"
 msgstr "Σφάλματα εισαγωγής/εξαγωγής:"
 
 msgid "plugins.importexport.user.error.userHasNoPassword"
 msgstr ""
+"Ο εισαγόμενος χρήστης «{$username}» δεν διαθέτει κωδικό πρόσβασης. Ελέγξτε "
+"τη μορφή του XML αρχείου εισαγωγής. Ο χρήστης δεν έχει εισαχθεί."
 
 msgid "plugins.importexport.user.error.passwordHasBeenChanged"
 msgstr ""
+"Ο κωδικός πρόσβασης του εισαγόμενου χρήστη «{$username}» δεν μπόρεσε να "
+"εισαχθεί ως έχει. Έχει σταλεί ένας νέος κωδικός πρόσβασης στο email του "
+"χρήστη. Ο χρήστης έχει εισαχθεί."
 
 msgid "plugins.importexport.user.error.plainPasswordNotValid"
 msgstr ""
+"Ο εισαγόμενος χρήστης «{$username}» έχει έναν απλό κωδικό πρόσβασης που δεν "
+"είναι έγκυρος. Ο χρήστης δεν έχει εισαχθεί."
 
 msgid "plugins.importexport.user.error.usernameEmailMismatch"
 msgstr ""
+"Το όνομα χρήστη «{$username}» και η διεύθυνση ηλεκτρονικού ταχυδρομείου "
+"«{$email}» δεν αντιστοιχούν στον ίδιο υπάρχοντα χρήστη."
 
 msgid "plugins.importexport.common.settings.form.testMode.label"
-msgstr ""
+msgstr "Δοκιμαστικό"
 
 msgid "manager.navigationMenus.form.title"
 msgstr "Τίτλος"
@@ -2487,16 +2665,16 @@ msgid "stats.city"
 msgstr "Πόλη"
 
 msgid "stats.views"
-msgstr ""
+msgstr "Προβολές"
 
 msgid "stats.downloads"
-msgstr ""
+msgstr "Λήψεις"
 
 msgid "stats.views.timelineInterval"
-msgstr ""
+msgstr "Σύνολο προβολών κατά ημερομηνία"
 
 msgid "stats.downloads.timelineInterval"
-msgstr ""
+msgstr "Σύνολο λήψεων κατά ημερομηνία"
 
 msgid "stats.countWithYearlyAverage"
 msgstr "{$count} ({$average}/year)"
@@ -2593,6 +2771,9 @@ msgstr ""
 
 msgid "stats.description.submissionsSkipped"
 msgstr ""
+"Αυτό περιλαμβάνει υποβολές που δεν υπολογίζονται σε άλλα σύνολα, όπως "
+"εκείνες που βρίσκονται ακόμη σε εξέλιξη και εκείνες που φαίνεται να έχουν "
+"εισαχθεί."
 
 msgid "stats.descriptionForStat"
 msgstr "Περιγραφή για {$stat}"
@@ -2601,10 +2782,10 @@ msgid "stats.editorialActivity"
 msgstr "Συντακτική δραστηριότητα"
 
 msgid "stats.file.type.primaryFile"
-msgstr ""
+msgstr "Πρωτεύον Αρχείο"
 
 msgid "stats.file.type.suppFile"
-msgstr ""
+msgstr "Συμπληρωματικό Αρχείο"
 
 msgid "stats.fileViews"
 msgstr "Προβολές αρχείων"
@@ -2619,28 +2800,28 @@ msgid "stats.pdf"
 msgstr "PDF"
 
 msgid "stats.geographic.ccAttribution"
-msgstr ""
+msgstr "Η γεωεντοπισμός παρέχεται από το <a href='https://db-ip.com'>DB-IP</a>"
 
 msgid "stats.geographic.tooltip.label"
-msgstr ""
+msgstr "Σχετικά με τον Γεωεντοπισμό"
 
 msgid "stats.downloadReport.betweenDates"
-msgstr ""
+msgstr "{$startDate} έως {$endDate}"
 
 msgid "stats.downloadReport.allFilters"
 msgstr ""
 
 msgid "stats.publications.downloadReport.downloadFiles"
-msgstr ""
+msgstr "Λήψη Αρχείων"
 
 msgid "stats.publications.downloadReport.downloadFiles.description"
-msgstr ""
+msgstr "Ο αριθμός λήψεων του κάθε αρχείου."
 
 msgid "stats.publications.downloadReport.downloadGeographic"
 msgstr ""
 
 msgid "stats.publications.downloadReport.downloadGeographic.description"
-msgstr ""
+msgstr "Ο αριθμός των προβολών και των λήψεων για κάθε πόλη, περιοχή ή χώρα."
 
 msgid "stats.region"
 msgstr "Περιφέρεια"
@@ -2652,25 +2833,25 @@ msgid "stats.submissionsActive"
 msgstr "Ενεργές Υποβολές"
 
 msgid "stats.timeline"
-msgstr ""
+msgstr "Χρονολόγιο"
 
 msgid "stats.timeline.downloadReport.description"
-msgstr ""
+msgstr "Ο αριθμός των {$type} για κάθε {$interval}."
 
 msgid "stats.timeline.downloadReport.downloadTimeline"
-msgstr ""
+msgstr "Χρονολόγιο Λήψης"
 
 msgid "stats.timelineInterval"
-msgstr ""
+msgstr "Διάστημα Χρονολογίου"
 
 msgid "stats.timelineType"
-msgstr ""
+msgstr "Τύπος Χρονολογίου"
 
 msgid "stats.total"
 msgstr "Σύνολο"
 
 msgid "stats.unique"
-msgstr ""
+msgstr "Μοναδικά"
 
 msgid "stats.totalWithinDateRange"
 msgstr "Σύνολο εντός εύρους ημερομηνιών"
@@ -2684,9 +2865,8 @@ msgstr ""
 msgid "stats.userStatistics"
 msgstr "Στατιστικά Χρηστών"
 
-#, fuzzy
 msgid "stats.name.submissionsReceived"
-msgstr "Κατατεθειμένες Υποβολές"
+msgstr "Ληφθείσες Υποβολές"
 
 msgid "stats.name.submissionsSkipped"
 msgstr "Άλλες Υποβολές"
@@ -2735,24 +2915,27 @@ msgstr "Ποσοστό Απόρριψης μετά την κρίση"
 
 msgid "plugins.importexport.native.processFailed"
 msgstr ""
+"Η διαδικασία απέτυχε. Ελέγξτε παρακάτω για τυχόν σφάλματα ή προειδοποιήσεις."
 
 msgid "plugins.importexport.native.export.submissions.results"
-msgstr ""
+msgstr "Εξαγωγή Αποτελεσμάτων Υποβολών"
 
 msgid "plugins.importexport.native.export.download.results"
-msgstr ""
+msgstr "Λήψη του εξαγόμενου αρχείου"
 
 msgid "plugins.importexport.native.export.completed"
-msgstr ""
+msgstr "Η εξαγωγή ολοκληρώθηκε επιτυχώς."
 
 msgid "plugins.importexport.native.export.completed.downloadFile"
-msgstr ""
+msgstr "Κατεβάστε το αρχείο που εξήχθη πατώντας το παρακάτω κουμπί."
 
 msgid "plugins.importexport.native.common.any"
 msgstr ""
 
 msgid "plugins.importexport.native.common.error.filter.configuration.count"
 msgstr ""
+"Λανθασμένη ρύθμιση φίλτρου [{$filterName}]: {$filterCount} εμφανίσεις. Θα "
+"έπρεπε να υπάρχει μόνο μία."
 
 msgid "plugins.importexport.common.cliError"
 msgstr "ΣΦΑΛΜΑ:"
@@ -2760,98 +2943,122 @@ msgstr "ΣΦΑΛΜΑ:"
 msgid "plugins.importexport.common.error.unknownContext"
 msgstr "Η καθορισμένη διαδρομή περιοδικού, \"{$contextPath}\", δεν υπάρχει."
 
+#, fuzzy
 msgid "plugins.importexport.submission.cli.display"
-msgstr ""
+msgstr "\"{$submissionId}\" - \"{$submissionTitle}\""
 
 msgid "plugins.importexport.author.exportFailed"
-msgstr ""
+msgstr "Η διαδικασία δεν κατάφερε να επεξεργαστεί τους συγγραφείς"
 
 msgid "plugins.importexport.publication.exportFailed"
-msgstr ""
+msgstr "Η διαδικασία δεν κατάφερε να επεξεργαστεί τις δημοσιεύσεις"
 
 msgid "emailTemplate.variable.allReviewersComments"
 msgstr ""
+"Όλα τα σχόλια από τις ολοκληρωμένες αξιολογήσεις. Τα ονόματα των αξιολογητών "
+"παραμένουν κρυφά στις ανώνυμες αξιολογήσεις"
 
 msgid "emailTemplate.variable.authorsWithAffiliation"
-msgstr ""
+msgstr "Τα ονόματα και οι ιδιότητες των συγγραφέων της υποβολής."
 
 msgid "emailTemplate.variable.context.passwordLostUrl"
 msgstr ""
+"Η URL διεύθυνση μιας σελίδας όπου ο χρήστης μπορεί να ανακτήσει έναν χαμένο "
+"κωδικό πρόσβασης"
 
 msgid "emailTemplate.variable.context.submissionsUrl"
 msgstr ""
+"Η URL διεύθυνση για την εμφάνιση όλων των υποβολών που έχουν ανατεθεί σε "
+"έναν χρήστη"
 
 msgid "emailTemplate.variable.context.userProfileUrl"
 msgstr ""
+"Η URL διεύθυνση που επιτρέπει σε έναν χρήστη να δει και να επεξεργαστεί το "
+"προφίλ του"
 
 msgid "emailTemplate.variable.decision.name"
-msgstr ""
+msgstr "Το όνομα της απόφασης που ελήφθη"
 
 msgid "emailTemplate.variable.decision.description"
-msgstr ""
+msgstr "Περιγραφή της απόφασης που ελήφθη"
 
 msgid "emailTemplate.variable.decision.stage"
 msgstr ""
+"Το στάδιο της ροής εργασίας της επιμέλειας στο οποίο ελήφθη αυτή η απόφαση"
 
 msgid "emailTemplate.variable.decision.round"
 msgstr ""
+"Ο γύρος της αξιολόγησης στο πλαίσιο του οποίου ελήφθη η απόφαση αυτή, εφόσον "
+"η απόφαση αφορά στάδιο αξιολόγησης"
 
 msgid "emailTemplate.variable.discussion.subject"
-msgstr ""
+msgstr "Το θέμα της συζήτησης"
 
 msgid "emailTemplate.variable.discussion.content"
-msgstr ""
+msgstr "Το περιεχόμενο της νέας συζήτησης ή απάντησης"
 
 msgid "emailTemplate.variable.editorialReminder.outstandingTasks"
-msgstr ""
+msgstr "Λίστα υποβολών με εκκρεμείς διεργασίες"
 
 msgid "emailTemplate.variable.editorialReminder.numberOfSubmissions"
-msgstr ""
+msgstr "Ο αριθμός των υποβολών που έχουν ανατεθεί στον συγκεκριμένο επιμελητή"
 
 msgid "emailTemplate.variable.recipient.userFullName"
-msgstr ""
+msgstr "Το πλήρες όνομα του παραλήπτη ή όλοι οι παραλήπτες"
 
 msgid "emailTemplate.variable.recipient.username"
-msgstr ""
+msgstr "Το όνομα χρήστη του παραλήπτη ή όλοι οι παραλήπτες"
 
 msgid "emailTemplate.variable.recipient.reviewDueDate"
-msgstr ""
+msgstr "Ημερομηνία κατά την οποία θα πρέπει να έχει ολοκληρωθεί η αξιολόγηση"
 
 msgid "emailTemplate.variable.recipient.responseDueDate"
 msgstr ""
+"Ημερομηνία κατά την οποία ο αξιολογητής πρέπει να αποδεχτεί ή να απορρίψει "
+"την ανάθεση"
 
 msgid "emailTemplate.variable.recipient.reviewAssignmentUrl"
-msgstr ""
+msgstr "Η URL διεύθυνση της ανάθεσης αξιολόγησης"
 
 msgid "emailTemplate.variable.recommendation"
-msgstr ""
+msgstr "Η προτεινόμενη απόφαση, όπως «Αποδοχή Υποβολής»"
 
 msgid "emailTemplate.variable.review.assignedDate"
-msgstr ""
+msgstr "Η ημερομηνία ανάθεσης της παρούσας αξιολόγησης"
 
 msgid "emailTemplate.variable.review.method"
-msgstr ""
+msgstr "Ο τύπος της αξιολόγησης, όπως ανώνυμη, διπλά ανώνυμη ή ανοιχτή"
 
 msgid "emailTemplate.variable.review.recommendation"
-msgstr ""
+msgstr "Η πρόταση του αξιολογητή, όπως «Αποδοχή της Υποβολής» ή «Απόρριψη»"
 
 msgid "emailTemplate.variable.review.round"
-msgstr ""
+msgstr "Ο γύρος αξιολόγησης, όπως 1ος γύρος ή 2ος γύρος"
 
 msgid "emailTemplate.variable.review.files"
-msgstr ""
+msgstr "Τα αρχεία που ανέβασε ο αξιολογητής"
 
 msgid "emailTemplate.variable.review.name"
-msgstr ""
+msgstr "Το όνομα του αξιολογητή"
 
 msgid "emailTemplate.variable.reviewType"
 msgstr ""
+"Περιγραφή της προεπιλεγμένης μεθόδου αξιολόγησης, όπως η διπλή ανώνυμη ή η "
+"ανοιχτή"
 
 msgid "emailTemplate.variable.reviewType.doubleAnonymous"
 msgstr ""
+"Το περιοδικό αυτό εφαρμόζει τη διαδικασία διπλής ανώνυμης αξιολόγησης από "
+"ομότιμους. Οι αξιολογητές δεν θα έχουν πρόσβαση σε καμία πληροφορία σας που "
+"θα μπορούσε να ταυτοποιήσει ούτε εσάς ούτε τους συν-συγγραφείς σας. "
+"Αντίστοιχα, δεν θα γνωρίζετε ποιος αξιολόγησε την δική σας υποβολή και δεν "
+"θα λάβετε απευθείας επικοινωνία από τους αξιολογητές."
 
 msgid "emailTemplate.variable.reviewType.anonymous"
 msgstr ""
+"Το περιοδικό αυτό εφαρμόζει τη διαδικασία «ανώνυμης αξιολόγησης». Το όνομά "
+"σας, καθώς και τα ονόματα των συν-συγγραφέων σας, θα είναι ορατά στους "
+"κριτές. Ωστόσο, η ταυτότητα των αξιολογητών θα παραμείνει ανώνυμη."
 
 msgid "emailTemplate.variable.reviewType.open"
 msgstr ""
@@ -2989,126 +3196,171 @@ msgid "mailable.decision.notifyOtherAuthors.description"
 msgstr ""
 
 msgid "mailable.decision.notifyOtherAuthors.variable.message.description"
-msgstr ""
+msgstr "Αντίγραφο του email που αποστάλθηκε στον συντάκτη που υπέβαλε το άρθρο"
 
 msgid "mailable.decision.notifyReviewer.name"
-msgstr ""
+msgstr "Ενημέρωση των Αξιολογητών για την Απόφαση"
 
 msgid "mailable.decision.notifyReviewer.description"
 msgstr ""
+"Αυτό το email αποστέλλεται από έναν Επιμελητή σε έναν Αξιολογητή, "
+"προκειμένου να τον ενημερώσει ότι έχει ληφθεί απόφαση σχετικά με μια υποβολή "
+"την οποία είχε αξιολογήσει."
 
 msgid "mailable.decision.notifyReviewer.variable.decisionDescription"
 msgstr ""
+"Μια σύντομη περιγραφή της παρούσας απόφασης, η οποία προορίζεται να "
+"συμπεριληφθεί σε μια ειδοποίηση που θα αποσταλεί με email στους κριτές "
+"σχετικά με την απόφαση αυτή"
 
 msgid "mailable.decision.notifyReviewer.variable.decisionDescription.accept"
-msgstr ""
+msgstr "Αποφασίσαμε να δεχτούμε αυτή την υποβολή χωρίς διορθώσεις."
 
 msgid "mailable.decision.notifyReviewer.variable.decisionDescription.decline"
-msgstr ""
+msgstr "Αποφασίσαμε να απορρίψουμε την αυτή την υποβολή."
 
 msgid ""
 "mailable.decision.notifyReviewer.variable.decisionDescription."
 "pendingRevisions"
-msgstr ""
+msgstr "Ζητήσαμε από τους συγγραφείς να υποβάλουν διορθωμένες εκδόσεις."
 
 msgid "mailable.decision.notifyReviewer.variable.decisionDescription.resubmit"
 msgstr ""
+"Ζητήσαμε από τους συγγραφείς να υποβάλουν μια αναθεωρημένη έκδοση για "
+"περαιτέρω αξιολόγηση."
 
 msgid ""
 "mailable.decision.notifyReviewer.variable.decisionDescription.unassigned"
-msgstr ""
+msgstr "Έγινε ανάκληση ανάθεσης του προσκεκλημένου αξιολογητή για την υποβολή."
 
 msgid "mailable.decision.accept.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή έγινε Δεκτή."
 
 msgid "mailable.decision.accept.notifyAuthor.description"
 msgstr ""
+"Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνεται ο συγγραφέας ότι η "
+"εργασία του έχει γίνει δεκτή για δημοσίευση."
 
 #, fuzzy
 msgid "mailable.decision.backToCopyediting.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή γύρισε πίσω στην Επιμέλεια Κειμένου"
 
 #, fuzzy
 msgid "mailable.decision.backToCopyediting.notifyAuthor.description"
 msgstr ""
+"Με αυτό το email ενημερώνεται ο συγγραφέας ότι η υποβολή του έχει επιστρέψει "
+"στο στάδιο της επιμέλειας κειμένου."
 
 msgid "mailable.decision.backFromCopyediting.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή επιστράφηκε από την Επιμέλεια Κειμένου"
 
 msgid "mailable.decision.backFromCopyediting.notifyAuthor.description"
 msgstr ""
+"Με αυτό το email ενημερώνεται ο συγγραφέας ότι η υποβολή του έχει επιστραφεί "
+"από το στάδιο της επιμέλειας κειμένου."
 
 msgid "mailable.decision.cancelReviewRound.notifyAuthor.name"
-msgstr ""
+msgstr "Ακύρωση του Γύρου Αξιολόγησης"
 
 msgid "mailable.decision.cancelReviewRound.notifyAuthor.description"
 msgstr ""
+"Με αυτό το email ενημερώνεται ο συγγραφέας ότι ακυρώθηκε ένας γύρος "
+"αξιολόγησης για την υποβολή του."
 
 msgid "mailable.decision.decline.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή Απορρίφθηκε"
 
 msgid "mailable.decision.decline.notifyAuthor.description"
 msgstr ""
+"Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνεται ο συγγραφέας ότι η "
+"υποβολή του απορρίφθηκε μετά από αξιολόγηση από ομότιμους."
 
 msgid "mailable.decision.initialDecline.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή Απορρίφθηκε (πριν την κρίση)"
 
 msgid "mailable.decision.newReviewRound.notifyAuthor.name"
-msgstr ""
+msgstr "Ξεκίνησε Νέος Γύρος Αξιολογήσεων"
 
 msgid "mailable.decision.newReviewRound.notifyAuthor.description"
 msgstr ""
+"Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνεται ο συγγραφέας ότι "
+"ξεκινά ένας νέος γύρος αξιολόγησης για την υποβολή του."
 
 msgid "mailable.decision.requestRevisions.notifyAuthor.name"
-msgstr ""
+msgstr "Ζητήθηκαν Αναθεωρήσεις"
 
 msgid "mailable.decision.requestRevisions.notifyAuthor.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνει τον συγγραφέα ότι "
+"αποφασίστηκε να ζητηθούν διορθώσεις κατά τη διάρκεια της αξιολόγησης από "
+"ομότιμους."
 
 msgid "mailable.decision.resubmit.notifyAuthor.name"
-msgstr ""
+msgstr "Επανυποβολή για Αξιολόγηση"
 
 msgid "mailable.decision.resubmit.notifyAuthor.description"
 msgstr ""
+"Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνεται ο συγγραφέας για "
+"την απόφαση «αναθεώρηση και εκ νέου υποβολή» σχετικά με την υποβολή του."
 
 msgid "mailable.decision.revertDecline.notifyAuthor.name"
-msgstr ""
+msgstr "Επαναφορά Απορριφθείσας Υποβολής"
 
 msgid "mailable.decision.revertDecline.notifyAuthor.description"
 msgstr ""
+"Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνεται ο συγγραφέας ότι "
+"ανακαλείται η προηγούμενη απόφαση για την απόρριψη της υποβολής του μετά από "
+"αξιολόγηση από ομότιμους."
 
 msgid "mailable.decision.revertInitialDecline.notifyAuthor.name"
-msgstr ""
+msgstr "Η Επαναφορά Υποβολής Απορρίφθηκε Χωρίς Αξιολόγηση"
 
 msgid "mailable.decision.revertInitialDecline.notifyAuthor.description"
 msgstr ""
+"Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνεται ο συγγραφέας ότι "
+"ανακαλείται η προηγούμενη απόφαση για απόρριψη της υποβολής του χωρίς "
+"αξιολόγηση."
 
 msgid "mailable.decision.sendExternalReview.notifyAuthor.name"
-msgstr ""
+msgstr "Απεστάλη για Αξιολόγηση"
 
 msgid "mailable.decision.sendExternalReview.notifyAuthor.description"
 msgstr ""
+"Με αυτό το email ενημερώνεται ο συγγραφέας ότι η υποβολή του προχωρά στο "
+"στάδιο της αξιολόγησης."
 
 msgid "mailable.decision.sendToProduction.notifyAuthor.name"
-msgstr ""
+msgstr "Απεστάλη στην Παραγωγή"
 
 msgid "mailable.decision.sendToProduction.notifyAuthor.description"
 msgstr ""
+"Με αυτό το email ενημερώνεται ο συγγραφέας ότι η υποβολή του προωθείται στο "
+"στάδιο της παραγωγής."
 
 msgid "mailable.decision.skipReview.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή Έγινε Δεκτή (Χωρίς Αξιολόγηση)"
 
 msgid "mailable.decision.skipReview.notifyAuthor.description"
 msgstr ""
+"Με αυτό το email ενημερώνεται ο συγγραφέας ότι η υποβολή του προωθείται "
+"απευθείας στο στάδιο της επιμέλειας κειμένου και δεν θα υποβληθεί σε "
+"αξιολόγηση από ομότιμους."
 
 msgid "mailable.decision.recommendation.notifyEditors.name"
-msgstr ""
+msgstr "Υποβλήθηκε Σύσταση"
 
 msgid "mailable.decision.recommendation.notifyEditors.description"
 msgstr ""
+"Αυτό το μήνυμα ενημερώνει έναν ανώτερο Επιμελητή ή έναν Επιμελητή Τμήματος "
+"ότι έχει γίνει μια συντακτική πρόταση σχετικά με μία από τις υποβολές που "
+"τους έχουν ανατεθεί. Το μήνυμα αυτό χρησιμοποιείται όταν ένας επιμελητής "
+"έχει το δικαίωμα μόνο να προτείνει μια συντακτική απόφαση, ενώ απαιτείται "
+"εξουσιοδοτημένος επιμελητής για την καταχώριση των συντακτικών αποφάσεων. "
+"Αυτή η επιλογή μπορεί να επιλεγεί κατά την ανάθεση συμμετεχόντων σε μια "
+"υποβολή."
 
 msgid "mailable.reviewConfirm.name"
-msgstr ""
+msgstr "Επιβεβαίωση Αξιολόγησης"
 
 msgid "mailable.reviewConfirm.description"
 msgstr ""
@@ -3117,7 +3369,7 @@ msgstr ""
 "και την ολοκλήρωση της αξιολόγησης μέχρι τη λήξη της προθεσμίας."
 
 msgid "mailable.reviewDecline.name"
-msgstr ""
+msgstr "Απόρριψη Αξιολόγησης"
 
 msgid "mailable.reviewDecline.description"
 msgstr ""
@@ -3125,83 +3377,77 @@ msgstr ""
 "ενημέρωση ότι το αίτημα αξιολόγησης δεν έγινε δεκτό."
 
 msgid "mailable.reviewRemind.name"
-msgstr ""
+msgstr "Υπενθύμιση Αξιολόγησης"
 
 msgid "mailable.reviewRemind.description"
 msgstr ""
+"Αυτό το email αποστέλλεται από έναν Επιμελητή για να υπενθυμίσει σε έναν "
+"αξιολογητή ότι η αξιολόγησή του εκκρεμεί και πρέπει να υποβληθεί."
 
 msgid "mailable.reviewRemindAuto.name"
-msgstr ""
+msgstr "Υπενθύμιση Αξιολόγησης (Αυτοματοποιημένη)"
 
-#, fuzzy
 msgid "mailable.reviewRemindAuto.description"
 msgstr ""
-"Το παρόν μήνυμα αποστέλλεται αυτόματα όταν παρέλθει η προθεσμία ολοκλήρωσης "
-"μίας αξιολόγησης (ανατρέξτε στις Επιλογές Αξιολόγησης κάτω από τις Ρυθμίσεις "
-"> Ροή εργασιών > Αξιολόγηση) και η πρόσβαση με ένα κλικ είναι "
-"απενεργοποιημένη για τους Αξιολογητές. Οι προγραμματισμένες εργασίες θα "
-"πρέπει να έχουν ενεργοποιηθεί και διαμορφωθεί (ανατρέξτε στο αρχείο "
-"διαμόρφωσης του ιστοτόπου)."
+"Αυτό το email αποστέλλεται αυτόματα όταν ένας αξιολογητής δεν έχει "
+"ολοκληρώσει εγκαίρως την αξιολόγησή του."
 
 msgid "mailable.reviewAcknowledgement.name"
-msgstr ""
+msgstr "Επιβεβαίωση Αξιολόγησης"
 
 msgid "mailable.reviewAcknowledgement.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται από έναν επιμελητή σε "
+"έναν αξιολογητή, προκειμένου να επιβεβαιώσει ότι η αξιολόγησή του έχει "
+"παραληφθεί και να τον ευχαριστήσει για τη συμβολή του."
 
 msgid "mailable.reviewResponseOverdueAuto.name"
-msgstr ""
+msgstr "Καθυστέρηση Απάντησης σε Αξιολόγηση (Αυτοματοποιημένο)"
 
-#, fuzzy
 msgid "mailable.reviewResponseOverdueAuto.description"
 msgstr ""
-"Το παρόν μήνυμα αποστέλλεται αυτόματα όταν η προθεσμία επιβεβαίωσης της "
-"ανάληψης μίας αξιολόγησης παρέλθει (ανατρέξτε στο Επιλογές Αξιολόγησης, κάτω "
-"από τις Ρυθμίσεις > Ροή εργασιών > Αξιολόγηση) και η πρόσβαση με ένα κλικ "
-"είναι απενεργοποιημένη. Οι προγραμματισμένες εργασίες θα πρέπει να έχουν "
-"ενεργοποιηθεί και διαμορφωθεί (ανατρέξτε στο αρχείο διαμόρφωσης του "
-"ιστοτόπου)."
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται αυτόματα όταν παρέλθει "
+"η προθεσμία που έχει δοθεί σε έναν αξιολογητή για να απαντήσει σε ένα αίτημα "
+"αξιολόγησης."
 
 msgid "mailable.reviewRequest.name"
-msgstr ""
+msgstr "Αίτημα Αξιολόγησης"
 
-#, fuzzy
 msgid "mailable.reviewRequest.description"
 msgstr ""
-"Το παρόν αίτημα αξιολόγησης μιας υποβολής αποστέλλεται από τον Επιμελητή "
-"Ενότητας σε έναν Αξιολογητή. Παρέχει πληροφορίες σχετικά με την υποβολή όπως "
-"ο τίτλος, η περίληψη, η προθεσμία της αξιολόγησης και ο τρόπος πρόσβασης "
-"στην υποβολή. Το συγκεκριμένο μήνυμα χρησιμοποιείται όταν η \"Τυπική "
-"Διαδικασία Αξιολόγησης\" έχει επιλεχθεί στη Διαχείριση > Ρυθμίσεις > Ροή "
-"εργασιών > Αξιολόγηση."
+"Σε αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου που αποστέλλει ο Επιμελητής της "
+"Ενότητας σε έναν Αξιολογητή, ζητείται από τον Αξιολογητή να αποδεχτεί ή να "
+"απορρίψει την ανάθεση της αξιολόγησης μιας υποβολής. "
 
 msgid "mailable.reviewRequestSubsequent.name"
 msgstr ""
 
-#, fuzzy
 msgid "mailable.reviewRequestSubsequent.description"
 msgstr ""
-"Το παρόν αίτημα αξιολόγησης μιας υποβολής αποστέλλεται από τον Επιμελητή "
-"Ενότητας σε έναν Αξιολογητή για τον δεύτερο ή ακόλουθο κύκλο αξιολόγησης. "
-"Παρέχει πληροφορίες σχετικά με την υποβολή, όπως ο τίτλος και η περίληψη, η "
-"προθεσμία της αξιολόγησης ο τρόπος πρόσβασης στην υποβολή. Το συγκεκριμένο "
-"μήνυμα χρησιμοποιείται όταν επιλέγεται η Πρότυπη Διαδικασία Αξιολόγησης στη "
-"Διαχείριση > Ρυθμίσεις > Ροή εργασιών > Αξιολόγηση."
+"Σε αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου, ο Επιμελητής ζητά από τον "
+"Αξιολογητή να αποδεχτεί ή να απορρίψει την ανάθεση της αξιολόγησης μιας "
+"υποβολής για έναν επιπλέον γύρο αξιολόγησης. Περιέχει πληροφορίες σχετικά με "
+"την υποβολή, όπως τον τίτλο και την περίληψη, την προθεσμία υποβολής της "
+"αξιολόγησης, καθώς και οδηγίες για την πρόσβαση στην ίδια την υποβολή."
 
 msgid "plugins.importexport.common.error.currentPublicationNullOrMissing"
-msgstr ""
+msgstr "Λείπει η τρέχουσα δημοσίευση της υποβολής"
 
 msgid "plugins.importexport.common.error.submissionChildFailed"
 msgstr ""
+"Δεν κατέστη δυνατή η επεξεργασία του υπο-στοιχείου {$child} της υποβολής"
 
 msgid "mailable.editorialReminder.name"
-msgstr ""
+msgstr "Υπενθύμιση Επιμελητή"
 
 msgid "mailable.editorialReminder.description"
 msgstr ""
+"Ένα αυτοματοποιημένο email που αποστέλλεται στους επιμελητές με εκκρεμείς "
+"εργασίες"
 
+#, fuzzy
 msgid "mailable.passwordResetRequested.name"
-msgstr ""
+msgstr "Επιβεβαίωση Αλλαγής Κωδικού Πρόσβασης"
 
 msgid "mailable.passwordResetRequested.description"
 msgstr ""
@@ -3210,16 +3456,17 @@ msgstr ""
 "έναν σύνδεσμο όπου μπορούν να αλλάξουν τον κωδικό πρόσβασής τους."
 
 msgid "mailable.userRegister.name"
-msgstr ""
+msgstr "Δημιουργήθηκε από Χρήστη"
 
-#, fuzzy
 msgid "mailable.userRegister.description"
 msgstr ""
-"Το παρόν μήνυμα καλωσορίσματος αποστέλλεται στους νέους Χρήστες. Περιέχει το "
-"όνομα Χρήστη και τον κωδικό πρόσβασής τους στον ιστότοπο."
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται σε έναν "
+"νεοδημιουργημένο χρήστη, όταν ο επιμελητής έχει δημιουργήσει τον χρήστη μέσω "
+"των ρυθμίσεων. Το μήνυμα πρέπει να καλωσορίζει τον χρήστη στο σύστημα και να "
+"του παρέχει τα στοιχεία του ονόματος χρήστη και του κωδικού πρόσβασής του."
 
 msgid "mailable.reviewerRegister.name"
-msgstr ""
+msgstr "Μητρώο Αξιολογητών"
 
 msgid "mailable.reviewerRegister.description"
 msgstr ""
@@ -3227,58 +3474,67 @@ msgstr ""
 "Περιέχει το όνομα Χρήστη και τον κωδικό πρόσβασής τους στον ιστότοπο."
 
 msgid "mailable.submissionSavedForLater.name"
-msgstr ""
+msgstr "Η υποβολή αποθηκεύτηκε για αργότερα"
 
 msgid "mailable.submissionSavedForLater.description"
 msgstr ""
+"Ένα αυτοματοποιημένο μήνυμα ηλεκτρονικού ταχυδρομείου που αποστέλλεται στους "
+"συγγραφείς όταν αποθηκεύουν την υποβολή τους για να την ολοκληρώσουν αργότερα"
 
 msgid "mailable.submissionAck.name"
-msgstr ""
+msgstr "Επιβεβαίωση Υποβολής"
 
-#, fuzzy
 msgid "mailable.submissionAck.description"
 msgstr ""
-"Εφόσον έχει ενεργοποιηθεί η αντίστοιχη επιλογή, το παρόν μήνυμα αποστέλλεται "
-"αυτόματα σε έναν Συγγραφέα, κατά την ολοκλήρωση της διαδικασίας υποβολής "
-"άρθρου. Ευχαριστεί τον Συγγραφέα για την υποβολή και παρέχει πληροφορίες "
-"σχετικά με την παρακολούθηση της υποβολής."
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται αυτόματα σε έναν "
+"συγγραφέα όταν υποβάλλει ένα άρθρο. Περιέχει πληροφορίες σχετικά με την "
+"παρακολούθηση της υποβολής κατά τη διάρκεια της διαδικασίας επιμέλειας και "
+"ευχαριστεί τον συγγραφέα για την υποβολή."
 
 msgid "mailable.submissionAckNotAuthor.name"
-msgstr ""
+msgstr "Επιβεβαίωση Υποβολής (Άλλοι Συγγραφείς)"
 
 #, fuzzy
 msgid "mailable.submissionAckNotAuthor.description"
 msgstr ""
-"Εφόσον έχει ενεργοποιηθεί η αντίστοιχη επιλογή, το παρόν μήνυμα αποστέλλεται "
-"αυτόματα στους μη εγγεγραμμένους στην πλατφόρμα Συγγραφείς, όπως "
-"καθορίστηκαν κατά τη διαδικασία υποβολής."
+"Αυτό το email αποστέλλεται αυτόματα στους λοιπούς συγγραφείς που αναφέρονται "
+"σε μια υποβολή (οι οποίοι όμως δεν έχουν πραγματοποιήσει την υποβολή)."
 
 msgid "mailable.discussionSubmission.name"
-msgstr ""
+msgstr "Συζήτηση (Υποβολή)"
 
 msgid "mailable.discussionSubmission.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται όταν δημιουργείται μια "
+"συζήτηση ή όταν υπάρχει απάντηση σε αυτή κατά το στάδιο υποβολής."
 
 msgid "mailable.discussionReview.name"
-msgstr ""
+msgstr "Συζήτηση (Αξιολόγηση)"
 
 msgid "mailable.discussionReview.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται όταν δημιουργείται μια "
+"συζήτηση ή όταν υπάρχει απάντηση σε αυτή κατά το στάδιο της αξιολόγησης."
 
 msgid "mailable.discussionCopyediting.name"
-msgstr ""
+msgstr "Συζήτηση (Τυπογραφικό Δοκίμιο)"
 
 msgid "mailable.discussionCopyediting.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται όταν δημιουργείται μια "
+"συζήτηση ή όταν υπάρχει απάντηση σε αυτή κατά το στάδιο του Τυπογραφικού "
+"Δοκιμίου."
 
 msgid "mailable.discussionProduction.name"
-msgstr ""
+msgstr "Συζήτηση (Παραγωγή)"
 
 msgid "mailable.discussionProduction.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται όταν δημιουργείται μια "
+"συζήτηση ή όταν υπάρχει απάντηση σε αυτή κατά το στάδιο της παραγωγής."
 
 msgid "mailable.revisedVersionNotify.name"
-msgstr ""
+msgstr "Ειδοποίηση για Αναθεωρημένη Έκδοση"
 
 msgid "mailable.revisedVersionNotify.description"
 msgstr ""
@@ -3286,164 +3542,198 @@ msgstr ""
 "Συγγραφέας μεταφορτώνει στην πλατφόρμα μία αναθεωρημένη έκδοση του άρθρου."
 
 msgid "mailable.announcementNotify.name"
-msgstr ""
+msgstr "Νέα Ανακοίνωση"
 
 msgid "mailable.announcementNotify.description"
 msgstr "Αυτό το email αποστέλλεται όταν δημιουργείται μια νέα ανακοίνωση."
 
 msgid "mailable.statisticsReportNotify.name"
-msgstr ""
+msgstr "Ειδοποίηση για Αναφορά Στατιστικών"
 
 msgid "mailable.editReviewNotify.name"
-msgstr ""
+msgstr "Ειδοποίηση για Επεξεργασία Αξιολόγησης"
 
 msgid "mailable.editReviewNotify.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ειδοποιεί αυτόματα τον αξιολογητή "
+"όταν γίνονται αλλαγές στις λεπτομέρειες της ανάθεσης αξιολόγησης."
 
 msgid "mailable.reviewCompleteNotifyEditors.name"
-msgstr ""
+msgstr "Ειδοποίηση Επιμελητών για Σχολιασμό από Αξιολογητή"
 
 msgid "mailable.reviewCompleteNotifyEditors.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται αυτόματα στους "
+"αρμόδιους επιμελητές όταν ο αξιολογητής διατυπώνει τη σύστασή του σχετικά με "
+"την αξιολόγηση"
 
 msgid "manager.people.authSource"
-msgstr ""
+msgstr "Πηγή πιστοποίησης"
 
 #, fuzzy
 msgid "mailable.decision.backToReview.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή επιστράφηκε για Αξιολόγηση"
 
 #, fuzzy
 msgid "mailable.decision.backToReview.notifyAuthor.description"
 msgstr ""
+"Με αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου ενημερώνεται ο συγγραφέας ότι η "
+"υποβολή του έχει επιστραφεί στο στάδιο της αξιολόγησης."
 
 #, fuzzy
 msgid "mailable.decision.backToSubmission.notifyAuthor.name"
-msgstr ""
+msgstr "Η Υποβολή επιστράφηκε στο Στάδιο της Υποβολής"
 
 #, fuzzy
 msgid "mailable.decision.backToSubmission.notifyAuthor.description"
 msgstr ""
+"Με αυτό το email ενημερώνεται ο συγγραφέας ότι η υποβολή του έχει επιστραφεί "
+"στο στάδιο της υποβολής."
 
 msgid "manager.manageEmails"
-msgstr ""
+msgstr "Διαχείριση των Email"
 
 msgid "manager.manageEmailTemplates.description"
 msgstr ""
+"<p><a href=\"{$url}\">Προσθήκη και επεξεργασία προτύπων</a> για όλα τα "
+"μηνύματα ηλεκτρονικού ταχυδρομείου που αποστέλλονται από το σύστημα.</p>"
 
 msgid "manager.mailables.addTemplates"
 msgstr ""
+"Προσθήκη και επεξεργασία προτύπων που θέλετε να είναι διαθέσιμα στον χρήστη "
+"όταν στέλνει αυτό το email. Το προεπιλεγμένο πρότυπο θα φορτώνεται αυτόματα, "
+"ενώ ο χρήστης θα μπορεί να φορτώνει γρήγορα οποιαδήποτε άλλα πρότυπα "
+"προσθέσετε εδώ."
 
 msgid "manager.mailables.templates"
-msgstr ""
+msgstr "Πρότυπα"
 
 msgid "manager.mailables.editTemplate"
-msgstr ""
+msgstr "Επεξεργασία Προτύπου"
 
 msgid "manager.mailables.removeTemplate"
-msgstr ""
+msgstr "Αφαίρεση Προτύπου"
 
 msgid "manager.mailables.removeTemplate.confirm"
-msgstr ""
+msgstr "Θέλετε σίγουρα να διαγράψετε το πρότυπο <strong>{$template}</strong>;"
 
 msgid "manager.mailables.resetTemplate"
-msgstr ""
+msgstr "Επαναφορά Προτύπου"
 
 msgid "manager.mailables.resetTemplate.confirm"
 msgstr ""
+"Θέλετε σίγουρα να επαναφέρετε το θέμα και το κύριο κείμενο στις "
+"προεπιλεγμένες τιμές τους για το πρότυπο <strong>{$template}</strong>;"
 
 msgid "manager.mailables.search"
-msgstr ""
+msgstr "Αναζήτηση με όνομα ή περιγραφή"
 
 msgid "manager.emailTemplate.name.description"
 msgstr ""
+"Εισάγετε ένα σύντομο όνομα για να μπορείτε να βρείτε πιο εύκολα αυτό το "
+"πρότυπο."
 
 msgid "manager.newSubmission"
-msgstr ""
+msgstr "Νέα Υποβολή"
 
 msgid "manager.newSubmission.description"
 msgstr ""
+"Ρυθμίστε τις ειδοποιήσεις μέσω email που θα αποστέλλονται όταν γίνεται μια "
+"νέα υποβολή."
 
 msgid "manager.submissionAck.description"
 msgstr ""
+"Ποιος θα πρέπει να λαμβάνει ένα email όταν ολοκληρώνεται μια νέα υποβολή."
 
 msgid "manager.submissionAck.off"
-msgstr ""
+msgstr "Να μην αποστέλλεται email."
 
 msgid "manager.submissionAck.submittingAuthor"
-msgstr ""
+msgstr "Να αποστέλλεται email αποκλειστικά στον συγγραφέα που υπέβαλε το άρθρο."
 
 msgid "manager.submissionAck.allAuthors"
-msgstr ""
+msgstr "Να αποστέλλεται email σε όλους τους συγγραφείς."
 
 msgid "manager.editorialDecisions"
-msgstr ""
+msgstr "Αποφάσεις Επιμελητή"
 
 msgid "manager.editorialDecisions.description"
 msgstr ""
+"Ρυθμίστε τις ειδοποιήσεις μέσω ηλεκτρονικού ταχυδρομείου που θα "
+"αποστέλλονται στους συγγραφείς όταν καταγράφεται μια απόφαση επιμελητή."
 
 msgid "manager.forEditors"
-msgstr ""
+msgstr "Για Επιμελητές"
 
 msgid "manager.forEditors.description"
 msgstr ""
+"Ρυθμίστε τις ειδοποιήσεις μέσω ηλεκτρονικού ταχυδρομείου που θα "
+"αποστέλλονται στους επιμελητές."
 
 msgid "manager.editorialStatistics"
-msgstr ""
+msgstr "Στατιστικά Επιμελητών"
 
 msgid "manager.editorialStatistics.description"
 msgstr ""
+"Αν θα αποστέλλεται ή όχι μηνιαίο email στους επιμελητές με στατιστικά "
+"στοιχεία για το περιοδικό, όπως τα ποσοστά αποδοχής και απόρριψης υποβολών. "
+"Οι επιμελητές μπορούν να διαγραφούν από τη λίστα παραληπτών αυτού του email "
+"μέσω του προφίλ χρήστη τους."
 
 msgid "manager.editorialStatistics.on"
-msgstr ""
+msgstr "Αποστολή μηνιαίου email στους επιμελητές."
 
 msgid "manager.editorialStatistics.off"
-msgstr ""
+msgstr "Μη αποστολή μηνιαίου email στους επιμελητές."
 
 msgid "manager.submitWithCategories.description"
 msgstr ""
+"Θα πρέπει να ζητείται από τον συγγραφέα που υποβάλλει το άρθρο να επιλέξει "
+"μια κατηγορία κατά την νέας υποβολή;"
 
 msgid "manager.submitWithCategories.yes"
-msgstr ""
+msgstr "Ναι, προσθέστε ένα πεδίο «κατηγορίες» στον οδηγό υποβολής."
 
 msgid "manager.submitWithCategories.no"
-msgstr ""
+msgstr "Όχι, μην εμφανίζετε αυτό το πεδίο στους συγγραφείς."
 
 msgid "mailable.copyeditRequest.name"
-msgstr ""
+msgstr "Αίτημα για Επιμέλεια Κειμένου"
 
 msgid "mailable.editorAssign.name"
 msgstr ""
 
 msgid "mailable.layoutRequest.name"
-msgstr ""
+msgstr "Έτοιμο για Παραγωγή"
 
 msgid "mailable.system"
-msgstr ""
+msgstr "Σύστημα"
 
 msgid "mailable.versionCreated.name"
-msgstr ""
+msgstr "Δημιουργία Έκδοσης"
 
 msgid "mailable.reviewComplete.name"
-msgstr ""
+msgstr "Η Αξιολόγηση Ολοκληρώθηκε"
 
 msgid "mailable.reviewEdit.name"
-msgstr ""
+msgstr "Η Αξιολόγηση Επεξεργάστηκε"
 
 msgid "mailable.submissionAckOtherAuthors.name"
-msgstr ""
+msgstr "Γνωστοποίηση Υποβολής προς Άλλους Συγγραφείς"
 
 msgid "mailable.editorAssigned.name"
-msgstr ""
+msgstr "Ανάθεση σε Επιμελητή (Αυτόματα)"
 
 msgid "mailable.editorAssigned.description"
 msgstr ""
+"Αυτό το μήνυμα ηλεκτρονικού ταχυδρομείου αποστέλλεται σε έναν επιμελητή όταν "
+"του ανατίθεται αυτόματα μια υποβολή."
 
 msgid "mailable.editorAssignedManual.name"
-msgstr ""
+msgstr "Ανάθεση Επιμελητή"
 
 msgid "mailable.submissionNeedsEditor.name"
-msgstr ""
+msgstr "Η Υποβολή χρειάζεται Επιμελητή"
 
 #~ msgid "manager.setup.selectOne"
 #~ msgstr "Επιλέξτε ένα"
@@ -3497,3 +3787,249 @@ msgstr "Κύριος τίτλος"
 
 msgid "plugins.importexport.common.validation"
 msgstr "Επικυρώστε το XML πριν από την εξαγωγή και την ευρετηρίαση."
+
+msgid "manager.announcements.notEnabled"
+msgstr ""
+"Θα πρέπει να <a href=\"#announcements/announcement-settings\">ενεργοποιήσετε "
+"τις ανακοινώσεις</a>."
+
+msgid "manager.navigationMenus.items.form.title.required"
+msgstr "Απαιτείται ο τίτλος του στοιχείου του μενού."
+
+msgid "manager.highlights.urlText.description"
+msgstr "Η ετικέτα, όπως «Διαβάστε Περισσότερα», για το κουμπί της επισήμανσης."
+
+msgid "manager.highlights.add"
+msgstr "Προσθήκη Επισήμανσης"
+
+msgid "manager.highlights.confirmDelete"
+msgstr ""
+"Σίγουρα θέλετε να διαγράψετε το {$title}; Αυτή η ενέργεια δεν μπορεί να "
+"αναιρεθεί."
+
+msgid "manager.highlights.delete"
+msgstr "Διαγραφή Επισήμανσης"
+
+msgid "manager.highlights.edit"
+msgstr "Επεξεργασία Επισήμανσης"
+
+msgid "manager.highlights.image"
+msgstr "Εικόνα"
+
+msgid "manager.highlights.urlText"
+msgstr "Ετικέτα Κουμπιού"
+
+msgid "manager.statistics.counterR5Report.settings.itemId"
+msgstr "ID Υποβολής"
+
+msgid "manager.statistics.counterR5Report.settings.wrongItemId"
+msgstr "Το ID της υποβολής δεν υπάρχει."
+
+msgid "manager.language.gridAction.addLangauage"
+msgstr "Προσθήκη/Κατάργηση Γλωσσών"
+
+msgid "manager.language.submissionMetadata"
+msgstr "Μεταδεδομένα"
+
+msgid "manager.language.submission.from.error"
+msgstr "Πρέπει να επιλεγεί τουλάχιστον μία τοπική ρύθμιση."
+
+msgid "manager.language.websiteLanguages"
+msgstr "Γλώσσες Ιστοσελίδας"
+
+msgid "manager.language.submissionLanguages"
+msgstr "Γλώσσες Υποβολής"
+
+msgid "manager.language.submission.form.description"
+msgstr "Επιλέξτε γλώσσες για νέες υποβολές και τα μεταδεδομένα τους."
+
+msgid "manager.image"
+msgstr "Εικόνα"
+
+msgid "manager.statistics.counterR5Reports.description"
+msgstr ""
+"Δείτε την <a href=\"https://cop5.projectcounter.org/en/5.0.3/04-reports/index"
+".html\" target=\"_new\">τεκμηρίωση του COUNTER 5.0.3</a> για περισσότερες "
+"πληροφορίες σχετικά με την κάθε αναφορά."
+
+msgid "manager.statistics.counterR5Report.settings.date.yop.description"
+msgstr ""
+"Μια λίστα ή ένα εύρος ετών έκδοσης που θα εμφανιστεί στην απάντηση, με τη "
+"μορφή yyyy|yyyy|yyyy-yyyy."
+
+msgid "doi.manager.settings.doiSuffixPattern.required"
+msgstr "Απαιτείται ένα πρότυπο κατάληξης DOI."
+
+msgid "manager.statistics.counterR5"
+msgstr "Counter R5"
+
+msgid "manager.statistics.counterR5Reports"
+msgstr "Αναφορές Counter R5"
+
+msgid "manager.statistics.counterR5Reports.usageNotPossible"
+msgstr "Δεν υπάρχουν ακόμη διαθέσιμα στατιστικά στοιχεία χρήσης του COUNTER R5."
+
+msgid "manager.statistics.counterR5Report.settings.startDate"
+msgstr "Ημερομηνία Έναρξης"
+
+msgid "manager.statistics.counterR5Report.settings.date.startDate.description"
+msgstr ""
+"Η ημερομηνία πρέπει να έχει τη μορφή YYYY-MM-DD ή YYYY-MM. Η νωρίτερη δυνατή "
+"ημερομηνία είναι {$earliestDate}."
+
+msgid "manager.statistics.counterR5Report.settings.endDate"
+msgstr "Ημερομηνία Λήξης"
+
+msgid "manager.statistics.counterR5Report.settings.date.endDate.description"
+msgstr ""
+"Η ημερομηνία πρέπει να έχει τη μορφή YYYY-MM-DD ή YYYY-MM. Η τελευταία "
+"δυνατή ημερομηνία είναι η {$lastDate}."
+
+msgid "manager.statistics.counterR5Report.settings.wrongDateFormat"
+msgstr "Η μορφή της ημερομηνίας δεν είναι έγκυρη."
+
+msgid "manager.statistics.counterR5Report.settings.customerId"
+msgstr "ID Πελάτη"
+
+msgid "manager.statistics.counterR5Report.settings.attributesToShow"
+msgstr "Χαρακτηριστικά Προς Εμφάνιση"
+
+msgid "manager.statistics.counterR5Report.settings.yop"
+msgstr "Έτος Έκδοσης"
+
+msgid "manager.statistics.counterR5Report.settings.excludeMonthlyDetails"
+msgstr "Εξαίρεση Μηνιαίων Στοιχείων"
+
+msgid "manager.setup.notifyUsers.queued"
+msgstr ""
+"Τα email έχουν προστεθεί με επιτυχία στην ουρά για αποστολή το συντομότερο "
+"δυνατό."
+
+msgid "manager.setup.reviewOptions.reminders.submit.before"
+msgstr "Υποβολή Αξιολόγησης - Πριν από τις"
+
+msgid "manager.setup.reviewOptions.reminders.submit.after"
+msgstr "Υποβολή Αξιολόγησης – Μετά από τις"
+
+msgid "manager.setup.reviewOptions.reminders.label.before.days"
+msgstr "{$value} ημέρες πριν την ημερομηνία λήξης"
+
+msgid "manager.setup.reviewOptions.reminders.min.label"
+msgstr "Κανένα"
+
+msgid "manager.setup.reviewOptions.reminders.disbale.label"
+msgstr "Δεν έχει οριστεί υπενθύμιση"
+
+msgid "manager.setup.reviewOptions.reminders.description"
+msgstr ""
+"Αποστολή υπενθύμισης μέσω email για απάντηση στο αίτημα αξιολόγησης (εάν ο "
+"αξιολογητής δεν έχει απαντήσει ακόμη στο αίτημα αξιολόγησης) ή για υποβολή "
+"της αξιολόγησης (εάν ο αξιολογητής δεν έχει υποβάλει ακόμη την αξιολόγηση)"
+
+msgid "manager.setup.reviewOptions.reminders.response.before"
+msgstr "Απάντηση σε Αίτημα Αξιολόγησης – Πριν από τις"
+
+msgid "manager.setup.reviewOptions.reminders.label.after.days"
+msgstr "{$value} ημέρες μετά από την ημερομηνία λήξης"
+
+msgid "manager.setup.reviewOptions.reminders.response.after"
+msgstr "Απάντηση σε Αίτημα Αξιολόγησης - Μετά από τις"
+
+msgid "manager.setup.reviewOptions.reviewerSuggestionEnabled.description"
+msgstr ""
+"Ο συγγραφέας μπορεί να προτείνει διάφορους πιθανούς αξιολογητές πριν "
+"ολοκληρώσει την υποβολή, κάτι που μπορεί να επιταχύνει τη διαδικασία "
+"αξιολόγησης και να προσφέρει πολύτιμες πληροφορίες στην συντακτική ομάδα."
+
+msgid "manager.setup.reviewOptions.reviewerSuggestionEnabled.label"
+msgstr ""
+"Να επιτρέπεται στους συγγραφείς να προτείνουν πιθανούς αξιολογητές κατά τη "
+"διαδικασία υποβολής"
+
+msgid "manager.setup.workflow.reviewerSuggestionsHelp.description"
+msgstr ""
+"Το παρακάτω εμφανίζεται στους συγγραφείς κατά τη φάση των προτάσεων των "
+"αξιολογητών. Δώστε μια σύντομη εξήγηση σχετικά με τις πληροφορίες που πρέπει "
+"να παρέχει ο συγγραφέας για τον εαυτό του, τους συν-συγγραφείς και τυχόν "
+"άλλους συντελεστές."
+
+msgid "manager.setup.reviewOptions.numReviewsPerSubmission.description"
+msgstr ""
+"Ελάχιστος αριθμός επιβεβαιωμένων αξιολογήσεων που απαιτούνται για μια υποβολή"
+
+msgid "manager.setup.reviewOptions.numReviewsPerSubmission"
+msgstr "Ελάχιστος απαιτούμενος αριθμός επιβεβαιωμένων αξιολογήσεων"
+
+msgid "manager.categories.form.removeCoverImageOnDifferentContextNowAllowed"
+msgstr ""
+"Η κατηγορία δεν υπάρχει ή ανήκει σε διαφορετικό πλαίσιο. Βεβαιωθείτε ότι "
+"εργάζεστε στο σωστό πλαίσιο και δοκιμάστε ξανά."
+
+msgid "notification.defaultLocaleSettingsCannotBeSaved"
+msgstr ""
+"Δεν ήταν δυνατή η αποθήκευση της ρύθμισης γλώσσας. Πρέπει να ενεργοποιηθούν "
+"όλες οι επιλογές."
+
+msgid "manager.plugins.pluginGallery.installed"
+msgstr "Εγκατεστημένη έκδοση: {$version}"
+
+msgid "settings.roles.permitSettings"
+msgstr "Να επιτρέπονται αλλαγές στις Ρυθμίσεις"
+
+msgid "manager.categories.form.removeCoverImageFileNotFound"
+msgstr ""
+"Δεν ήταν δυνατή η εύρεση των αρχείων της εικόνας εξωφύλλου και της "
+"μικρογραφίας. Πιθανόν να έχουν ήδη διαγραφεί. Δοκιμάστε να ανανεώσετε τη "
+"σελίδα."
+
+msgid "manager.setup.reviewOptions.reminders"
+msgstr "Ορισμός υπενθυμίσεων για Αξιολόγηση"
+
+msgid "manager.statistics.counterR5Report.settings"
+msgstr "Ρυθμίσεις Αναφορών"
+
+msgid "manager.setup.reviewOptions.reviewerSuggestionEnabled"
+msgstr "Πρόταση για Αξιολογητή κατά την Υποβολή"
+
+msgid "notification.submissionLocales"
+msgstr "Ενημερώθηκαν οι τοπικές ρυθμίσεις της υποβολής."
+
+msgid "plugins.importexport.native.error.submissionFileWithoutRevision"
+msgstr ""
+"Το αρχείο υποβολής {$id} παραλείφθηκε, καθώς δεν διαθέτει μια έγκυρη "
+"αναθεώρηση."
+
+msgid "plugins.importexport.native.error.submissionFileInvalidFileStage"
+msgstr ""
+"Το αρχείο υποβολής {$id} παραλείφθηκε, καθώς δεν διαθέτει έγκυρο στάδιο "
+"αρχείου."
+
+msgid "plugins.importexport.common.error.missingAffiliationName"
+msgstr ""
+"Ο συγγραφέας {$authorName} δεν διαθέτει affiliation στη γλώσσα της υποβολής, "
+"{$localeName}. Η υποβολή δεν μπορεί να εισαχθεί χωρίς αυτή την πληροφορία."
+
+msgid "plugins.importexport.native.error.submissionFileRevisionMissing"
+msgstr ""
+"Η αναθεώρηση {$revision} του αρχείου υποβολής {$id} παραλείφθηκε, καθώς το "
+"αρχείο δεν εντοπίστηκε στη διαδρομή «{$path}»."
+
+msgid "plugins.importexport.common.error.publicationCoverImageMissing"
+msgstr ""
+"Η εικόνα εξωφύλλου της δημοσίευσης {$id} δεν εξήχθη· το αρχείο της δεν "
+"εντοπίστηκε στη διαδρομή «{$path}»."
+
+msgid "mailable.changeProfileEmailInvitationNotify.name"
+msgstr "Πρόσκληση Αλλαγής Διεύθυνσης Ηλεκτρονικού Ταχυδρομείου"
+
+msgid "manager.setup.editorialMasthead.order.reviewers.description"
+msgstr ""
+"Οι επιμελητές θα εμφανίζονται σε τυποποιημένη μορφή, προκειμένου να "
+"διατηρηθεί η ομοιομορφία και να διασφαλιστεί η εύκολη εύρεσή τους σε αυτή "
+"την ενότητα."
+
+msgid "manager.setup.editorialMasthead.editorialHistory.description"
+msgstr ""
+"Παρακαλούμε να αναφέρετε το ιστορικό της επιμέλειας, συμπεριλαμβανομένου του "
+"πλήρους ονόματος και του φορέα στον οποίο ανήκει ο εκάστοτε επιμελητής, "
+"καθώς και των ημερομηνιών έναρξης και λήξης του κάθε επιμελητή."

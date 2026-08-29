@@ -1983,6 +1983,7 @@ msgstr ""
 "{$editorName} szerkesztőként megerősítette a(z) {$submissionId} beküldés "
 "szakmai lektorálását a {$round} számú lektorálási körben."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} megtette a(z) {$submissionId} beküldés szakmai lektorálását "
@@ -2989,3 +2990,6 @@ msgstr ""
 
 msgid "submission.submissionFile"
 msgstr "Beküldési fájl"
+
+msgid "reviewer.competingInterests"
+msgstr "Összeférhetetlenség"

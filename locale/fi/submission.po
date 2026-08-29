@@ -2071,6 +2071,7 @@ msgstr ""
 "Toimittaja {$editorName} on vahvistanut arvion käsikirjoitukselle "
 "{$submissionId} kierroksella {$round}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} on saanut valmiiksi arvion käsikirjoitukselle "
@@ -3239,3 +3240,6 @@ msgstr "Arviointi valmistunut {$date}"
 msgid "dashboard.reviewAssignment.statusReceived.description"
 msgstr ""
 "Arviointi valmistui {$date}, ja sen suositus oli: <b>{$recommendation}</b>"
+
+msgid "reviewer.competingInterests"
+msgstr "Sidonnaisuudet"

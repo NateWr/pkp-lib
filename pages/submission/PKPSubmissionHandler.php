@@ -31,6 +31,7 @@ use Illuminate\Support\LazyCollection;
 use PKP\components\forms\FormComponent;
 use PKP\components\forms\publication\PKPCitationsForm;
 use PKP\components\forms\dataCitation\DataCitationEditForm;
+use PKP\components\forms\funder\FunderEditForm;
 use PKP\components\forms\publication\PKPDataAvailabilityForm;
 use PKP\components\forms\publication\TitleAbstractForm;
 use PKP\components\forms\submission\CommentsForTheEditors;
@@ -57,6 +58,7 @@ abstract class PKPSubmissionHandler extends Handler
     public const SECTION_TYPE_CONFIRM = 'confirm';
     public const SECTION_TYPE_CONTRIBUTORS = 'contributors';
     public const SECTION_TYPE_DATA_CITATIONS = 'dataCitations';
+    public const SECTION_TYPE_FUNDERS = 'funders';
     public const SECTION_TYPE_REVIEWER_SUGGESTIONS = 'reviewerSuggestions';
     public const SECTION_TYPE_FILES = 'files';
     public const SECTION_TYPE_FORM = 'form';
@@ -185,7 +187,7 @@ abstract class PKPSubmissionHandler extends Handler
             )
         ) {
             $this->showErrorPage(
-                'submission.wizard.sectionClosed',
+                __('submission.wizard.sectionClosed'),
                 __('submission.wizard.sectionClosed.message', [
                     'contextName' => $context->getLocalizedData('name'),
                     'section' => $section->getLocalizedTitle(),
@@ -258,6 +260,14 @@ abstract class PKPSubmissionHandler extends Handler
             $dataCitationEditForm = new DataCitationEditForm('emit');
             $components['dataCitation'] = [
                 'dataCitationEditForm' => $dataCitationEditForm->getConfig(),
+            ];
+        }
+
+        $fundersSetting = $context->getData('funders');
+        if (in_array($fundersSetting, [Context::METADATA_REQUEST, Context::METADATA_REQUIRE])) {
+            $funderEditForm = new FunderEditForm('emit');
+            $components['funder'] = [
+                'funderEditForm' => $funderEditForm->getConfig(),
             ];
         }
 
@@ -781,13 +791,48 @@ abstract class PKPSubmissionHandler extends Handler
             ];
         }
 
+        $dataSections = [];
+
         $dataCitationsSetting = $request->getContext()->getData('dataCitations');
         if (in_array($dataCitationsSetting, [Context::METADATA_REQUEST, Context::METADATA_REQUIRE])) {
-            $sections[] = [
+            $dataSections[] = [
                 'id' => 'dataCitations',
-                'name' => __('submission.dataCitations'),
                 'type' => self::SECTION_TYPE_DATA_CITATIONS,
-                'description' => __('submission.dataCitations.description'),
+            ];
+        }
+
+        $dataAvailabilitySetting = $request->getContext()->getData('dataAvailability');
+        if (in_array($dataAvailabilitySetting, [Context::METADATA_REQUEST, Context::METADATA_REQUIRE])) {
+            $dataAvailabilityForm = new PKPDataAvailabilityForm(
+                $publicationApiUrl,
+                $locales,
+                $publication,
+                true,
+                $dataAvailabilitySetting === Context::METADATA_REQUIRE
+            );
+            $this->removeButtonFromForm($dataAvailabilityForm);
+            $dataSections[] = [
+                'id' => $dataAvailabilityForm->id,
+                'type' => self::SECTION_TYPE_FORM,
+                'form' => $dataAvailabilityForm->getConfig(),
+            ];
+        }
+
+        // The "Data" heading is shown once, above whichever data section comes first
+        foreach ($dataSections as $index => $dataSection) {
+            $sections[] = array_merge([
+                'name' => $index === 0 ? __('submission.dataAvailabilityAndCitation.data') : '',
+                'description' => $index === 0 ? __('submission.dataAvailabilityAndCitation.data.description') : '',
+            ], $dataSection);
+        }
+
+        $fundersSetting = $request->getContext()->getData('funders');
+        if (in_array($fundersSetting, [Context::METADATA_REQUEST, Context::METADATA_REQUIRE])) {
+            $sections[] = [
+                'id' => 'funders',
+                'name' => __('submission.funders'),
+                'type' => self::SECTION_TYPE_FUNDERS,
+                'description' => '',
             ];
         }
 
@@ -833,16 +878,6 @@ abstract class PKPSubmissionHandler extends Handler
         );
         $this->removeButtonFromForm($metadataForm);
 
-        $dataAvailabilitySetting = $request->getContext()->getData('dataAvailability');
-        $dataAvailabilityForm = new PKPDataAvailabilityForm(
-            $publicationApiUrl,
-            $locales,
-            $publication,
-            in_array($dataAvailabilitySetting, [Context::METADATA_REQUEST, Context::METADATA_REQUIRE]),
-            $dataAvailabilitySetting === Context::METADATA_REQUIRE
-        );
-        $this->removeButtonFromForm($dataAvailabilityForm);
-
         $commentsForm = new CommentsForTheEditors(
             Repo::submission()->getUrlApi($request->getContext(), $submission->getId()),
             $submission
@@ -856,12 +891,6 @@ abstract class PKPSubmissionHandler extends Handler
             $sections[] = [
                 'id' => $metadataForm->id,
                 'form' => $this->getLocalizedForm($metadataForm, $submission->getData('locale'), $locales),
-            ];
-        }
-        if (in_array($dataAvailabilitySetting, [Context::METADATA_REQUEST, Context::METADATA_REQUIRE])) {
-            $sections[] = [
-                'id' => $dataAvailabilityForm->id,
-                'form' => $dataAvailabilityForm->getConfig(),
             ];
         }
         $sections[] = [
@@ -971,15 +1000,14 @@ abstract class PKPSubmissionHandler extends Handler
     /**
      * Show an error page
      */
-    protected function showErrorPage(string $titleLocaleKey, string $message): void
+    protected function showErrorPage(string $title, string $message): void
     {
         $this->_isBackendPage = false;
         $templateMgr = TemplateManager::getManager(Application::get()->getRequest());
-        $templateMgr->assign([
-            'pageTitle' => $titleLocaleKey,
-            'messageTranslated' => $message,
-        ]);
-        $templateMgr->display('frontend/pages/message.tpl');
+        $templateMgr->displaySystemMessage(
+            title: $title,
+            message: $message,
+        );
     }
 
     /**

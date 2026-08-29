@@ -28,6 +28,7 @@ use PKP\components\forms\citation\CitationStructuredEditForm;
 use PKP\components\forms\decision\LogReviewerResponseForm;
 use PKP\components\forms\publication\ContributorForm;
 use PKP\components\forms\dataCitation\DataCitationEditForm;
+use PKP\components\forms\funder\FunderEditForm;
 use PKP\controllers\grid\users\reviewer\PKPReviewerGridHandler;
 use PKP\core\JSONMessage;
 use PKP\core\PKPApplication;
@@ -179,6 +180,7 @@ abstract class PKPDashboardHandler extends Handler
         $citationStructuredEditForm = new CitationStructuredEditForm('emit');
         $citationRawEditForm = new CitationRawEditForm('emit');
         $dataCitationEditForm = new DataCitationEditForm('emit');
+        $funderEditForm = new FunderEditForm('emit');
 
         $templateMgr->setState([
             'pageInitConfig' => [
@@ -194,6 +196,7 @@ abstract class PKPDashboardHandler extends Handler
                     'supportsCitations' => !!$context->getData('citations'),
                     'supportsDataCitations' => !!$context->getData('dataCitations'),
                     'supportsDataAvailability' => !!$context->getData('dataAvailability'),
+                    'supportsFunders' => !!$context->getData('funders'),
                     'identifiersEnabled' => $identifiersEnabled,
                     'isReviewerSuggestionEnabled' => (bool)$context->getData('reviewerSuggestionEnabled'),
                 ],
@@ -203,7 +206,8 @@ abstract class PKPDashboardHandler extends Handler
                     'versionStageOptions' => $versionStageOptions,
                     'citationStructuredEditForm' => $citationStructuredEditForm->getConfig(),
                     'citationRawEditForm' => $citationRawEditForm->getConfig(),
-                    'dataCitationEditForm' => $dataCitationEditForm->getConfig()
+                    'dataCitationEditForm' => $dataCitationEditForm->getConfig(),
+                    'funderEditForm' => $funderEditForm->getConfig()
                 ],
             ]
         ]);
@@ -244,6 +248,11 @@ abstract class PKPDashboardHandler extends Handler
             'REVIEW_ROUND_STATUS_RECOMMENDATIONS_COMPLETED' => ReviewRound::REVIEW_ROUND_STATUS_RECOMMENDATIONS_COMPLETED,
             'REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED' => ReviewRound::REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED,
             'REVIEW_ROUND_STATUS_RETURNED_TO_REVIEW' => ReviewRound::REVIEW_ROUND_STATUS_RETURNED_TO_REVIEW,
+            'REVIEW_ASSIGNMENT_NEW' => ReviewAssignment::REVIEW_ASSIGNMENT_NEW,
+            'REVIEW_ASSIGNMENT_UNCONSIDERED' => ReviewAssignment::REVIEW_ASSIGNMENT_UNCONSIDERED,
+            'REVIEW_ASSIGNMENT_RECONSIDERED' => ReviewAssignment::REVIEW_ASSIGNMENT_RECONSIDERED,
+            'REVIEW_ASSIGNMENT_CONSIDERED' => ReviewAssignment::REVIEW_ASSIGNMENT_CONSIDERED,
+            'REVIEW_ASSIGNMENT_VIEWED' => ReviewAssignment::REVIEW_ASSIGNMENT_VIEWED,
             'SUBMISSION_REVIEW_METHOD_ANONYMOUS' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_ANONYMOUS,
             'SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS,
             'SUBMISSION_REVIEW_METHOD_OPEN' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_OPEN,
@@ -262,6 +271,9 @@ abstract class PKPDashboardHandler extends Handler
             'DECISION_BACK_FROM_COPYEDITING' => Decision::BACK_FROM_COPYEDITING,
             'DECISION_NEW_EXTERNAL_ROUND' => Decision::NEW_EXTERNAL_ROUND,
             'DECISION_BACK_FROM_PRODUCTION' => Decision::BACK_FROM_PRODUCTION,
+            'DECISION_MOVE_TO_DONE' => Decision::MOVE_TO_DONE,
+            'DECISION_RETURN_TO_WORKFLOW' => Decision::RETURN_TO_WORKFLOW,
+            'DECISION_RETURN_TO_DONE' => Decision::RETURN_TO_DONE,
 
             'DECISION_RECOMMEND_ACCEPT' => Decision::RECOMMEND_ACCEPT,
             'DECISION_RECOMMEND_DECLINE' => Decision::RECOMMEND_DECLINE,
@@ -408,6 +420,11 @@ abstract class PKPDashboardHandler extends Handler
         $userRoles = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES);
         $dashboardViews = Repo::submission()->getDashboardViews($context, $user, $this->selectedRoleIds);
         $viewsData = $dashboardViews->map(fn (DashboardView $dashboardView) => $dashboardView->getData())->values()->toArray();
+
+        // The search view only shows in the page's list - not as a clickable menu item or a count.
+        if ($this->dashboardPage === DashboardPage::EditorialDashboard) {
+            $viewsData[] = Repo::submission()->getSearchView($context, $user, $this->selectedRoleIds)->getData();
+        }
 
         Hook::call('Dashboard::views', [&$viewsData, $userRoles]);
 

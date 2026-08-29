@@ -1,20 +1,21 @@
 # Jonas Raoni Soares da Silva <weblate@raoni.org>, 2021.
 # Manolis Saldaris <omanos@gmail.com>, 2022.
+# Theodoros Theodoropoulos <bujam1@yahoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:43+00:00\n"
-"PO-Revision-Date: 2022-07-20 11:19+0000\n"
-"Last-Translator: Manolis Saldaris <omanos@gmail.com>\n"
-"Language-Team: Greek <http://translate.pkp.sfu.ca/projects/pkp-lib/common/"
-"el_GR/>\n"
-"Language: el_GR\n"
+"PO-Revision-Date: 2026-07-03 17:30+0000\n"
+"Last-Translator: Theodoros Theodoropoulos <bujam1@yahoo.com>\n"
+"Language-Team: Greek <http://translate.pkp.sfu.ca/projects/pkp-lib/common/el/"
+">\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.4.2\n"
+"X-Generator: Weblate 4.18.2\n"
 
 msgid "common.publicKnowledgeProject"
 msgstr "Public Knowledge Project"
@@ -147,7 +148,7 @@ msgid "common.attachFiles"
 msgstr "Επισύναψη αρχείων"
 
 msgid "common.attachSelected"
-msgstr ""
+msgstr "Επισύναψη Επιλεγμένων"
 
 msgid "common.name"
 msgstr "Όνομα"
@@ -355,7 +356,7 @@ msgid "common.description"
 msgstr "Περιγραφή"
 
 msgid "common.details"
-msgstr ""
+msgstr "Λεπτομέρειες"
 
 msgid "common.dimensionsInches"
 msgstr "{$width}&Prime;&times;{$height}&Prime; at {$dpi} DPI/PPI"
@@ -364,10 +365,10 @@ msgid "common.dimensionsPixels"
 msgstr "{$width}&times;{$height} pixels"
 
 msgid "common.discardChanges"
-msgstr ""
+msgstr "Όχι, απόρριψη μη αποθηκευμένων αλλαγών"
 
 msgid "common.disconnected"
-msgstr ""
+msgstr "Αποσυνδεδεμένο"
 
 msgid "common.disable"
 msgstr "Απενεργοποίηση"
@@ -388,7 +389,7 @@ msgid "common.downloadPdf"
 msgstr "Μεταφόρτωση PDF"
 
 msgid "common.downloadReport"
-msgstr ""
+msgstr "Λήψη Αναφοράς"
 
 msgid "common.dragAndDropHere"
 msgstr "Σύρετε και αποθέστε αρχεία εδώ."
@@ -400,10 +401,10 @@ msgid "common.edit"
 msgstr "Επεξεργασία"
 
 msgid "common.editItem"
-msgstr ""
+msgstr "Επεξεργασία λογαριασμού για {$name}"
 
 msgid "common.emailTemplates"
-msgstr ""
+msgstr "Πρότυπα Email"
 
 msgid "common.enable"
 msgstr "Ενεργοποίηση"
@@ -478,10 +479,10 @@ msgid "common.findTemplate"
 msgstr "Εύρεση προτύπου"
 
 msgid "common.formatting"
-msgstr ""
+msgstr "Μορφοποίηση"
 
 msgid "common.geographic"
-msgstr ""
+msgstr "Γεωγραφικό"
 
 msgid "common.go"
 msgstr "Μετάβαση"
@@ -535,7 +536,7 @@ msgid "common.languages"
 msgstr "Γλώσσες"
 
 msgid "common.lastSaved"
-msgstr ""
+msgstr "Τελευταία αποθήκευση {$when}"
 
 msgid "common.lastActivity"
 msgstr "Η τελευταία δραστηριότητα καταγράφηκε στις {$date}."
@@ -550,7 +551,7 @@ msgid "common.lessThanOnly"
 msgstr "Λιγότερο από"
 
 msgid "common.keepWorking"
-msgstr ""
+msgstr "Συνέχιση Εργασίας"
 
 msgid "common.commaListSeparator"
 msgstr ", "
@@ -592,7 +593,7 @@ msgid "common.none"
 msgstr "Κανένα"
 
 msgid "common.noneSelected"
-msgstr ""
+msgstr "Χωρίς επιλογή"
 
 msgid "common.noneProvided"
 msgstr ""
@@ -742,7 +743,7 @@ msgid "common.readMoreWithTitle"
 msgstr "Διαβάστε περισσότερα σχετικά με {$title}"
 
 msgid "common.reconnecting"
-msgstr ""
+msgstr "Επανασύνδεση"
 
 msgid "common.record"
 msgstr "Εγγραφή"
@@ -790,10 +791,10 @@ msgid "common.reset"
 msgstr "Επαναφορά"
 
 msgid "common.reviewRoundNumber"
-msgstr ""
+msgstr "Γύρος {$round}"
 
 msgid "common.role"
-msgstr ""
+msgstr "Ρόλος"
 
 msgid "common.saveAndContinue"
 msgstr "Αποθήκευση και συνέχεια"
@@ -811,7 +812,7 @@ msgid "common.search"
 msgstr "Αναζήτηση"
 
 msgid "common.searchPhrase"
-msgstr ""
+msgstr "Αναζήτηση Φράσης"
 
 msgid "common.searching"
 msgstr "Γίνεται αναζήτηση"
@@ -847,7 +848,7 @@ msgid "common.showAllSteps"
 msgstr "Εμφάνιση όλων των βημάτων"
 
 msgid "common.showingSteps"
-msgstr ""
+msgstr "{$current}/{$total} βήματα"
 
 msgid "common.size"
 msgstr "Μέγεθος"
@@ -874,10 +875,10 @@ msgid "common.suggest"
 msgstr "Πρόταση"
 
 msgid "common.switchTo"
-msgstr ""
+msgstr "Μετάβαση σε"
 
 msgid "common.switchToNamedItem"
-msgstr ""
+msgstr "Μετάβαση σε {$name}"
 
 msgid "common.title"
 msgstr "Τίτλος"
@@ -895,10 +896,10 @@ msgid "common.type"
 msgstr "Τύπος"
 
 msgid "common.uploadedBy"
-msgstr ""
+msgstr "Ανέβηκε από {$name}"
 
 msgid "common.uploadedByAndWhen"
-msgstr ""
+msgstr "Ανέβηκε από {$name} στις {$date}"
 
 msgid "common.component"
 msgstr "Στοιχείο"
@@ -913,10 +914,14 @@ msgid "common.unread"
 msgstr "Μη αναγνωσμένο"
 
 msgid "common.unsavedChanges"
-msgstr ""
+msgstr "Μη Αποθηκευμένες Αλλαγές"
 
 msgid "common.unsavedChangesMessage"
 msgstr ""
+"Εντοπίσαμε αλλαγές που δεν έχουν αποθηκευτεί από τις {$when}. Αυτό μπορεί να "
+"συμβεί αν χαθεί η σύνδεση με τον διακομιστή ενώ εργάζεστε. Η επαναφορά αυτών "
+"των αλλαγών ενδέχεται να αντικαταστήσει τυχόν αλλαγές που έχετε κάνει από "
+"τότε. Θέλετε να επαναφέρετε αυτές τις αλλαγές τώρα;"
 
 msgid "common.untitled"
 msgstr "Χωρίς τίτλο"
@@ -966,7 +971,7 @@ msgid "common.user"
 msgstr "Χρήστης"
 
 msgid "common.user.nonexistent"
-msgstr ""
+msgstr "[Ανύπαρκτος χρήστης]"
 
 msgid "common.view"
 msgstr "Προβολή"
@@ -1041,28 +1046,30 @@ msgid "email.addAttachment"
 msgstr "Πρoσθήκη συνημμένου"
 
 msgid "email.addAttachment.submissionFiles.attach"
-msgstr ""
+msgstr "Επισύναψη Αρχείων Υποβολής"
 
 msgid "email.addAttachment.submissionFiles.submissionDescription"
-msgstr ""
+msgstr "Επισύναψη αρχείων που ανέβασε ο συγγραφέας κατά τη φάση υποβολής."
 
 msgid "email.addAttachment.submissionFiles.reviewDescription"
 msgstr ""
+"Επισύναψη αρχείων που ανέβηκαν κατά τη διαδικασία υποβολής, όπως "
+"αναθεωρήσεις ή άλλα αρχεία προς έλεγχο."
 
 msgid "email.addAttachment.libraryFiles"
-msgstr ""
+msgstr "Αρχεία Βιβλιοθήκης"
 
 msgid "email.addAttachment.libraryFiles.attach"
-msgstr ""
+msgstr "Προσθήκη Αρχείων Βιβλιοθήκης"
 
 msgid "email.addAttachment.libraryFiles.description"
-msgstr ""
+msgstr "Επισύναψη αρχείων από τις Βιβλιοθήκες Υποβολών και Εκδόσεων."
 
 msgid "email.addAttachment.reviewFiles.attach"
-msgstr ""
+msgstr "Επισύναψη Αρχείων από Επιμελητές"
 
 msgid "email.addAttachment.reviewFiles.description"
-msgstr ""
+msgstr "Επισυνάψτε αρχεία που έχουν ανεβάσει οι επιμελητές"
 
 msgid "email.addBccRecipient"
 msgstr "Πρoσθήκη αφανούς κοινοποίησης (BCC)"
@@ -1077,7 +1084,7 @@ msgid "email.attachments"
 msgstr "Συνημμένα"
 
 msgid "email.attachmentNotFound"
-msgstr ""
+msgstr "Το αρχείο {$fileName} δεν μπόρεσε να επισυναφθεί."
 
 msgid "email.bcc"
 msgstr "Αφανές αντίγραφο(BCC)"
@@ -1094,6 +1101,9 @@ msgstr "Κοιν:"
 
 msgid "email.confirmSwitchLocale"
 msgstr ""
+"Θέλετε σίγουρα να αλλάξετε τη γλώσσα σε {$localeName} για να συντάξετε αυτό "
+"το email; Οποιεσδήποτε αλλαγές έχετε κάνει στο θέμα και στο κύριο κείμενο "
+"του email θα χαθούν."
 
 msgid "email.compose"
 msgstr "Αποστολή μηνύματος"
@@ -1447,7 +1457,7 @@ msgid "navigation.admin"
 msgstr "Διαχείριση"
 
 msgid "navigation.archives"
-msgstr "Αρχεία"
+msgstr "Αρχείο Τευχών"
 
 msgid "navigation.breadcrumbLabel"
 msgstr "Βρίσκεστε εδώ:"
@@ -1468,7 +1478,7 @@ msgid "navigation.browse"
 msgstr "Περιήγηση"
 
 msgid "navigation.backTo"
-msgstr ""
+msgstr "⟵ Πίσω σε {$page}"
 
 msgid "navigation.browseByAuthor"
 msgstr "Κατά Συγγραφέα"
@@ -1477,7 +1487,7 @@ msgid "navigation.browseByTitle"
 msgstr "Κατά τίτλο"
 
 msgid "navigation.dashboard"
-msgstr "Πίνακας"
+msgstr "Πίνακας Ελέγχου"
 
 msgid "navigation.data"
 msgstr "Δεδομένα"
@@ -1567,7 +1577,7 @@ msgid "navigation.viewFrontend"
 msgstr "Προβολή ιστοτόπου"
 
 msgid "institution.institutions"
-msgstr ""
+msgstr "Ιδρύματα"
 
 msgid "notification.addedAuditor"
 msgstr "Ο Ελεγκτής (Auditor) έχει προστεθεί."
@@ -1718,10 +1728,10 @@ msgid "search.searchResults"
 msgstr "Αποτελέσματα αναζήτησης"
 
 msgid "search.searchResults.foundSingle"
-msgstr ""
+msgstr "Βρέθηκε ένα αποτέλεσμα."
 
 msgid "search.searchResults.foundPlural"
-msgstr ""
+msgstr "Βρέθηκαν {$count} αποτελέσματα."
 
 msgid "search.subject"
 msgstr "Λέξεις-κλειδιά"
@@ -1764,7 +1774,7 @@ msgid "dashboard.myQueue"
 msgstr "Η λίστα μου"
 
 msgid "review.anonymousPeerReview.title"
-msgstr ""
+msgstr "Πώς να διασφαλίσετε ότι όλα τα αρχεία έχουν ανωνυμοποιηθεί"
 
 #, fuzzy
 msgid "review.anonymousPeerReview"
@@ -1842,7 +1852,7 @@ msgid "notification.reinstatedReviewer"
 msgstr "Έγινε επαναφορά του Αξιολογητή."
 
 msgid "notification.reviewerResendRequest"
-msgstr ""
+msgstr "Αποστάλθηκε αίτημα για επανεξέταση της ανάθεσης της αξιολόγησης."
 
 msgid "notification.addedStageParticipant"
 msgstr "Ο Χρήστης προστέθηκε ως συμμετέχων σε κάποιο στάδιο."
@@ -1882,10 +1892,10 @@ msgid "notification.signedFile"
 msgstr "Το αρχείο έχει θεωρηθεί"
 
 msgid "timeZone"
-msgstr ""
+msgstr "Ζώνη ώρας"
 
 msgid "user.email"
-msgstr ""
+msgstr "Διεύθυνση email"
 
 msgid "user.authorization.submissionFile"
 msgstr ""
@@ -1902,16 +1912,16 @@ msgid "user.authorization.invalidRepresentation"
 msgstr "Μη έγκυρη αναπαράσταση"
 
 msgid "user.authorization.invalidReviewRound"
-msgstr ""
+msgstr "Μη έγκυρος γύρος αξιολόγησης."
 
 msgid "user.authorization.invalidQuery"
-msgstr ""
+msgstr "Μη έγκυρη συνομιλία."
 
 msgid "user.authorization.unauthorizedNote"
-msgstr ""
+msgstr "Δεν έχετε πρόσβαση σε αυτό το μήνυμα της συνομιλίας."
 
 msgid "user.authorization.unauthorizedReviewAssignment"
-msgstr ""
+msgstr "Δεν έχετε πρόσβαση σε αυτή την ανάθεση για αξιολόγηση."
 
 msgid "user.authorization.authorRoleMissing"
 msgstr ""
@@ -1925,7 +1935,7 @@ msgstr ""
 "συνδεθεί με τον κατάλληλο λογαριασμό Χρήστη."
 
 msgid "user.register.form.privacyConsentLabel"
-msgstr ""
+msgstr "Επιλογές Ιδιωτικότητας"
 
 msgid "notification.type.queryActivity"
 msgstr "Δραστηριότητα συζητήσεων"
@@ -1954,7 +1964,7 @@ msgstr ""
 "συντακτικής έκθεσης."
 
 msgid "notification.type.editorialReminder"
-msgstr ""
+msgstr "Εβδομαδιαίο email με τις εκκρεμείς διεργασίες"
 
 msgid "semicolon"
 msgstr "{$label}:"
@@ -1978,25 +1988,39 @@ msgid "notification.removedNavigationMenu"
 msgstr "Το μενού περιήγησης αφαιρέθηκε επιτυχώς."
 
 msgid "notification.unsubscribeNotifications.success"
-msgstr ""
+msgstr "Έχετε διαγραφεί από την λίστα αποδεκτών"
 
 msgid "notification.unsubscribeNotifications.error"
-msgstr ""
+msgstr "Δεν μπορέσαμε να σας διαγράψουμε από την λίστα αποδεκτών"
 
 msgid "notification.unsubscribeNotifications.pageMessage"
 msgstr ""
+"Επιλέξτε τα μηνύματα ηλεκτρονικού ταχυδρομείου που δεν επιθυμείτε πλέον να "
+"λαμβάνετε στη διεύθυνση {$email} από το περιοδικό {$contextName}."
 
 msgid "notification.unsubscribeNotifications.resubscribe"
 msgstr ""
+"Μπορείτε να ενεργοποιήσετε ξανά τις ειδοποιήσεις μέσω email ανά πάσα στιγμή "
+"από το <a href=\"{$profileNotificationUrl}\">προφίλ χρήστη</a>."
 
 msgid "notification.unsubscribeNotifications.successMessage"
 msgstr ""
+"Η διεύθυνση ηλεκτρονικού ταχυδρομείου {$email} διαγράφηκε με επιτυχία από τη "
+"λίστα αποδεκτών. Δεν θα σας στέλνουμε πλέον αυτά τα μηνύματα. Μπορείτε να "
+"εγγραφείτε ξανά για να λαμβάνετε ειδοποιήσεις μέσω ηλεκτρονικού ταχυδρομείου "
+"ανά πάσα στιγμή από το <a href=\"{$profileNotificationUrl}\">προφίλ "
+"χρήστη</a>."
 
 msgid "notification.unsubscribeNotifications.errorMessage"
 msgstr ""
+"Παρουσιάστηκε ένα απροσδόκητο σφάλμα και δεν καταφέραμε να διαγράψουμε τη "
+"διεύθυνση ηλεκτρονικού ταχυδρομείου {$email}. Μπορείτε να διαγραφείτε από "
+"όλες τις ειδοποιήσεις μέσω ηλεκτρονικού ταχυδρομείου από το <a href=\""
+"{$profileNotificationUrl}\">προφίλ χρήστη</a> ή να επικοινωνήσετε μαζί μας "
+"για βοήθεια."
 
 msgid "notification.unsubscribeNotifications"
-msgstr ""
+msgstr "Απεγγραφή"
 
 msgid "list.viewMore"
 msgstr "Προβολή πρόσθετων πληροφοριών για το {$name}"
@@ -2005,13 +2029,13 @@ msgid "list.viewLess"
 msgstr "Απόκρυψη πρόσθετων πληροφοριών για το {$name}"
 
 msgid "list.expandAll"
-msgstr ""
+msgstr "Εμφάνιση όλων"
 
 msgid "list.collapseAll"
-msgstr ""
+msgstr "Σύμπτυξη όλων"
 
 msgid "validation.invalidOption"
-msgstr ""
+msgstr "Αυτή η επιλογή δεν είναι έγκυρη."
 
 msgid "validator.accepted"
 msgstr "Αποδεχτείτε αυτό το αντικείμενο .."
@@ -2031,6 +2055,8 @@ msgstr ""
 
 msgid "validator.alpha_dash_period"
 msgstr ""
+"Αυτό μπορεί να περιέχει μόνο γράμματα, αριθμούς, παύλες, κάτω παύλες και "
+"τελείες."
 
 msgid "validator.alpha_num"
 msgstr "Πρέπει να περιλαμβάνονται μόνο γράμματα και αριθμοί."
@@ -2060,10 +2086,14 @@ msgid "validator.confirmed"
 msgstr "Η επιβεβαίωση για αυτό το πεδίο δεν ταιριάζει."
 
 msgid "validator.country"
-msgstr ""
+msgstr "Μη έγκυρη χώρα."
 
 msgid "validator.country.regex"
 msgstr ""
+"Αυτή η χώρα δεν είναι έγκυρη. Η χώρα πρέπει να αντιστοιχεί σε έναν από τους "
+"διεθνείς κωδικούς δύο γραμμάτων. Δείτε όλους τους κωδικούς στη διεύθυνση "
+"https://en.wikipedia.org/wiki/"
+"ISO_3166-1_alpha-2#Officially_assigned_code_elements."
 
 msgid "validator.currency"
 msgstr "Δεν είναι έγκυρο αυτό το νόμισμα."
@@ -2213,28 +2243,30 @@ msgid "validator.timezone"
 msgstr "Δεν είναι έγκυρη η ζώνη ώρας."
 
 msgid "validator.unique"
-msgstr ""
+msgstr "Το {$attribute} έχει ήδη χρησιμοποιηθεί."
 
 msgid "validator.url"
 msgstr "Μη έγκυρο URL."
 
 msgid "validator.no_new_line"
-msgstr ""
+msgstr "Δεν επιτρέπεται νέα γραμμή."
 
 msgid "validator.allowable_title_html_tags"
-msgstr ""
+msgstr "Επιτρέπονται μόνο οι ετικέτες HTML [{$tags}]."
 
 msgid "filter.input.error.notSupported"
 msgstr ""
 
 msgid "filter.error.missingRequirements"
 msgstr ""
+"Προσπαθείτε να εκτελέσετε μια μετατροπή που δεν υποστηρίζεται στο περιβάλλον "
+"εγκατάστασής σας."
 
 msgid "filter.import.error.couldNotImportNode"
 msgstr ""
 
 msgid "plugins.importexport.common.error.unknownCommand"
-msgstr ""
+msgstr "Άγνωστη εντολή {$command}"
 
 msgid "common.withForwardSlash"
 msgstr "{$item}/{$afterSlash}"
@@ -2294,3 +2326,112 @@ msgstr "Τα στοιχεία Συγγραφέα επικαιροποιήθηκ�
 #~ msgstr ""
 #~ "Προέκυψε ένα μη αναμενόμενο σφάλμα. Μπορεί να έχετε αποσυνδεθεί. "
 #~ "Ανανεώστε τη σελίδα και ξαναπροσπαθήστε."
+
+msgid "common.yesContinue"
+msgstr "Ναι, Συνέχεια"
+
+msgid "common.refreshingData"
+msgstr "Ανανέωση δεδομένων"
+
+msgid "common.viewMoreDetails"
+msgstr "Εμφάνιση περισσότερων λεπτομερειών"
+
+msgid "common.fromUntil"
+msgstr "{$from} &ndash; {$until}"
+
+msgid "common.numero"
+msgstr "Αρ."
+
+msgid "form.errorSummaryOne"
+msgstr ""
+"Εντοπίστηκε 1 σφάλμα! Παρακαλώ δείτε το παρακάτω και διορθώστε το προτού "
+"συνεχίσετε."
+
+msgid "form.errorSummaryMany"
+msgstr ""
+"Εντοπίστηκαν {$count} σφάλματα! Παρακαλώ δείτε τα παρακάτω και διορθώστε τα "
+"προτού συνεχίσετε."
+
+msgid "navigation.reviewAssignments"
+msgstr "Οι Αναθέσεις μου ως Αξιολογητής"
+
+msgid "reviewer.submission.acceptedOn"
+msgstr "Η Αξιολόγηση έγινε δεκτή στις"
+
+msgid "reviewer.submission.submittedOn"
+msgstr "Η Αξιολόγηση υποβλήθηκε στις"
+
+msgid "about.editorialMasthead.linkToEditorialHistory"
+msgstr "Εμφάνιση <a href=\"{$url}\">Ιστορικού Επιμέλειας</a>"
+
+msgid "common.moreActions"
+msgstr "Περισσότερες Ενέργειες"
+
+msgid "common.editorialMasthead"
+msgstr "Συντακτική Ομάδα"
+
+msgid "common.editorialMasthead.peerReviewers"
+msgstr "Αξιολογητές το Προηγούμενο Έτος"
+
+msgid "common.editorialHistory.peerReviewers"
+msgstr "Αξιολογητές τα Προηγούμενα Έτη"
+
+msgid "common.editorialMasthead.peerReviewers.description"
+msgstr ""
+"Οι επιμελητές εκφράζουν την ευγνωμοσύνη τους προς τους αξιολογητές που "
+"αναφέρονται παρακάτω, για το έτος {$year}."
+
+msgid "common.editorialHistory.page.description"
+msgstr ""
+"Σε αυτή την ενότητα εμφανίζονται τα άτομα που έχουν συνεισφέρει στο παρελθόν."
+
+msgid "common.filtersClear"
+msgstr "Καθαρισμός Φίλτρων"
+
+msgid "common.editorialHistory.page.orcidLink"
+msgstr "Εμφάνιση του ORCID προφίλ για {$name}"
+
+msgid "common.assignments"
+msgstr "Αναθέσεις"
+
+msgid "common.changeLanguage"
+msgstr "Αλλαγή Γλώσσας"
+
+msgid "common.openLinkNewTab"
+msgstr "Άνοιγμα συνδέσμου σε νέα καρτέλα."
+
+msgid "common.showingXofX"
+msgstr "Εμφάνιση <strong>{$start} έως {$finish}</strong> από {$total}"
+
+msgid "common.loaded"
+msgstr "Φορτώθηκε"
+
+msgid "navigation.dashboards"
+msgstr "Πίνακας Ελέγχου Επιμελητή"
+
+msgid "navigation.mySubmissions"
+msgstr "Οι Υποβολές μου ως Συγγραφέας"
+
+msgid "common.sandbox"
+msgstr "Η εφαρμογή εκτελείται σε προστατευμένη λειτουργία."
+
+msgid "common.inParenthesis"
+msgstr "({$text})"
+
+msgid "showAll"
+msgstr "Εμφάνιση Όλων"
+
+msgid "showLess"
+msgstr "Εμφάνιση Λιγότερων"
+
+msgid "validator.date.comparison"
+msgstr "Οι ημερομηνίες που δόθηκαν για σύγκριση δεν είναι έγκυρες."
+
+msgid "validator.multilingual"
+msgstr "Η απαίτηση για πολυγλωσσικότητα δεν ικανοποιείται για αυτό το πεδίο."
+
+msgid "common.editorialHistory"
+msgstr "Ιστορικό Επιμέλειας"
+
+msgid "common.editorialHistory.page"
+msgstr "Σελίδα Ιστορικού Επιμέλειας"

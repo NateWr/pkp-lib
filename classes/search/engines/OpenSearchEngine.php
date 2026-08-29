@@ -17,14 +17,17 @@ namespace PKP\search\engines;
 use APP\core\Application;
 use APP\facades\Repo;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine as ScoutEngine;
 use OpenSearch\Client;
 use PKP\config\Config;
 use PKP\facades\Locale;
+use PKP\funder\Funder;
 use PKP\plugins\Hook;
 use PKP\publication\PKPPublication;
 use PKP\search\parsers\SearchFileParser;
+use PKP\submission\reviewAssignment\ReviewAssignment;
 use PKP\submissionFile\SubmissionFile;
 
 class OpenSearchEngine extends ScoutEngine
@@ -53,11 +56,16 @@ class OpenSearchEngine extends ScoutEngine
             throw new \Exception('The opensearch username and/or password is missing. Review your config.inc.php file for details.');
         }
 
-        return (new \OpenSearch\ClientBuilder())
+        $clientBuilder = (new \OpenSearch\ClientBuilder())
             ->setHosts(json_decode($hosts, flags: JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR))
             ->setBasicAuthentication($username, $password)
-            ->setSSLVerification((bool) Config::getVar('search', 'opensearch_ssl_verification', true))
-            ->build();
+            ->setSSLVerification((bool) Config::getVar('search', 'opensearch_ssl_verification', true));
+
+        if (Config::getVar('search', 'opensearch_debug')) {
+            $clientBuilder->setLogger(Log::getLogger());
+        }
+
+        return $clientBuilder->build();
     }
 
     public function update($models)
@@ -105,10 +113,68 @@ class OpenSearchEngine extends ScoutEngine
             // Index all authors
             $authors = [];
             foreach ($publication->getData('authors') as $author) {
+                $authorEntry = [];
                 foreach ($author->getFullNames() as $locale => $fullName) {
-                    $authors[$locale] = ($authors[$locale] ?? '') . $fullName . ' ';
+                    $authorEntry['name'][$locale] = ($authors[$locale] ?? '') . $fullName . ' ';
+                }
+                foreach ($author->getAffiliations() as $affiliation) {
+                    $authorEntry['affiliation'] = $affiliation->getAffiliationName(null, array_keys($authorEntry['name']));
+                }
+                $authors[] = $authorEntry;
+            }
+
+            // Index funders for faceted filtering (whereIn('funders') → terms on filterKeys).
+            $funderNamesByLocale = [];
+            $funderRors = [];
+            $funderFilterKeys = [];
+            foreach ($submission->getData('funders') as $funder) {
+                $names = $funder->name;
+                if (is_array($names)) {
+                    foreach ($names as $locale => $name) {
+                        if ($name !== null && $name !== '') {
+                            $funderNamesByLocale[$locale][] = $name;
+                        }
+                    }
+                }
+
+                $ror = $funder->getRawOriginal('ror');
+                if (!empty($ror)) {
+                    $funderRors[] = $ror;
+                    // filterKey: ROR URL (same identity as getUniqueFunderNames / filterByFunder).
+                    $funderFilterKeys[] = $ror;
+                    continue;
+                }
+
+                // filterKey: lowercased free-text name(s), any locale — mimics the SQL filter
+                // on funder_settings.name (see Collector::filterByFunder).
+                if (is_array($names)) {
+                    foreach ($names as $name) {
+                        if (is_string($name) && $name !== '') {
+                            $funderFilterKeys[] = strtolower(trim($name));
+                        }
+                    }
                 }
             }
+
+            $reviewers = [];
+            foreach (Repo::reviewAssignment()->getCollector()
+                ->filterBySubmissionIds([$submission->getId()])
+                ->filterByIsPubliclyVisible(true)
+                ->filterByIsConfirmedByEditor(true)
+                ->filterByReviewMethods([ReviewAssignment::SUBMISSION_REVIEW_METHOD_OPEN])
+                ->getMany() as $reviewAssignment
+            ) {
+                $reviewer = Repo::user()->get($reviewAssignment->getReviewerId());
+                if (!$reviewer) {
+                    continue;
+                }
+
+                $reviewers[] = [
+                    'name' => $reviewer->getFullNames(),
+                    'affiliation' => $reviewer->getAffiliation(null),
+                ];
+            }
+
             $json = [
                 'index' => $this->getIndexName(),
                 'id' => $submission->getId(),
@@ -118,6 +184,7 @@ class OpenSearchEngine extends ScoutEngine
                     'abstracts' => $publication->getData('abstract'),
                     'bodies' => $bodies,
                     'authors' => $authors,
+                    'reviewers' => $reviewers,
                     'contextId' => $submission->getData('contextId'),
                     'datePublished' => $publication->getData('datePublished'),
                     'sectionId' => $publication->getData('sectionId'),
@@ -128,8 +195,22 @@ class OpenSearchEngine extends ScoutEngine
                     'subject' => collect($publication->getData('subjects'))
                         ->map(fn ($items) => collect($items)->pluck('name')->all())
                         ->all(),
+                    'funders' => [
+                        'name' => $funderNamesByLocale,
+                        'ror' => array_values(array_unique($funderRors)),
+                        // filterKeys: non-display identity strings used only for exact filter
+                        // matching. A filterKey is either a funder's ROR or a lowercased
+                        // free-text name — the same contract as filterByFunder() / getUniqueFunderNames()'s
+                        // "value" (not the human-readable label).
+                        'filterKeys' => array_values(array_unique($funderFilterKeys)),
+                    ],
                 ]
             ];
+            // Funder name accessor memoizes submissions/RORs in unbounded
+            // per-process caches; flush so bulk reindexing (CLI) does not
+            // accumulate every submission in memory.
+            Funder::clearResolverCaches();
+
             // Give hooks a chance to alter the record before indexing
             if (Hook::run('OpenSearchEngine::update', ['json' => &$json, 'submission' => $submission]) !== Hook::ABORT) {
                 $client->create($json);
@@ -164,19 +245,34 @@ class OpenSearchEngine extends ScoutEngine
             'index' => $this->getIndexName(),
             'body' => [
                 'query' => [
-                    'bool' => [
-                        ...($builder->query ? ['must' => [
+                    'bool' => ['must' => [
+                        ...($builder->query ? [[
                             'multi_match' => [
                                 'query' => $builder->query,
-                                'fields' => ['titles.*', 'abstracts.*', 'bodies.*', 'authors.*'],
+                                'fields' => ['titles.*^4', 'abstracts.*^3', 'bodies.*', 'authors.name.*^5', 'authors.affiliation.*^2'],
                             ],
                         ]] : []),
-                        'filter' => &$filter,
-                    ],
+                        ...(isset($builder->wheres['title']) ? [[
+                            'multi_match' => ['query' => $builder->wheres['title'], 'fields' => ['titles.*']],
+                        ]] : []),
+                        ...(isset($builder->wheres['abstract']) ? [[
+                            'multi_match' => ['query' => $builder->wheres['abstract'], 'fields' => ['abstracts.*']],
+                        ]] : []),
+                        ...(isset($builder->wheres['author']) ? [[
+                            'multi_match' => ['query' => $builder->wheres['author'], 'fields' => ['authors.*']],
+                        ]] : []),
+                        ...(!empty($builder->whereIns['reviewers']) ? array_map(fn ($reviewer) => [
+                            'multi_match' => ['query' => $reviewer, 'fields' => ['reviewers.*']],
+                        ], $builder->whereIns['reviewers']) : []),
+                        ...(isset($builder->wheres['body']) ? [[
+                            'multi_match' => ['query' => $builder->wheres['body'], 'fields' => ['bodies.*']],
+                        ]] : []),
+                    ], 'filter' => &$filter],
                 ],
                 'sort' => &$sort,
             ],
         ];
+
         $filter[] = ['term' => ['status' => PKPPublication::STATUS_PUBLISHED]];
 
         // Handle "where" conditions
@@ -193,6 +289,12 @@ class OpenSearchEngine extends ScoutEngine
                     if ($value) {
                         $$field = new \Carbon\Carbon($value);
                     }
+                    break;
+                case 'title':
+                case 'abstract':
+                case 'author':
+                case 'body':
+                    // Already processed above in $query
                     break;
                 default: continue 2;
             }
@@ -219,6 +321,11 @@ class OpenSearchEngine extends ScoutEngine
                     case 'subjects':
                         $filter[] = ['terms' => ['subject.' . Locale::getLocale() . '.keyword' => $list]];
                         break;
+                    case 'funders':
+                        // Exact match on filterKeys (ROR or lowercased free-text name); OR if several.
+                        $filter[] = ['terms' => ['funders.filterKeys' => $list]];
+                        break;
+                    case 'reviewers': break; // Handled above
                     default: continue 2;
                 }
             };
@@ -236,7 +343,7 @@ class OpenSearchEngine extends ScoutEngine
                     break;
                 case 'title':
                     $sort[] = (object) [
-                        'titles.' . Locale::getLocale() => (object) [
+                        'titles.' . Locale::getLocale() . '.keyword' => (object) [
                             'order' => $order['direction'],
                         ]
                     ];
@@ -324,11 +431,10 @@ class OpenSearchEngine extends ScoutEngine
         }
         $metadataLocales = array_unique($metadataLocales);
 
-        $typicalKeywordClause = fn ($fielddata = false) => [
+        $typicalKeywordClause = fn () => [
             'properties' => [
                 ...array_map(fn ($e) => [
                     'type' => 'text',
-                    'fielddata' => $fielddata,
                     'fields' => [
                         'keyword' => [
                             'type' => 'keyword',
@@ -344,7 +450,8 @@ class OpenSearchEngine extends ScoutEngine
                 'mappings' => [
                     'properties' => [
                         'abstracts' => $typicalKeywordClause(),
-                        'titles' => $typicalKeywordClause(true),
+                        'titles' => $typicalKeywordClause(),
+                        'reviewers' => $typicalKeywordClause(),
                         'authors' => $typicalKeywordClause(),
                         'categoryId' => ['type' => 'long'],
                         'contextId' => ['type' => 'long'],
@@ -353,6 +460,14 @@ class OpenSearchEngine extends ScoutEngine
                         'subject' => $typicalKeywordClause(),
                         'sectionId' => ['type' => 'long'],
                         'status' => ['type' => 'long'],
+                        'funders' => [
+                            'properties' => [
+                                'name' => $typicalKeywordClause(),
+                                'ror' => ['type' => 'keyword'],
+                                // filterKey = ROR or lowercased free-text name (filter identity, not label).
+                                'filterKeys' => ['type' => 'keyword'],
+                            ],
+                        ],
                     ],
                 ],
             ],

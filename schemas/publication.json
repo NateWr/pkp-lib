@@ -146,7 +146,6 @@
 		"dataCitations": {
 			"type": "array",
 			"description": "Optional metadata that contains an array of citations for data cited in this submission.",
-			"apiSummary": true,
 			"readOnly": true,
 			"items": {
 				"$ref": "#/definitions/DataCitation"
@@ -209,6 +208,14 @@
 			"multilingual": true,
 			"readOnly": true,
 			"apiSummary": true
+		},
+		"funders": {
+			"type": "array",
+			"description": "Optional metadata that contains an array of funders for this publication.",
+			"readOnly": true,
+			"items": {
+				"$ref": "#/definitions/Funder"
+			}
 		},
 		"fundingStatement": {
 			"type": "string",
@@ -447,7 +454,7 @@
 		},
 		"type": {
 			"type": "string",
-			"description": "Optional metadata that describes the type of the submission and usually matches on of the [Dublin Core Types](http://dublincore.org/documents/dcmi-type-vocabulary/#section-7-dcmi-type-vocabulary).",
+			"description": "Optional metadata that describes the type of the submission and usually matches one of the [Dublin Core Types](http://dublincore.org/documents/dcmi-type-vocabulary/#section-7-dcmi-type-vocabulary).",
 			"multilingual": true,
 			"validation": [
 				"nullable"

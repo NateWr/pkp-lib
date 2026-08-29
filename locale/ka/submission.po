@@ -2011,6 +2011,7 @@ msgstr ""
 "რედაქტორმა {$editorName} დაადასტურა მიმოხილვა მიმოხილვაზე მრგვალი {$round} "
 "მიმოხილვა წარდგენისთვის {$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName}-მა დაასრულა მიმოხილვა {$round} მიმოხილვის წარსადგენად "
@@ -2640,3 +2641,6 @@ msgstr ""
 msgid "submission.submissionFile"
 msgstr "გასაგზავნი ფაილი"
 
+
+msgid "reviewer.competingInterests"
+msgstr "ინტერესთა კონფლიქტი"

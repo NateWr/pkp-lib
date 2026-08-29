@@ -2123,6 +2123,7 @@ msgstr ""
 "Redaktorius {$editorName} patvirtino pateikto darbo {$submissionId} peržiūrą "
 "{$round} peržiūros etape."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} baigė {$round} peržiūros etapo pateiktą darbą "
@@ -3153,3 +3154,6 @@ msgstr ""
 
 msgid "dashboard.submissions.incomplete.bulkDelete.column.description"
 msgstr "Pasirinkite nepilnai pateiktus duomenis, kuriuos norite ištrinti."
+
+msgid "reviewer.competingInterests"
+msgstr "Dominančios sritys"

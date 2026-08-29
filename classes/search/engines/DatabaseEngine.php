@@ -13,6 +13,7 @@
 namespace PKP\search\engines;
 
 use APP\core\Application;
+use APP\facades\Repo;
 use Illuminate\Database\Query\Builder as DatabaseBuilder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -22,8 +23,10 @@ use Laravel\Scout\Engines\Engine as ScoutEngine;
 use PKP\config\Config;
 use PKP\controlledVocab\ControlledVocab;
 use PKP\facades\Locale;
+use PKP\identity\Identity;
 use PKP\publication\PKPPublication;
 use PKP\submission\PKPSubmission;
+use PKP\submission\reviewAssignment\ReviewAssignment;
 
 class DatabaseEngine extends ScoutEngine
 {
@@ -59,16 +62,27 @@ class DatabaseEngine extends ScoutEngine
             $$field = match($field) {
                 'contextId' => (int) $value,
                 'publishedFrom', 'publishedTo' => $value ? new \Carbon\Carbon($value) : null,
+                'author', 'title', 'abstract', 'body' => (string) $value,
             };
         };
 
         // Handle "whereIn" conditions
-        $sectionIds = $categoryIds = $keywords = $subjects = null;
+        $sectionIds = $categoryIds = $keywords = $subjects = $funders = null;
         foreach ($builder->whereIns as $field => $list) {
             $$field = match($field) {
-                'sectionIds', 'categoryIds', 'keywords', 'subjects' => is_null($list) ? null : (array) $list,
+                'sectionIds', 'categoryIds', 'keywords', 'subjects', 'funders', 'reviewers' => is_null($list) ? null : (array) $list,
             };
         };
+
+        // Only the first reviewer keyword is applied (OpenSearch supports several).
+        $reviewer = is_array($reviewers)
+            ? (array_values(array_filter($reviewers, fn ($v) => is_string($v) && $v !== ''))[0] ?? null)
+            : null;
+
+        // Only the first funder is applied (OpenSearch supports several).
+        $funder = is_array($funders)
+            ? (array_values(array_filter($funders, fn ($v) => is_string($v) && $v !== ''))[0] ?? null)
+            : null;
 
         // Handle options
         foreach ($builder->options as $option => &$value) {
@@ -106,6 +120,38 @@ class DatabaseEngine extends ScoutEngine
             ->join('submissions AS s', 'ft.submission_id', 's.submission_id')
             ->when($contextId, fn (DatabaseBuilder $q) => $q->where('context_id', $contextId))
             ->whereIn('s.submission_id', DB::table('publications')->where('status', PKPPublication::STATUS_PUBLISHED)->select('submission_id'))
+            // Reuse Collector::filterByFunder as a subquery (no PHP ID materialization).
+            ->when(
+                $funder,
+                function (DatabaseBuilder $q) use ($funder, $contextId) {
+                    $collector = Repo::submission()->getCollector()
+                        ->filterByFunder($funder)
+                        ->filterByContextIds(
+                            $contextId
+                                ? [$contextId]
+                                : [Application::SITE_CONTEXT_ID_ALL]
+                        );
+                    $q->whereIn(
+                        's.submission_id',
+                        $collector->getQueryBuilder()
+                            ->select('s.submission_id')
+                    );
+                }
+            )
+            ->when(!empty($reviewer), fn ($q) => $q->whereIn(
+                's.submission_id',
+                DB::table('review_assignments AS ra')
+                    ->select('ra.submission_id')
+                    ->join('submissions AS ras', 'ras.submission_id', 'ra.submission_id')
+                    ->where('ras.context_id', $contextId)
+                    ->whereNotNull('ra.date_considered')
+                    ->where('ra.review_method', ReviewAssignment::SUBMISSION_REVIEW_METHOD_OPEN)
+                    ->where('ra.is_review_publicly_visible', 1)
+                    ->join('users AS u', 'u.user_id', 'ra.reviewer_id')
+                    ->join('user_settings AS us', 'u.user_id', 'us.user_id')
+                    ->whereIn('us.setting_name', [Identity::IDENTITY_SETTING_GIVENNAME, Identity::IDENTITY_SETTING_FAMILYNAME, 'affiliation'])
+                    ->where('us.setting_value', 'like', '%' . addcslashes($reviewer, '%_') . '%')
+            ))
             ->when($publishedFrom || $publishedTo || is_array($sectionIds) || is_array($categoryIds) || is_array($keywords) || is_array($subjects), fn ($q) => $q->whereExists(
                 fn ($q) => $q->selectRaw(1)
                     ->from('publications AS p')
@@ -168,6 +214,10 @@ class DatabaseEngine extends ScoutEngine
                     ->orderBy($q->raw('MIN(title_current.setting_value)'), $orderDirection);
             })
             ->when($builder->query, fn ($q) => $q->whereFullText(['title', 'abstract', 'body', 'authors'], $builder->query))
+            ->when(!empty($title), fn ($q) => $q->whereFullText(['title'], $title))
+            ->when(!empty($abstract), fn ($q) => $q->whereFullText(['abstract'], $abstract))
+            ->when(!empty($author), fn ($q) => $q->whereFullText(['authors'], $author))
+            ->when(!empty($body), fn ($q) => $q->whereFullText(['body'], $body))
             ->groupBy('s.submission_id');
     }
 

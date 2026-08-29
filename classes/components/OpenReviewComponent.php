@@ -11,34 +11,32 @@
  *
  * @ingroup classes_components
  *
- * @brief A class to prepare configurations for PkpOpenReview UI component.
+ * @brief A class to prepare configurations for PkpOpenReviews UI component.
  */
 
 namespace PKP\components;
 
-use APP\facades\Repo;
 use APP\submission\Submission;
-use Illuminate\Support\Enumerable;
+use PKP\API\v1\peerReviews\resources\SubmissionPeerReviewResource;
 use PKP\API\v1\peerReviews\resources\SubmissionPeerReviewSummaryResource;
 use PKP\submission\reviewer\recommendation\enums\ReviewerRecommendationType;
 
 class OpenReviewComponent
 {
-    private Enumerable $publicationsPeerReviews;
+    private array $submissionPeerReviews;
     private array $submissionPeerReviewSummary;
 
     public function __construct(Submission $submission)
     {
-        $this->publicationsPeerReviews = Repo::publication()->getPublicPeerReviews(
-            $submission->getPublishedPublications()
-        );
+        $this->submissionPeerReviews = (new SubmissionPeerReviewResource($submission))
+            ->resolve();
 
         $this->submissionPeerReviewSummary = (new SubmissionPeerReviewSummaryResource($submission))
             ->resolve();
     }
 
     /**
-     * Get the locale keys to expose for the PkpOpenReview component.
+     * Get the locale keys to expose for the PkpOpenReviews component.
      */
     public function getLocaleKeys(): array
     {
@@ -48,15 +46,22 @@ class OpenReviewComponent
             'openReview.reviewCount',
             'openReview.fullReview',
             'openReview.noCommentsAvailable',
+            'reviewer.submission.competingInterests',
+            'reviewer.submission.competingInterests.declaredNone',
+            'openReview.citeReviewReport',
             'openReview.readReview',
             'openReview.hideReview',
             'openReview.readResponse',
             'openReview.hideResponse',
             'openReview.sortByReviewRound',
+            'openReview.citeDoi',
             'common.pagination.previous',
             'common.pagination.next',
             'submission.reviewRound.authorResponse',
-            // PkpOpenReviewSummary component locale keys
+            'common.inProgress',
+            'submission.submit.contributorType.anonymous',
+            'manager.userComment.comments',
+            // PkpOpenReviewsSummary component locale keys
             'openReview.title',
             'openReview.status',
             'openReview.statusInProgress',
@@ -86,12 +91,12 @@ class OpenReviewComponent
     }
 
     /**
-     * Get the configuration for the PkpOpenReview component.
+     * Get the configuration for the PkpOpenReviews component.
      */
     public function getConfig(): array
     {
         return [
-            'publicationsPeerReviews' => $this->publicationsPeerReviews->all(),
+            'submissionPeerReviews' => $this->submissionPeerReviews,
             'submissionPeerReviewSummary' => $this->submissionPeerReviewSummary,
         ];
     }
@@ -112,7 +117,7 @@ class OpenReviewComponent
     }
 
     /**
-     * Get SVG icons used by the PkpOpenReview component.
+     * Get SVG icons used by the PkpOpenReviews component.
      */
     public function getSvgIcons(): array
     {

@@ -21,7 +21,6 @@ use APP\facades\Repo;
 use APP\handler\Handler;
 use APP\template\TemplateManager;
 use DateTime;
-use Illuminate\Support\Collection;
 use PKP\context\Context;
 use PKP\facades\Locale;
 use PKP\orcid\OrcidManager;
@@ -30,7 +29,6 @@ use PKP\security\authorization\ContextRequiredPolicy;
 use PKP\security\Role;
 use PKP\userGroup\relationships\enums\UserUserGroupStatus;
 use PKP\userGroup\relationships\UserUserGroup;
-use PKP\userGroup\UserGroup;
 
 class AboutContextHandler extends Handler
 {
@@ -62,24 +60,6 @@ class AboutContextHandler extends Handler
         $templateMgr->display('frontend/pages/about.tpl');
     }
 
-
-    private function getSortedMastheadUserGroups(Context $context): Collection
-    {
-        $mastheadUserGroups = UserGroup::withContextIds([$context->getId()])
-            ->masthead(true)
-            ->excludeRoles([Role::ROLE_ID_REVIEWER])
-            ->get();
-
-        $savedOrder = (array) $context->getData('mastheadUserGroupIds');
-
-        $sortedUserGroups = $mastheadUserGroups->sortBy(function ($userGroup) use ($savedOrder) {
-            return array_search($userGroup->id, $savedOrder);
-        });
-
-        return $sortedUserGroups;
-    }
-
-
     /**
      * Display editorial masthead page.
      *
@@ -92,8 +72,8 @@ class AboutContextHandler extends Handler
     {
         $context = $request->getContext();
 
-        // Get sorted masthead roles using the extracted method
-        $mastheadRoles = $this->getSortedMastheadUserGroups($context);
+        // Get sorted masthead roles
+        $mastheadRoles = Repo::userGroup()->getSortedMastheadUserGroups($context);
 
         // Get all user IDs grouped by user group ID for the masthead roles
         $allUsersIdsGroupedByUserGroupId = Repo::userGroup()->getMastheadUserIdsByRoleIds(
@@ -102,17 +82,17 @@ class AboutContextHandler extends Handler
         );
 
         $mastheadUsers = [];
-        foreach ($mastheadRoles as $userGroupId => $mastheadUserGroup) {
-            foreach ($allUsersIdsGroupedByUserGroupId[$userGroupId] ?? [] as $userId) {
+        foreach ($mastheadRoles as $mastheadUserGroup) {
+            foreach ($allUsersIdsGroupedByUserGroupId[$mastheadUserGroup->id] ?? [] as $userId) {
                 $user = Repo::user()->get($userId);
                 $userUserGroup = UserUserGroup::withUserId($user->getId())
-                    ->withUserGroupIds([$userGroupId])
+                    ->withUserGroupIds([$mastheadUserGroup->id])
                     ->withActive()
                     ->withMasthead()
                     ->first();
                 if ($userUserGroup) {
                     $startDatetime = $userUserGroup->dateStart ? new DateTime($userUserGroup->dateStart) : null;
-                    $mastheadUsers[$userGroupId][$user->getId()] = [
+                    $mastheadUsers[$mastheadUserGroup->id][$user->getId()] = [
                         'user' => $user,
                         'dateStart' => $startDatetime ? $startDatetime->format('Y') : '',
                     ];
@@ -158,8 +138,8 @@ class AboutContextHandler extends Handler
     {
         $context = $request->getContext();
 
-        // get sorted masthead roles using the extracted method
-        $mastheadRoles = $this->getSortedMastheadUserGroups($context);
+        // get sorted masthead roles
+        $mastheadRoles = Repo::userGroup()->getSortedMastheadUserGroups($context);
 
         // get all user IDs grouped by user group ID for the masthead roles with ended status
         $allUsersIdsGroupedByUserGroupId = Repo::userGroup()->getMastheadUserIdsByRoleIds(
@@ -169,11 +149,11 @@ class AboutContextHandler extends Handler
         );
 
         $mastheadUsers = [];
-        foreach ($mastheadRoles as $userGroupId => $mastheadUserGroup) {
-            foreach ($allUsersIdsGroupedByUserGroupId[$userGroupId] ?? [] as $userId) {
+        foreach ($mastheadRoles as $mastheadUserGroup) {
+            foreach ($allUsersIdsGroupedByUserGroupId[$mastheadUserGroup->id] ?? [] as $userId) {
                 $user = Repo::user()->get($userId);
                 $userUserGroups = UserUserGroup::withUserId($user->getId())
-                    ->withUserGroupIds([$userGroupId])
+                    ->withUserGroupIds([$mastheadUserGroup->id])
                     ->withEnded()
                     ->withMasthead()
                     ->orderBy('date_start', 'desc')
@@ -188,7 +168,7 @@ class AboutContextHandler extends Handler
                     ];
                 }
                 if (!empty($services)) {
-                    $mastheadUsers[$userGroupId][$user->getId()] = [
+                    $mastheadUsers[$mastheadUserGroup->id][$user->getId()] = [
                         'user' => $user,
                         'services' => $services
                     ];

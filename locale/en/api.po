@@ -167,6 +167,18 @@ msgstr "Files larger than {$maxSize} can not be uploaded."
 msgid "api.files.400.config"
 msgstr "File could not be uploaded because of a server configuration error. Please contact the system administrator."
 
+msgid "api.funders.404.funderNotFound"
+msgstr "The funder you requested was not found."
+
+msgid "api.funders.403.submissionsNotMatched"
+msgstr "The funder you requested is not associated with this submission."
+
+msgid "api.dataCitations.404.dataCitationNotFound"
+msgstr "The data citation you requested was not found."
+
+msgid "api.dataCitations.403.publicationsNotMatched"
+msgstr "The data citation you requested is not associated with this publication."
+
 msgid "api.highlights.400.noOrderData"
 msgstr "Highlight order could not be saved because no ordering information was found."
 
@@ -326,6 +338,15 @@ msgstr "You do not have permission to delete this submission."
 msgid "api.submissions.403.userCantEdit"
 msgstr "You are not allowed to edit this publication."
 
+msgid "api.submissions.403.alreadyInDone"
+msgstr "This submission is already in the Done stage."
+
+msgid "api.submissions.403.noMoveToDoneHistory"
+msgstr "This submission has no history of being moved to Done."
+
+msgid "api.submissions.403.noPublishedPublication"
+msgstr "This submission has no published publication to return to Done with."
+
 msgid "api.submissions.404.siteWideEndpoint"
 msgstr "This endpoint is not available from a context. It must be accessed from the site-wide namespace."
 
@@ -386,11 +407,17 @@ msgstr "Publication identifiers form is unavailable as there are no enabled Iden
 msgid "api.rors.404.rorNotFound"
 msgstr "The ror you requested was not found."
 
+msgid "api.rors.429.tooManyRequests"
+msgstr "Too many ROR lookup requests. Please wait a moment and try again."
+
+msgid "api.rors.429.globalRateLimited"
+msgstr "Too many ROR lookup requests are being processed right now. Please wait a moment and try again."
+
+msgid "api.rors.429.rorApiRateLimited"
+msgstr "The ROR registry (ror.org) is currently rate limiting our requests. Please wait a few minutes and try again."
+
 msgid "api.409.resourceActionConflict"
 msgstr "Unable to complete the intended action on resource."
-
-msgid "api.emailTemplates.404.userGroupIds"
-msgstr "One or more of the provided user groups does not exist."
 
 msgid "api.categories.400.invalidContext"
 msgstr "Cannot create or update categories in the context provided."
@@ -401,14 +428,17 @@ msgstr "A category cannot be its own parent or create a circular reference with 
 msgid "api.categories.409.circularReference"
 msgstr "A circular reference was detected while building the category tree."
 
-msgid "api.userComments.400.cannotCommentOnPublicationVersion"
-msgstr "You are only allowed to comment on the most recently published publication."
+msgid "api.userComments.400.cannotCommentOnUnpublishedSubmission"
+msgstr "You can not comment on this submission because no published version is available."
 
 msgid "api.userComments.400.missingPublicationParam"
 msgstr "The request is missing the required `publicationIds` query parameter."
 
 msgid "api.userComments.400.invalidPublicationId"
 msgstr "An invalid publication ID was provided: `{$publicationId}`."
+
+msgid "api.userComments.400.invalidSubmissionId"
+msgstr "An invalid submission ID was provided: `{$submissionId}`."
 
 msgid "api.userComments.400.invalidUserId"
 msgstr "An invalid user ID was provided: `{$userId}`."
@@ -418,6 +448,9 @@ msgstr "The `commentText` field is required."
 
 msgid "api.userComments.form.400.required.publicationId"
 msgstr "The `publicationId` field is required."
+
+msgid "api.userComments.form.400.required.submissionId"
+msgstr "The `submissionId` field is required."
 
 msgid "api.userComments.form.400.required.note"
 msgstr "The `note` field is required."
@@ -430,6 +463,9 @@ msgstr "An invalid value was provided for `isReported`: `{$isReported}`."
 
 msgid "api.citations.404.citationNotFound"
 msgstr "The citation you requested was not found."
+
+msgid "api.citations.403.publicationsNotMatched"
+msgstr "The citation you requested is not assigned to this publication."
 
 msgid "api.publication.400.invalidPublicationId"
 msgstr "An invalid publication ID was provided: `{$publicationId}`."
@@ -460,3 +496,54 @@ msgstr "The request is missing a value for `authorReviewResponse`."
 
 msgid "api.reviewRound.422.reviewAssignments"
 msgstr "This review round has review assignments that needs to be completed before a response can be requested from the Author."
+
+msgid "api.dois.reviews.422.cannotAssignDoi"
+msgstr "Cannot assign a DOI to review that is not publicly visible."
+
+msgid "api.reviews.assignments.invalidQualityRating"
+msgstr "The submitted quality rating for this review assignment is invalid. Valid ratings ranges from 0 to 5, with 0 being \"no rating\" and 5 being the highest."
+
+msgid "api.422.missingRequiredField"
+msgstr "The \"{$field}\" field is required."
+
+msgid "api.submissions.reviews.422.uneditableFields"
+msgstr "Your request included fields that are not editable through this endpoint."
+
+msgid "api.reviews.assignments.alreadyConsidered"
+msgstr "The review assignment has already been considered and cannot be considered again."
+
+msgid "api.reviews.assignments.422.missingOrInvalidConsideredValue"
+msgstr "The `considered` field is missing or contains an invalid value."
+
+msgid "api.submissions.reviews.422.invalidRecommendation"
+msgstr "The submitted reviewer recommendation ID is not a valid for this Context."
+
+msgid "api.submissions.reviews.422.invalidReviewFormSubmitted"
+msgstr "The submitted review form must be an object or a valid JSON string."
+
+msgid "api.submissions.reviews.422.reviewFormQuestionResponseRequired"
+msgstr "An answer is required for the review question with element ID {$elementId}."
+
+msgid "api.submissions.reviews.422.invalidReviewFormResponse"
+msgstr "The response submitted for the review question with element ID {$elementId} is not valid."
+
+msgid "api.submissions.reviews.422.commentsNotAllowed"
+msgstr "Comments are not allowed for this review."
+
+msgid "api.submissions.reviews.422.formSubmissionNotAllowed"
+msgstr "Form submissions are not allowed for this review."
+
+msgid "api.submissions.reviews.422.reviewNotEditable.declined"
+msgstr "This review not editable because it was declined."
+
+msgid "api.submissions.reviews.422.reviewNotEditable.cancelled"
+msgstr "This review not editable because it was cancelled."
+
+msgid "api.submissions.reviews.422.reviewerRecommendation.notEditable"
+msgstr "Editing reviewer recommendation for reviews is not supported."
+
+msgid "api.submissions.reviews.422.invalidReviewFormElementSubmitted"
+msgstr "The form element with ID {$elementId} is not a part of this review assignment's review form"
+
+msgid "api.submissions.reviews.422.invalidComments"
+msgstr "The submitted comments are not valid."

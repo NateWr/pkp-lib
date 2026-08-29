@@ -30,12 +30,15 @@ use APP\file\PublicFileManager;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
+use APP\view\HomepageBlocksRegistry;
+use APP\view\MetadataBlocksRegistry;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Less_Parser;
+use PKP\API\v1\navigationMenus\PKPNavigationMenuController;
 use PKP\config\Config;
 use PKP\context\Context;
 use PKP\controllers\grid\GridHandler;
@@ -54,7 +57,6 @@ use PKP\file\FileManager;
 use PKP\form\FormBuilderVocabulary;
 use PKP\i18n\LocaleConversion;
 use PKP\i18n\LocaleMetadata;
-use PKP\API\v1\navigationMenus\PKPNavigationMenuController;
 use PKP\navigationMenu\NavigationMenuDAO;
 use PKP\notification\Notification;
 use PKP\plugins\Hook;
@@ -140,6 +142,12 @@ class PKPTemplateManager extends Smarty
     /** @var bool Track whether vue runtime is included */
     private bool $isVueRuntimeIncluded = false;
 
+    /** @var MetadataBlocksRegistry Register and load metadata blocks for the reader facing UI */
+    public MetadataBlocksRegistry $metadataBlocks;
+
+    /** @var HomepageBlocksRegistry Register and load metadata blocks for the reader facing UI */
+    public HomepageBlocksRegistry $homepageBlocks;
+
     /**
      * Constructor.
      * Initialize template engine and assign basic template variables.
@@ -174,6 +182,9 @@ class PKPTemplateManager extends Smarty
         // This routes {include} directives through Laravel's FileViewFinder
         // for unified template resolution and hook firing
         $this->template_class = \PKP\core\blade\SmartyTemplate::class;
+
+        $this->metadataBlocks = new MetadataBlocksRegistry();
+        $this->homepageBlocks = new HomepageBlocksRegistry();
     }
 
     /**
@@ -206,6 +217,7 @@ class PKPTemplateManager extends Smarty
             'currentLocale' => $locale,
             'currentLocaleLangDir' => Locale::getMetadata($locale)?->isRightToLeft() ? 'rtl' : 'ltr',
             'applicationName' => __($application->getNameKey()),
+            'site' => $request->getSite(),
         ]);
 
         // Assign date and time format
@@ -257,17 +269,7 @@ class PKPTemplateManager extends Smarty
                 ['contexts' => ['frontend', 'backend']]
             );
 
-            $activeTheme = null;
-            $contextOrSite = $currentContext ? $currentContext : $request->getSite();
-            $allThemes = PluginRegistry::getPlugins('themes');
-            foreach ($allThemes as $theme) { /** @var \PKP\plugins\Plugin|\PKP\plugins\ThemePlugin $theme */
-                if ($contextOrSite->getData('themePluginPath') === $theme->getDirName()) {
-                    $activeTheme = $theme;
-                    break;
-                }
-            }
-
-            $this->assign(['activeTheme' => $activeTheme]);
+            $this->assign(['activeTheme' => $this->getActiveTheme($request, $currentContext)]);
         }
 
         if ($router instanceof \PKP\core\PKPPageRouter) {
@@ -369,6 +371,7 @@ class PKPTemplateManager extends Smarty
         }
 
         // Register custom functions
+        $this->registerPlugin('modifier', 'date', date(...));
         $this->registerPlugin('modifier', 'in_array', in_array(...));
         $this->registerPlugin('modifier', 'trim', trim(...));
         $this->registerPlugin('modifier', 'date_format', $this->smartyDateFormat(...));
@@ -920,16 +923,6 @@ class PKPTemplateManager extends Smarty
             $this->setLocaleKeys(['common.ok']);
             $this->setLocaleKeys(['common.clearSelection']); // PkpCombobox
 
-            // Stylesheet compiled from Vue.js single-file components
-            $this->addStyleSheet(
-                'build',
-                $baseUrl . '/styles/build_frontend.css',
-                [
-                    'priority' => self::STYLE_SEQUENCE_CORE,
-                    'contexts' => ['frontend'],
-                ]
-            );
-
             $this->addJavaScript(
                 'pkpAppFrontend',
                 $baseUrl . '/js/build_frontend.js',
@@ -939,6 +932,14 @@ class PKPTemplateManager extends Smarty
                 ]
             );
 
+            $this->addStyleSheet(
+                'pkpAppFrontend',
+                $baseUrl . '/styles/build_frontend.css',
+                [
+                    'priority' => self::STYLE_SEQUENCE_CORE,
+                    'contexts' => ['frontend']
+                ]
+            );
         }
     }
 
@@ -971,7 +972,9 @@ class PKPTemplateManager extends Smarty
             'WORKFLOW_STAGE_ID_EXTERNAL_REVIEW' => WORKFLOW_STAGE_ID_EXTERNAL_REVIEW,
             'WORKFLOW_STAGE_ID_EDITING' => WORKFLOW_STAGE_ID_EDITING,
             'WORKFLOW_STAGE_ID_PRODUCTION' => WORKFLOW_STAGE_ID_PRODUCTION,
+            'WORKFLOW_STAGE_ID_DONE' => WORKFLOW_STAGE_ID_DONE,
             'INSERT_TAG_VARIABLE_TYPE_PLAIN_TEXT' => INSERT_TAG_VARIABLE_TYPE_PLAIN_TEXT,
+            'ASSOC_TYPE_REVIEW_ASSIGNMENT' => Application::ASSOC_TYPE_REVIEW_ASSIGNMENT,
             'ROLE_ID_MANAGER' => Role::ROLE_ID_MANAGER,
             'ROLE_ID_SITE_ADMIN' => Role::ROLE_ID_SITE_ADMIN,
             'ROLE_ID_AUTHOR' => Role::ROLE_ID_AUTHOR,
@@ -1143,9 +1146,7 @@ class PKPTemplateManager extends Smarty
                 $menu = [];
 
                 if ($request->getContext()) {
-                    $isNewSubmissionLinkPresent = false;
                     if (count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $userRoles))) {
-                        $isNewSubmissionLinkPresent = false;
                         if (count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT], $userRoles))) {
                             $dashboardViews = Repo::submission()->getDashboardViews($request->getContext(), $request->getUser(), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT]);
                             $requestedPage = $router->getRequestedPage($request);
@@ -1163,13 +1164,16 @@ class PKPTemplateManager extends Smarty
                                 ];
                             });
 
-                            if (!$request->getContext()->getData('disableSubmissions')) {
-                                $viewsData['newSubmission'] = [
-                                    'name' => __('dashboard.startNewSubmission'),
-                                    'url' => $router->url($request, null, 'submission')
-                                ];
-                                $isNewSubmissionLinkPresent = true;
-                            }
+                            // Search box at the top of the editorial dashboard nav group.
+                            // isCurrent keeps the group expanded/selected when the search view is active on reload.
+                            $viewsData = $viewsData->prepend([
+                                'itemType' => 'search',
+                                'name' => __('search.searchResults'),
+                                'searchLabel' => __('editor.submission.searchGlobal'),
+                                'searchParam' => 'searchPhrase', // query param this search uses; unique per search view
+                                'isCurrent' => $requestedPage === 'dashboard' && $requestedOp === 'editorial' && $requestedViewId === DashboardView::VIEW_SEARCH,
+                                'url' => $router->url($request, null, 'dashboard', 'editorial', null, ['currentViewId' => DashboardView::VIEW_SEARCH]),
+                            ], DashboardView::VIEW_SEARCH);
 
                             $menu['dashboards'] = [
                                 'name' => __('navigation.dashboards'),
@@ -1214,26 +1218,20 @@ class PKPTemplateManager extends Smarty
                                 ];
                             });
 
-                            if (!$request->getContext()->getData('disableSubmissions') && !$isNewSubmissionLinkPresent) {
-                                $viewsData['newSubmission'] = [
-                                    'name' => __('dashboard.startNewSubmission'),
-                                    'url' => $router->url($request, null, 'submission')
-                                ];
-                            }
-
-
                             $menu['mySubmissions'] = [
                                 'name' => __('navigation.mySubmissions'),
                                 'submenu' => $viewsData,
                                 'icon' => 'MySubmissions',
                             ];
                         }
-                    } elseif (count($userRoles) === 1 && in_array(Role::ROLE_ID_READER, $userRoles)) {
+                    }
+
+                    if (!$request->getContext()->getData('disableSubmissions')) {
                         $menu['submit'] = [
-                            'name' => __('author.submit'),
+                            'name' => __('dashboard.startNewSubmission'),
                             'url' => $router->url($request, null, 'submission'),
                             'isCurrent' => $router->getRequestedPage($request) === 'submission',
-                            'icon' => 'MySubmissions'
+                            'icon' => 'DefaultDocument'
                         ];
                     }
 
@@ -1427,6 +1425,7 @@ class PKPTemplateManager extends Smarty
      * - "mytheme::frontend.pages.article" → "mytheme::frontend.pages.article" (passthrough)
      *
      * @param string $template Smarty template path or Laravel view name
+     *
      * @return string Laravel view name in dot notation (possibly with namespace)
      */
     public function smartyPathToViewName(string $template): string
@@ -1720,6 +1719,25 @@ class PKPTemplateManager extends Smarty
     }
 
     /**
+     * Display a system message template
+     */
+    public function displaySystemMessage(
+        string $title,
+        string $message,
+        string $type = 'message',
+        string $backLink = '',
+        string $backLinkLabel = '',
+    ) {
+        $this->assign([
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'backLink' => $backLink,
+            'backLinkLabel' => $backLinkLabel,
+        ]);
+        $this->display('frontend/pages/system-message.tpl');
+    }
+    /**
      * Clear template compile and cache directories.
      */
     public function clearTemplateCache()
@@ -1884,12 +1902,12 @@ class PKPTemplateManager extends Smarty
 
     /**
      * Smarty modifier: json_encode_html_attribute
-     * 
+     *
      * Encodes a value to JSON with full HTML-attribute safety.
      * Escapes ", ', <, >, & as \u0022, \u0027, \u003C, \u003E, \u0026
      * so the output can be safely placed inside any HTML attribute
      */
-    function smartyJsonEncodeHtmlAttribute($value)
+    public function smartyJsonEncodeHtmlAttribute($value)
     {
         return json_encode(
             $value,
@@ -2620,18 +2638,23 @@ class PKPTemplateManager extends Smarty
         $navigationMenuDao = DAORegistry::getDAO('NavigationMenuDAO'); /** @var NavigationMenuDAO $navigationMenuDao */
 
         $output = '';
-        $navigationMenus = $navigationMenuDao->getByArea($contextId, $areaName)->toArray();
+        $navigationMenu = null;
+        $navigationMenus = $navigationMenuDao->getByArea($contextId, $areaName);
         if (isset($navigationMenus[0])) {
             $navigationMenu = $navigationMenus[0];
             app()->get('navigationMenu')->getMenuTree($navigationMenu);
         }
 
+        if (!$navigationMenu) {
+            return '';
+        }
 
         $this->assign([
             'navigationMenu' => $navigationMenu,
             'id' => $params['id'],
             'ulClass' => $params['ulClass'] ?? '',
             'liClass' => $params['liClass'] ?? '',
+            'items' => $navigationMenu?->menuTree ?? [],
         ]);
 
         return $this->fetch($menuTemplatePath);
@@ -2880,5 +2903,23 @@ class PKPTemplateManager extends Smarty
     public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    /**
+     * Get the active theme for a context or site
+     */
+    public function getActiveTheme(Request $request, ?Context $context = null): ?ThemePlugin
+    {
+        $activeTheme = null;
+        $contextOrSite = $context ? $context : $request->getSite();
+        $allThemes = PluginRegistry::getPlugins('themes');
+        foreach ($allThemes as $theme) { /** @var \PKP\plugins\Plugin|\PKP\plugins\ThemePlugin $theme */
+            if ($contextOrSite->getData('themePluginPath') === $theme->getDirName()) {
+                $activeTheme = $theme;
+                break;
+            }
+        }
+
+        return $activeTheme;
     }
 }

@@ -20,7 +20,6 @@ use APP\publication\Publication;
 use APP\submission\Submission;
 use Illuminate\Support\Enumerable;
 use PKP\context\Context;
-use PKP\dataCitation\DataCitation;
 use PKP\services\PKPSchemaService;
 use PKP\submission\Genre;
 
@@ -34,9 +33,6 @@ class Schema extends \PKP\core\maps\Schema
 
     /** @var Submission */
     public $submission;
-
-    /** @var bool */
-    public $anonymize;
 
     /** @var Genre[] The file genres for this context. */
     public array $genres;
@@ -56,9 +52,9 @@ class Schema extends \PKP\core\maps\Schema
      *
      * Includes all properties in the publication schema.
      */
-    public function map(Publication $item, bool $anonymize = false): array
+    public function map(Publication $item, bool $anonymizeAuthors = false): array
     {
-        return $this->mapByProperties($this->getProps(), $item, $anonymize);
+        return $this->mapByProperties($this->getProps(), $item, $anonymizeAuthors);
     }
 
     /**
@@ -66,9 +62,9 @@ class Schema extends \PKP\core\maps\Schema
      *
      * Includes properties with the apiSummary flag in the publication schema.
      */
-    public function summarize(Publication $item, bool $anonymize = false): array
+    public function summarize(Publication $item, bool $anonymizeAuthors = false): array
     {
-        return $this->mapByProperties($this->getSummaryProps(), $item, $anonymize);
+        return $this->mapByProperties($this->getSummaryProps(), $item, $anonymizeAuthors);
     }
 
     /**
@@ -76,11 +72,11 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @see self::map
      */
-    public function mapMany(Enumerable $collection, bool $anonymize = false): Enumerable
+    public function mapMany(Enumerable $collection, bool $anonymizeAuthors = false): Enumerable
     {
         $this->collection = $collection;
-        return $collection->map(function ($item) use ($anonymize) {
-            return $this->map($item, $anonymize);
+        return $collection->map(function ($item) use ($anonymizeAuthors) {
+            return $this->map($item, $anonymizeAuthors);
         });
     }
 
@@ -89,11 +85,11 @@ class Schema extends \PKP\core\maps\Schema
      *
      * @see self::summarize
      */
-    public function summarizeMany(Enumerable $collection, bool $anonymize = false): Enumerable
+    public function summarizeMany(Enumerable $collection, bool $anonymizeAuthors = false): Enumerable
     {
         $this->collection = $collection;
-        return $collection->map(function ($item) use ($anonymize) {
-            return $this->summarize($item, $anonymize);
+        return $collection->map(function ($item) use ($anonymizeAuthors) {
+            return $this->summarize($item, $anonymizeAuthors);
         });
     }
 
@@ -101,6 +97,7 @@ class Schema extends \PKP\core\maps\Schema
      * Get and cache review DOI data for all publications in the current collection.
      *
      * @throws \Exception
+     *
      * @return array<int, array> Review DOI entries keyed by publication ID
      */
     protected function getReviewDoiItemsCache(Publication $publication): array
@@ -119,10 +116,8 @@ class Schema extends \PKP\core\maps\Schema
     /**
      * Map schema properties of a Publication to an assoc array
      */
-    protected function mapByProperties(array $props, Publication $publication, bool $anonymize): array
+    protected function mapByProperties(array $props, Publication $publication, bool $anonymizeAuthors): array
     {
-        $this->anonymize = $anonymize;
-
         $output = [];
 
         foreach ($props as $prop) {
@@ -134,7 +129,7 @@ class Schema extends \PKP\core\maps\Schema
                     );
                     break;
                 case 'authors':
-                    if ($this->anonymize) {
+                    if ($anonymizeAuthors) {
                         $output[$prop] = [];
                     } else {
                         $output[$prop] = Repo::author()->getSchemaMap($this->submission)
@@ -142,16 +137,16 @@ class Schema extends \PKP\core\maps\Schema
                     }
                     break;
                 case 'authorsString':
-                    $output[$prop] = $this->anonymize ? '' : $publication->getAuthorString();
+                    $output[$prop] = $anonymizeAuthors ? '' : $publication->getAuthorString();
                     break;
                 case 'authorsStringIncludeInBrowse':
-                    $output[$prop] = $this->anonymize ? '' : $publication->getAuthorString(true);
+                    $output[$prop] = $anonymizeAuthors ? '' : $publication->getAuthorString(true);
                     break;
                 case 'authorsStringShort':
-                    $output[$prop] = $this->anonymize ? '' : $publication->getShortAuthorString();
+                    $output[$prop] = $anonymizeAuthors ? '' : $publication->getShortAuthorString();
                     break;
                 case 'categoryIds':
-                    $output[$prop] = $publication->getData('categoryIds');
+                    $output[$prop] = iterator_to_array($publication->getData('categoryIds'));
                     break;
                 case 'citations':
                     $data = [];
@@ -163,11 +158,18 @@ class Schema extends \PKP\core\maps\Schema
                 case 'citationsRaw':
                     $output[$prop] = Repo::citation()->getRawCitationsByPublicationId($publication->getId())->implode(PHP_EOL);
                     break;
+                case 'dataAvailability':
+                    $output[$prop] = $anonymizeAuthors ? null : $publication->getData('dataAvailability');
+                    break;
                 case 'dataCitations':
                     $data = [];
-                    foreach ($publication->getData('dataCitations') as $dataCitation) {
-                        $data[] = Repo::dataCitation()->getSchemaMap()->map($dataCitation);
+
+                    if (!$anonymizeAuthors) {
+                        foreach ($publication->getData('dataCitations') as $dataCitation) {
+                            $data[] = Repo::dataCitation()->getSchemaMap()->map($dataCitation);
+                        }
                     }
+
                     $output[$prop] = $data;
                     break;
                 case 'doiObject':
@@ -177,6 +179,20 @@ class Schema extends \PKP\core\maps\Schema
                         $retVal = null;
                     }
                     $output[$prop] = $retVal;
+                    break;
+                case 'funders':
+                    $data = [];
+
+                    if (!$anonymizeAuthors) {
+                        foreach ($this->submission->getData('funders') as $funder) {
+                            $data[] = Repo::funder()->getSchemaMap()->map($funder);
+                        }
+                    }
+
+                    $output[$prop] = $data;
+                    break;
+                case 'fundingStatement':
+                    $output[$prop] = $anonymizeAuthors ? null : $publication->getData('fundingStatement');
                     break;
                 case 'reviewDoiItems':
                     $reviewDoiItemsByPub = $this->getReviewDoiItemsCache($publication);

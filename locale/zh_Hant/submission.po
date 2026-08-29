@@ -1817,6 +1817,7 @@ msgstr ""
 msgid "log.review.reviewConfirmed"
 msgstr ""
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 
@@ -2318,3 +2319,6 @@ msgstr ""
 msgid "submission.submissionFile"
 msgstr "投稿檔案"
 
+
+msgid "reviewer.competingInterests"
+msgstr "利益衝突"

@@ -2001,6 +2001,7 @@ msgstr ""
 msgid "log.review.reviewConfirmed"
 msgstr "Biên tập viên {round} cho bài nộp {$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr "{round} cho bài nộp {$submissionId}."
 
@@ -3167,3 +3168,6 @@ msgstr "Đã bị từ chối trong giai đoạn {$stageName}."
 
 msgid "dashboard.reviewAssignment.statusReceived.withoutRecommendation.description"
 msgstr "Phản biện đã được hoàn thành vào {$ date}"
+
+msgid "reviewer.competingInterests"
+msgstr "Xung đột lợi ích"

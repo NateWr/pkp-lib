@@ -50,7 +50,6 @@ class ReviewAssignment extends \PKP\core\DataObject
     public const REVIEW_ASSIGNMENT_STATUS_CANCELLED = 10; // reviewer cancelled review request
     public const REVIEW_ASSIGNMENT_STATUS_REQUEST_RESEND = 11; // request resent to reviewer after they declined
     public const REVIEW_ASSIGNMENT_STATUS_VIEWED = 12; // editor has viewed the review assignment, intermediate status between received and complete
-
     /**
      * All review assignment statuses that indicate a
      * review was completed
@@ -166,6 +165,22 @@ class ReviewAssignment extends \PKP\core\DataObject
     public function setCompetingInterests($competingInterests)
     {
         $this->setData('competingInterests', $competingInterests);
+    }
+
+    /**
+     * Get whether the reviewer answered the competing interests question.
+     */
+    public function getCompetingInterestsDeclared(): bool
+    {
+        return (bool) $this->getData('competingInterestsDeclared');
+    }
+
+    /**
+     * Set whether the reviewer answered the competing interests question.
+     */
+    public function setCompetingInterestsDeclared(bool $competingInterestsDeclared): void
+    {
+        $this->setData('competingInterestsDeclared', $competingInterestsDeclared);
     }
 
     /**
@@ -862,5 +877,19 @@ class ReviewAssignment extends \PKP\core\DataObject
         }
 
         return true;
+    }
+
+    /**
+     * Helper method to fetch current DOI
+     */
+    public function getDoi(): ?string
+    {
+        $doiObject = $this->getData('doiObject');
+
+        if (empty($doiObject)) {
+            return null;
+        } else {
+            return $doiObject->getData('doi');
+        }
     }
 }

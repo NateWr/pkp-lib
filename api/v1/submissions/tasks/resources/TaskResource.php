@@ -15,6 +15,7 @@
 
 namespace PKP\API\v1\submissions\tasks\resources;
 
+use APP\facades\Repo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
@@ -78,7 +79,7 @@ class TaskResource extends JsonResource
             }
         }
 
-        foreach ($activities as $activity) {
+        foreach ($activities as $activity) { /** @var EventLogEntry $activity */
             $taskDateDueOld = $activity->getData('taskDateDueOld');
             $taskDateDueNew = $activity->getData('taskDateDueNew');
             $dateLogged = $activity->getDateLogged();
@@ -87,7 +88,7 @@ class TaskResource extends JsonResource
                 'taskType' => EditorialTaskType::from($this->type)->label(),
                 'username' => $activity->getData('username'),
                 'dateLogged' => $dateLogged ? Carbon::parse($dateLogged)->format('Y-m-d') : null,
-                'userGroupName' => $activity->getData('userGroupName') ?? implode(', ', $activity->getLocalizedData('userGroupNames') ?? []),
+                'userGroupName' => $activity->getLocalizedData('userGroupName') ?? implode(', ', $activity->getLocalizedData('userGroupNames') ?? []),
                 'taskDateDueOld' => $taskDateDueOld ? Carbon::parse($taskDateDueOld)->format('Y-m-d') : null,
                 'taskDateDueNew' => $taskDateDueNew ? Carbon::parse($taskDateDueNew)->format('Y-m-d') : null,
                 'filename' => $activity->getLocalizedData('filename'),
@@ -97,22 +98,59 @@ class TaskResource extends JsonResource
                 'userFullName' => $activity->getLocalizedData('userFullName'),
             ]);
 
+            // The task file event log stores the submission file id under 'fileId'
+            // (SubmissionFile::getId() returns the submissionFileId), so fall back to it.
+            $submissionFileId = $activity->getData('submissionFileId') ?: $activity->getData('fileId');
+            $downloadUrl = null;
+            // Only the upload event has a downloadable file; a removed file no longer exists.
+            if ($submissionFileId && $activity->getEventType() == PKPSubmissionEventLogEntry::SUBMISSION_LOG_TASK_FILE_UPLOADED) {
+                $context = PKPApplication::get()->getRequest()->getContext();
+                $downloadUrl = PKPApplication::get()->getDispatcher()->url(
+                    PKPApplication::get()->getRequest(),
+                    PKPApplication::ROUTE_COMPONENT,
+                    $context->getData('urlPath'),
+                    'api.file.FileApiHandler',
+                    'downloadFile',
+                    null,
+                    [
+                        'submissionFileId' => $submissionFileId,
+                        'submissionId' => $activity->getData('submissionId') ?: $submission->getId(),
+                        'stageId' => $activity->getData('stageId') ?: $this->stageId,
+                    ]
+                );
+            }
+
+            // Attached impersonated details to the user label if exists
+            $userLabel = $activity->getLocalizedData('userFullName');
+            if ($impersonatedUserId = $activity->getImpersonatedUserId()) {
+                $impersonatedName = Repo::user()->get($impersonatedUserId, true)->getFullName();
+                if ($impersonatedName !== '') {
+                    $userLabel = __('submission.event.impersonation.userLabel', [
+                        'userName' => $userLabel,
+                        'impersonatedName' => $impersonatedName,
+                    ]);
+                }
+            }
+
             $latestActivities[] = [
                 'id' => $activity->getId(),
                 'message' => $activityMessage,
                 'type' => $activity->getEventType(),
                 'date' => $activity->getDateLogged(),
-                'userFullName' => $activity->getLocalizedData('userFullName'),
+                'userFullName' => $userLabel,
                 'userId' => $activity->getData('userId'),
-                'settings' => array_intersect_key(
-                    $activity->getAllData(),
-                    array_flip([
-                        'fileId',
-                        'filename',
-                        'stageId',
-                        'submissionFileId',
-                    ])
-                ),
+                'settings' => [
+                    ...array_intersect_key(
+                        $activity->getAllData(),
+                        array_flip([
+                            'fileId',
+                            'filename',
+                            'stageId',
+                            'submissionFileId',
+                        ])
+                    ),
+                    'downloadUrl' => $downloadUrl,
+                ],
             ];
         }
 
