@@ -9,25 +9,58 @@
  *
  * @class PKPAuthenticateSession
  *
- * @brief Monitor session data to control authentication flow 
+ * @brief Monitor session data to control authentication flow
  */
 
 namespace PKP\middleware;
 
-use PKP\security\Validation;
-use Illuminate\Support\Facades\Auth;
+use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use PKP\config\Config;
+use PKP\security\AuditEvent;
+use PKP\security\AuditLog;
+use PKP\security\Validation;
+use Psr\Log\LogLevel;
 
 class PKPAuthenticateSession extends \Illuminate\Session\Middleware\AuthenticateSession
 {
     /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function handle($request, Closure $next)
+    {
+        $response = parent::handle($request, $next);
+
+        if ($request->hasSession()
+            && $request->user()
+            && Config::getVar('security', 'session_check_ip')
+            && ($loginIp = $request->session()->get('login_ip'))
+            && $loginIp !== $request->ip()
+        ) {
+            $this->logout($request);
+        }
+
+        return $response;
+    }
+
+    /**
      * Log the user out of the application.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return void
      */
     protected function logout($request)
     {
+        // session terminated because the client IP changed mid-session. Capture the
+        // actor + old/new IP before Auth::logout()/invalidate() tears the session down.
+        AuditLog::log(AuditEvent::AUTH_LOGOUT_IP_CHANGE, LogLevel::WARNING, [
+            'userId' => $request->user()?->getId(),
+            'oldIp' => $request->session()->get('login_ip'),
+            'newIp' => $request->ip(),
+        ]);
+
         Auth::logout();
 
         $request->session()->invalidate();
@@ -39,7 +72,6 @@ class PKPAuthenticateSession extends \Illuminate\Session\Middleware\Authenticate
     /**
      * Get the path the user should be redirected to when their session is not authenticated.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
     protected function redirectTo(Request $request)

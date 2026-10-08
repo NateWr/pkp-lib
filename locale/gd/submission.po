@@ -1814,6 +1814,7 @@ msgstr ""
 msgid "log.review.reviewConfirmed"
 msgstr ""
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 
@@ -2318,3 +2319,6 @@ msgstr ""
 msgid "submission.submissionFile"
 msgstr "Faidhle tagraidh"
 
+
+msgid "reviewer.competingInterests"
+msgstr "Còmhstri ùidhean"

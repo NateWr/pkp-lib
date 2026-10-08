@@ -11,7 +11,7 @@
  *
  * @ingroup jobs
  *
- * @brief Job for retrieving structured metadata for citations from external services.
+ * @brief Job for extracting the identifiers a citation's raw text already carries.
  */
 
 namespace PKP\jobs\citation;
@@ -19,14 +19,9 @@ namespace PKP\jobs\citation;
 use APP\facades\Repo;
 use PKP\citation\enum\CitationProcessingStatus;
 use PKP\citation\pid\ExtractPidsHelper;
-use PKP\job\exceptions\JobException;
-use PKP\jobs\BaseJob;
 
-class ExtractPidsJob extends BaseJob
+class ExtractPidsJob extends CitationJob
 {
-    protected int $contextId;
-    protected int $citationId;
-
     public function __construct(int $contextId, int $citationId)
     {
         parent::__construct();
@@ -36,15 +31,13 @@ class ExtractPidsJob extends BaseJob
 
     /**
      * Handle the queue job execution process
-     *
-     * @throws JobException
      */
     public function handle(): void
     {
         $citation = Repo::citation()->get($this->citationId);
 
         if (!$citation) {
-            throw new JobException(JobException::INVALID_PAYLOAD);
+            return;
         }
 
         if ($citation->getProcessingStatus() >= CitationProcessingStatus::PID_EXTRACTED->value) {

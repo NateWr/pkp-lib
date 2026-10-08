@@ -30,12 +30,15 @@ use APP\file\PublicFileManager;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
+use APP\view\HomepageBlocksRegistry;
+use APP\view\MetadataBlocksRegistry;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Less_Parser;
+use PKP\API\v1\navigationMenus\PKPNavigationMenuController;
 use PKP\config\Config;
 use PKP\context\Context;
 use PKP\controllers\grid\GridHandler;
@@ -54,7 +57,6 @@ use PKP\file\FileManager;
 use PKP\form\FormBuilderVocabulary;
 use PKP\i18n\LocaleConversion;
 use PKP\i18n\LocaleMetadata;
-use PKP\API\v1\navigationMenus\PKPNavigationMenuController;
 use PKP\navigationMenu\NavigationMenuDAO;
 use PKP\notification\Notification;
 use PKP\plugins\Hook;
@@ -116,8 +118,17 @@ class PKPTemplateManager extends Smarty
     /** @var array Initial state data to be managed by the page's Vue.js component */
     protected array $_state = [];
 
-    /** @var array State that can be expose via pinia store on frontend when vue is enabled */
-    protected array $_piniaData = [];
+    /** @var array Shared page context exposed to frontend Pinia stores (pkp._piniaData.page) */
+    protected array $_piniaPageData = [];
+
+    /** @var array Init data for frontend Pinia stores, keyed by store id (pkp._piniaData.stores) */
+    protected array $_piniaStoreData = [];
+
+    /** @var array Global styles for Vue components, keyed by component name */
+    protected array $_vueComponentStyles = [];
+
+    /** @var bool Whether the global styles for Vue components have been output by the footer */
+    protected bool $_vueComponentStylesLoaded = false;
 
     /** @var array List of SVG icon names required by Vue components */
     protected array $_svgIcons = [];
@@ -139,6 +150,12 @@ class PKPTemplateManager extends Smarty
 
     /** @var bool Track whether vue runtime is included */
     private bool $isVueRuntimeIncluded = false;
+
+    /** @var MetadataBlocksRegistry Register and load metadata blocks for the reader facing UI */
+    public MetadataBlocksRegistry $metadataBlocks;
+
+    /** @var HomepageBlocksRegistry Register and load metadata blocks for the reader facing UI */
+    public HomepageBlocksRegistry $homepageBlocks;
 
     /**
      * Constructor.
@@ -174,6 +191,9 @@ class PKPTemplateManager extends Smarty
         // This routes {include} directives through Laravel's FileViewFinder
         // for unified template resolution and hook firing
         $this->template_class = \PKP\core\blade\SmartyTemplate::class;
+
+        $this->metadataBlocks = new MetadataBlocksRegistry();
+        $this->homepageBlocks = new HomepageBlocksRegistry();
     }
 
     /**
@@ -206,6 +226,7 @@ class PKPTemplateManager extends Smarty
             'currentLocale' => $locale,
             'currentLocaleLangDir' => Locale::getMetadata($locale)?->isRightToLeft() ? 'rtl' : 'ltr',
             'applicationName' => __($application->getNameKey()),
+            'site' => $request->getSite(),
         ]);
 
         // Assign date and time format
@@ -257,17 +278,7 @@ class PKPTemplateManager extends Smarty
                 ['contexts' => ['frontend', 'backend']]
             );
 
-            $activeTheme = null;
-            $contextOrSite = $currentContext ? $currentContext : $request->getSite();
-            $allThemes = PluginRegistry::getPlugins('themes');
-            foreach ($allThemes as $theme) { /** @var \PKP\plugins\Plugin|\PKP\plugins\ThemePlugin $theme */
-                if ($contextOrSite->getData('themePluginPath') === $theme->getDirName()) {
-                    $activeTheme = $theme;
-                    break;
-                }
-            }
-
-            $this->assign(['activeTheme' => $activeTheme]);
+            $this->assign(['activeTheme' => $this->getActiveTheme($request, $currentContext)]);
         }
 
         if ($router instanceof \PKP\core\PKPPageRouter) {
@@ -369,6 +380,7 @@ class PKPTemplateManager extends Smarty
         }
 
         // Register custom functions
+        $this->registerPlugin('modifier', 'date', date(...));
         $this->registerPlugin('modifier', 'in_array', in_array(...));
         $this->registerPlugin('modifier', 'trim', trim(...));
         $this->registerPlugin('modifier', 'date_format', $this->smartyDateFormat(...));
@@ -426,6 +438,7 @@ class PKPTemplateManager extends Smarty
         // load stylesheets/scripts/headers from a given context
         $this->registerPlugin('function', 'load_stylesheet', $this->smartyLoadStylesheet(...));
         $this->registerPlugin('function', 'load_script', $this->smartyLoadScript(...));
+        $this->registerPlugin('function', 'load_vue_component_styles', $this->smartyLoadVueComponentStyles(...));
         $this->registerPlugin('function', 'load_header', $this->smartyLoadHeader(...));
 
         // load NavigationMenu Areas from context
@@ -758,11 +771,83 @@ class PKPTemplateManager extends Smarty
     }
 
     /**
-     * Set initial state data to be managed by the Vue.js component on this page
+     * Add global styles for Vue components
+     *
+     * Applied to every instance of the component on the page, as the lowest
+     * priority styles of usePkpStyles(). Only affects Vue components, not Blade
+     * components. Merged with previously added styles per component, element and
+     * nested component key. In Blade templates use @vueComponentStyles([...]).
+     *
+     * The styles are output by the theme's footer via @loadVueComponentStyles
+     * (Smarty: {load_vue_component_styles}), so they must be added before it.
+     *
+     * @param array $styles Styles keyed by component name, e.g.
+     *  ['PkpButton' => ['root' => 'btn'], 'PkpDialog' => ['content' => 'rounded']]
      */
-    public function setPiniaData(array $data)
+    public function addVueComponentStyles(array $styles): void
     {
-        $this->_piniaData = array_merge($this->_piniaData, $data);
+        if ($this->_vueComponentStylesLoaded) {
+            error_log('Vue component styles for ' . implode(', ', array_keys($styles)) . ' were added after they were output by the footer and are ignored.');
+        }
+
+        $this->_vueComponentStyles = array_replace_recursive($this->_vueComponentStyles, $styles);
+    }
+
+    /**
+     * Get the script registering the global styles for Vue components
+     *
+     * Called from the theme's footer via @loadVueComponentStyles (Smarty:
+     * {load_vue_component_styles}), after the frontend scripts are loaded and
+     * after the page's templates have added their styles, but before the Vue
+     * apps mount.
+     */
+    public function loadVueComponentStyles(): string
+    {
+        $this->_vueComponentStylesLoaded = true;
+
+        if (!$this->isVueRuntimeIncluded || empty($this->_vueComponentStyles)) {
+            return '';
+        }
+
+        return '<script>pkp.modules.usePkpVueComponentStyles.usePkpVueComponentStyles().addStyles('
+            . json_encode($this->_vueComponentStyles, JSON_HEX_TAG | JSON_HEX_AMP)
+            . ');</script>';
+    }
+
+    /**
+     * Smarty usage: {load_vue_component_styles}
+     *
+     * @see self::loadVueComponentStyles()
+     */
+    public function smartyLoadVueComponentStyles(array $params, $smarty = null): string
+    {
+        return $this->loadVueComponentStyles();
+    }
+
+    /**
+     * Set shared page context for frontend Pinia stores
+     *
+     * Exposed as pkp._piniaData.page and read via usePkpPageData(). Use for data
+     * describing the page itself that more than one store needs. Shallow-merges
+     * with previously set data.
+     */
+    public function setPiniaPageData(array $data): void
+    {
+        $this->_piniaPageData = array_merge($this->_piniaPageData, $data);
+    }
+
+    /**
+     * Set init data for a frontend Pinia store
+     *
+     * Exposed as pkp._piniaData.stores[$storeId]. The store reads it once, when
+     * it is first used, via usePkpPageData().getStoreData(). Shallow-merges
+     * with data previously set for the same store, so plugins can add fields.
+     *
+     * @param string $storeId Pinia store id, e.g. 'pkpComments'
+     */
+    public function setPiniaStoreData(string $storeId, array $data): void
+    {
+        $this->_piniaStoreData[$storeId] = array_merge($this->_piniaStoreData[$storeId] ?? [], $data);
     }
 
 
@@ -920,16 +1005,6 @@ class PKPTemplateManager extends Smarty
             $this->setLocaleKeys(['common.ok']);
             $this->setLocaleKeys(['common.clearSelection']); // PkpCombobox
 
-            // Stylesheet compiled from Vue.js single-file components
-            $this->addStyleSheet(
-                'build',
-                $baseUrl . '/styles/build_frontend.css',
-                [
-                    'priority' => self::STYLE_SEQUENCE_CORE,
-                    'contexts' => ['frontend'],
-                ]
-            );
-
             $this->addJavaScript(
                 'pkpAppFrontend',
                 $baseUrl . '/js/build_frontend.js',
@@ -939,6 +1014,14 @@ class PKPTemplateManager extends Smarty
                 ]
             );
 
+            $this->addStyleSheet(
+                'pkpAppFrontend',
+                $baseUrl . '/styles/build_frontend.css',
+                [
+                    'priority' => self::STYLE_SEQUENCE_CORE,
+                    'contexts' => ['frontend']
+                ]
+            );
         }
     }
 
@@ -971,7 +1054,9 @@ class PKPTemplateManager extends Smarty
             'WORKFLOW_STAGE_ID_EXTERNAL_REVIEW' => WORKFLOW_STAGE_ID_EXTERNAL_REVIEW,
             'WORKFLOW_STAGE_ID_EDITING' => WORKFLOW_STAGE_ID_EDITING,
             'WORKFLOW_STAGE_ID_PRODUCTION' => WORKFLOW_STAGE_ID_PRODUCTION,
+            'WORKFLOW_STAGE_ID_DONE' => WORKFLOW_STAGE_ID_DONE,
             'INSERT_TAG_VARIABLE_TYPE_PLAIN_TEXT' => INSERT_TAG_VARIABLE_TYPE_PLAIN_TEXT,
+            'ASSOC_TYPE_REVIEW_ASSIGNMENT' => Application::ASSOC_TYPE_REVIEW_ASSIGNMENT,
             'ROLE_ID_MANAGER' => Role::ROLE_ID_MANAGER,
             'ROLE_ID_SITE_ADMIN' => Role::ROLE_ID_SITE_ADMIN,
             'ROLE_ID_AUTHOR' => Role::ROLE_ID_AUTHOR,
@@ -1143,9 +1228,7 @@ class PKPTemplateManager extends Smarty
                 $menu = [];
 
                 if ($request->getContext()) {
-                    $isNewSubmissionLinkPresent = false;
                     if (count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $userRoles))) {
-                        $isNewSubmissionLinkPresent = false;
                         if (count(array_intersect([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT], $userRoles))) {
                             $dashboardViews = Repo::submission()->getDashboardViews($request->getContext(), $request->getUser(), [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT]);
                             $requestedPage = $router->getRequestedPage($request);
@@ -1163,13 +1246,16 @@ class PKPTemplateManager extends Smarty
                                 ];
                             });
 
-                            if (!$request->getContext()->getData('disableSubmissions')) {
-                                $viewsData['newSubmission'] = [
-                                    'name' => __('dashboard.startNewSubmission'),
-                                    'url' => $router->url($request, null, 'submission')
-                                ];
-                                $isNewSubmissionLinkPresent = true;
-                            }
+                            // Search box at the top of the editorial dashboard nav group.
+                            // isCurrent keeps the group expanded/selected when the search view is active on reload.
+                            $viewsData = $viewsData->prepend([
+                                'itemType' => 'search',
+                                'name' => __('search.searchResults'),
+                                'searchLabel' => __('editor.submission.searchGlobal'),
+                                'searchParam' => 'searchPhrase', // query param this search uses; unique per search view
+                                'isCurrent' => $requestedPage === 'dashboard' && $requestedOp === 'editorial' && $requestedViewId === DashboardView::VIEW_SEARCH,
+                                'url' => $router->url($request, null, 'dashboard', 'editorial', null, ['currentViewId' => DashboardView::VIEW_SEARCH]),
+                            ], DashboardView::VIEW_SEARCH);
 
                             $menu['dashboards'] = [
                                 'name' => __('navigation.dashboards'),
@@ -1214,26 +1300,20 @@ class PKPTemplateManager extends Smarty
                                 ];
                             });
 
-                            if (!$request->getContext()->getData('disableSubmissions') && !$isNewSubmissionLinkPresent) {
-                                $viewsData['newSubmission'] = [
-                                    'name' => __('dashboard.startNewSubmission'),
-                                    'url' => $router->url($request, null, 'submission')
-                                ];
-                            }
-
-
                             $menu['mySubmissions'] = [
                                 'name' => __('navigation.mySubmissions'),
                                 'submenu' => $viewsData,
                                 'icon' => 'MySubmissions',
                             ];
                         }
-                    } elseif (count($userRoles) === 1 && in_array(Role::ROLE_ID_READER, $userRoles)) {
+                    }
+
+                    if (!$request->getContext()->getData('disableSubmissions')) {
                         $menu['submit'] = [
-                            'name' => __('author.submit'),
+                            'name' => __('dashboard.startNewSubmission'),
                             'url' => $router->url($request, null, 'submission'),
                             'isCurrent' => $router->getRequestedPage($request) === 'submission',
-                            'icon' => 'MySubmissions'
+                            'icon' => 'DefaultDocument'
                         ];
                     }
 
@@ -1427,6 +1507,7 @@ class PKPTemplateManager extends Smarty
      * - "mytheme::frontend.pages.article" → "mytheme::frontend.pages.article" (passthrough)
      *
      * @param string $template Smarty template path or Laravel view name
+     *
      * @return string Laravel view name in dot notation (possibly with namespace)
      */
     public function smartyPathToViewName(string $template): string
@@ -1573,8 +1654,11 @@ class PKPTemplateManager extends Smarty
             $output .= 'Object.assign(pkp.localeKeys, ' . json_encode($this->_localeKeys) . ');';
         }
 
-        if (!empty($this->_piniaData)) {
-            $output .= 'pkp._piniaData = ' . json_encode($this->_piniaData) . ';';
+        if (!empty($this->_piniaPageData) || !empty($this->_piniaStoreData)) {
+            $output .= 'pkp._piniaData = ' . json_encode([
+                'page' => (object) $this->_piniaPageData,
+                'stores' => (object) array_map(fn (array $data) => (object) $data, $this->_piniaStoreData),
+            ]) . ';';
         }
 
         $dispatcher = Application::get()->getDispatcher();
@@ -1717,8 +1801,31 @@ class PKPTemplateManager extends Smarty
 
         // Use fetch() for unified template rendering, then output
         echo $this->fetch($template, $cache_id, $compile_id, $parent);
+
+        if (!empty($this->_vueComponentStyles) && !$this->_vueComponentStylesLoaded) {
+            error_log('Vue component styles were added but not output. The theme\'s footer must include @loadVueComponentStyles (Smarty: {load_vue_component_styles}) after the frontend scripts.');
+        }
     }
 
+    /**
+     * Display a system message template
+     */
+    public function displaySystemMessage(
+        string $title,
+        string $message,
+        string $type = 'message',
+        string $backLink = '',
+        string $backLinkLabel = '',
+    ) {
+        $this->assign([
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'backLink' => $backLink,
+            'backLinkLabel' => $backLinkLabel,
+        ]);
+        $this->display('frontend/pages/system-message.tpl');
+    }
     /**
      * Clear template compile and cache directories.
      */
@@ -1793,6 +1900,50 @@ class PKPTemplateManager extends Smarty
             $this->_fbv = new FormBuilderVocabulary();
         }
         return $this->_fbv;
+    }
+
+    /**
+     * Render the named fields of a form read-only.
+     */
+    public function setFieldsReadonly(string $formClass, string ...$fieldIds): void
+    {
+        $this->flagFields(FormBuilderVocabulary::TPL_VAR_FIELD_READONLY, $formClass, $fieldIds);
+    }
+
+    /**
+     * Render the named fields disabled.
+     */
+    public function setFieldsDisabled(string $formClass, string ...$fieldIds): void
+    {
+        $this->flagFields(FormBuilderVocabulary::TPL_VAR_FIELD_DISABLED, $formClass, $fieldIds);
+    }
+
+    /**
+     * Hide the named fields from the form. Pass FormBuilderVocabulary::FIELD_FORM_BUTTONS for
+     * the form button section.
+     */
+    public function hideFields(string $formClass, string ...$fieldIds): void
+    {
+        $this->flagFields(FormBuilderVocabulary::TPL_VAR_FIELD_HIDDEN, $formClass, $fieldIds);
+    }
+
+    /**
+     * Merges the already flagged fields
+     */
+    private function flagFields(string $tplVar, string $formClass, array $fieldIds): void
+    {
+        $map = $this->getTemplateVars($tplVar);
+        $map = is_array($map) ? $map : [];
+
+        if (!isset($map[$formClass]) || !is_array($map[$formClass])) {
+            $map[$formClass] = [];
+        }
+
+        foreach ($fieldIds as $fieldId) {
+            $map[$formClass][$fieldId] = true;
+        }
+
+        $this->assign($tplVar, $map);
     }
 
     /**
@@ -1884,12 +2035,12 @@ class PKPTemplateManager extends Smarty
 
     /**
      * Smarty modifier: json_encode_html_attribute
-     * 
+     *
      * Encodes a value to JSON with full HTML-attribute safety.
      * Escapes ", ', <, >, & as \u0022, \u0027, \u003C, \u003E, \u0026
      * so the output can be safely placed inside any HTML attribute
      */
-    function smartyJsonEncodeHtmlAttribute($value)
+    public function smartyJsonEncodeHtmlAttribute($value)
     {
         return json_encode(
             $value,
@@ -2620,18 +2771,24 @@ class PKPTemplateManager extends Smarty
         $navigationMenuDao = DAORegistry::getDAO('NavigationMenuDAO'); /** @var NavigationMenuDAO $navigationMenuDao */
 
         $output = '';
-        $navigationMenus = $navigationMenuDao->getByArea($contextId, $areaName)->toArray();
+        $navigationMenu = null;
+        $navigationMenus = $navigationMenuDao->getByArea($contextId, $areaName, !Validation::isLoggedIn());
         if (isset($navigationMenus[0])) {
             $navigationMenu = $navigationMenus[0];
             app()->get('navigationMenu')->getMenuTree($navigationMenu);
         }
 
+        if (!$navigationMenu) {
+            return '';
+        }
 
         $this->assign([
             'navigationMenu' => $navigationMenu,
             'id' => $params['id'],
             'ulClass' => $params['ulClass'] ?? '',
             'liClass' => $params['liClass'] ?? '',
+            'items' => $navigationMenu?->menuTree ?? [],
+            'ariaLabel' => $params['ariaLabel'] ?? '',
         ]);
 
         return $this->fetch($menuTemplatePath);
@@ -2880,5 +3037,23 @@ class PKPTemplateManager extends Smarty
     public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    /**
+     * Get the active theme for a context or site
+     */
+    public function getActiveTheme(Request $request, ?Context $context = null): ?ThemePlugin
+    {
+        $activeTheme = null;
+        $contextOrSite = $context ? $context : $request->getSite();
+        $allThemes = PluginRegistry::getPlugins('themes');
+        foreach ($allThemes as $theme) { /** @var \PKP\plugins\Plugin|\PKP\plugins\ThemePlugin $theme */
+            if ($contextOrSite->getData('themePluginPath') === $theme->getDirName()) {
+                $activeTheme = $theme;
+                break;
+            }
+        }
+
+        return $activeTheme;
     }
 }

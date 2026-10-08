@@ -2078,6 +2078,7 @@ msgstr ""
 "Redacteur {$userName} heeft een review bevestigd voor reviewronde {$round} "
 "voor inzending {$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} heeft een review afgerond voor reviewronde {$round} voor "
@@ -3256,3 +3257,6 @@ msgid "dashboard.minimumConfirmedReviewsNotMet"
 msgstr ""
 "Het minimum aantal goedgekeurde recensies is nog niet bereikt. Wilt u nog "
 "steeds doorgaan met deze redactionele beslissing?"
+
+msgid "reviewer.competingInterests"
+msgstr "Strijdige belangen"

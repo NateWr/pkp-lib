@@ -107,6 +107,9 @@ msgstr "Type"
 msgid "manager.announcements.form.typeIdValid"
 msgstr "Please select a valid announcement type."
 
+msgid "manager.announcements.latest"
+msgstr "Latest Announcement"
+
 msgid "manager.announcements.notEnabled"
 msgstr "You must <a href=\"#announcements/announcement-settings\">enable announcements</a>."
 
@@ -430,11 +433,6 @@ msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
 "The following error was returned by {$registrationAgency} and contains "
 "details about the cause of the error:"
-
-msgid "manager.dois.registrationAgency.registeredMessagePreamble"
-msgstr ""
-"The following message was returned by {$registrationAgency} and contains "
-"details about the registration:"
 
 msgid "manager.emails.addEmail"
 msgstr "Add Template"
@@ -983,6 +981,9 @@ msgstr "Items with DOIs"
 msgid "doi.manager.settings.doiPrefix.required"
 msgstr "A DOI prefix is required"
 
+msgid "doi.manager.settings.doiSuffixPattern.required"
+msgstr "A DOI suffix pattern is required."
+
 msgid "doi.manager.settings.doiSuffix"
 msgstr "DOI Format"
 
@@ -1050,6 +1051,9 @@ msgstr "DOIs for all versions"
 
 msgid "doi.editor.doiSuffixInvalidCharacters"
 msgstr "The DOI contains invalid characters."
+
+msgid "manager.setup.publisherLocation"
+msgstr "Publisher Location"
 
 msgid "manager.setup.publishing"
 msgstr "Publishing Details"
@@ -2253,6 +2257,34 @@ msgid "manager.setup.metadata.dataCitations.require"
 msgstr ""
 "Require the author to add data citation metadata before accepting their submission."
 
+msgid "manager.setup.metadata.funders"
+msgstr "Funders"
+
+msgid "manager.setup.metadata.funders.description"
+msgstr "Identify the Funders and Funder Grants associated with the submission."
+
+msgid "manager.setup.metadata.funders.enable"
+msgstr "Enable funder metadata"
+
+msgid "manager.setup.metadata.funders.noRequest"
+msgstr "Do not request funder metadata from the author during submission."
+
+msgid "manager.setup.metadata.funders.request"
+msgstr "Ask the author for funder metadata during submission."
+
+msgid "manager.setup.metadata.funders.require"
+msgstr ""
+"Require the author to add funder metadata before accepting their submission."
+
+msgid "manager.setup.metadata.funders.funderGrantValidation"
+msgstr "Funder Grant ID validation"
+
+msgid "manager.setup.metadata.funders.funderGrantValidation.description"
+msgstr "Enable grant ID validation for supported funders (using the Zenodo API)."
+
+msgid "manager.setup.metadata.funders.funderGrantValidation.enable"
+msgstr "Enable Grant ID validation."
+
 msgid "manager.setup.metadata.keywords.description"
 msgstr ""
 "Keywords are typically one- to three-word phrases that are used to indicate "
@@ -2554,6 +2586,21 @@ msgid "plugins.importexport.user.error.usernameEmailMismatch"
 msgstr ""
 "The username \"{$username}\" and the e-mail \"{$email}\" do not match to the "
 "one and the same existing user."
+
+msgid "plugins.importexport.user.error.invalidRoleDate"
+msgstr ""
+"The role \"{$userGroup}\" of the user \"{$username}\" has not been imported "
+"because \"{$date}\" is not a valid date."
+
+msgid "plugins.importexport.user.error.invalidRolePeriod"
+msgstr ""
+"The role \"{$userGroup}\" of the user \"{$username}\" has not been imported "
+"because its start date is not before its end date."
+
+msgid "plugins.importexport.user.error.roleOverlap"
+msgstr ""
+"The role \"{$userGroup}\" of the user \"{$username}\" has not been imported "
+"because the user already holds this role in an overlapping period."
 
 msgid "plugins.importexport.common.settings.form.testMode.label"
 msgstr "Testing"
@@ -3211,13 +3258,22 @@ msgid "emailTemplate.variable.stageAssignment.editors"
 msgstr "The editors assigned to this submission who can make a decision"
 
 msgid "emailTemplate.variable.submission.submissionTitle"
-msgstr "The submission's title"
+msgstr "The latest published version of the submission's title"
+
+msgid "emailTemplate.variable.publication.publicationTitle"
+msgstr "The publication's title"
 
 msgid "emailTemplate.variable.submission.submissionId"
 msgstr "The submission's unique ID number"
 
+msgid "emailTemplate.variable.publication.publicationId"
+msgstr "The publication's unique ID number"
+
 msgid "emailTemplate.variable.submission.submissionAbstract"
-msgstr "The submission's abstract"
+msgstr "The latest published version of the submission's abstract"
+
+msgid "emailTemplate.variable.publication.publicationAbstract"
+msgstr "The publication's abstract"
 
 msgid "emailTemplate.variable.submission.authorsShort"
 msgstr "The names of the authors in a short string, like \"Barnes, et al\""
@@ -3232,7 +3288,10 @@ msgid "emailTemplate.variable.submission.submissionUrl"
 msgstr "The URL to the submission in the editorial backend"
 
 msgid "emailTemplate.variable.submission.submissionPublishedUrl"
-msgstr "The URL to the published submission"
+msgstr "The URL to the published submission in its latest form"
+
+msgid "emailTemplate.variable.publication.publicationPublishedUrl"
+msgstr "The URL to a specific version of a published submission"
 
 msgid "emailTemplate.variable.submission.submissionWizardUrl"
 msgstr "The URL to the submission in the submission wizard"
@@ -3321,6 +3380,12 @@ msgstr "Reviewer Unassign"
 
 msgid "mailable.reviewerUnassign.description"
 msgstr "This email is sent when an editor unassigns a reviewer."
+
+msgid "mailable.reviewCancel.name"
+msgstr "Review Cancel"
+
+msgid "mailable.reviewCancel.description"
+msgstr "This email is sent when an editor cancels a review assignment."
 
 msgid "mailable.validateEmailSite.name"
 msgstr "Validate Email (Site)"
@@ -3565,6 +3630,12 @@ msgstr "Editorial Reminder"
 
 msgid "mailable.editorialReminder.description"
 msgstr "An automated email sent to editors with outstanding tasks"
+
+msgid "mailable.authorPublicationPublished.name"
+msgstr "Publication Published"
+
+msgid "mailable.authorPublicationPublished.description"
+msgstr "An automated email sent to authors of a version of a submission upon its publication"
 
 msgid "mailable.passwordResetRequested.name"
 msgstr "Password Reset Confirm"
@@ -3824,13 +3895,16 @@ msgid "manager.setup.editorialMasthead.order.description"
 msgstr "Define the order of masthead roles for public display."
 
 msgid "manager.setup.editorialMasthead.order.reviewers.description"
-msgstr "Reviewers will be displayed in a standardized format to maintain uniformity and ensure easy discoverability in this section."
+msgstr "Reviewers who completed a review in the previous calendar year will be credited in a standardized format to maintain uniformity and ensure easy discoverability in this section."
 
 msgid "manager.setup.editorialMasthead.editorialHistory.description"
 msgstr "Please provide the editorial history, including the full name, affiliation, and start and end dates of each editor."
 
 msgid "mailable.changeProfileEmailInvitationNotify.name"
 msgstr "Change Email Address Invitation"
+
+msgid "mailable.changeProfileEmailInvitationNotify.description"
+msgstr "Users who request a change to their email address in their user profile will receive this request to confirm."
 
 msgid "plugins.importexport.common.validation"
 msgstr "Validate XML before the export and registration."
@@ -4031,3 +4105,12 @@ msgstr "Request Author Review Response"
 
 msgid "mailable.reviewRound.requestAuthorResponse.description"
 msgstr "This email notifies the author to submit a response to reviewers' comments."
+
+msgid "manager.setup.enableEnrollmentMasthead"
+msgstr "Enrollment-based Masthead"
+
+msgid "manager.setup.enableEnrollmentMasthead.enable"
+msgstr "Present a masthead based on user enrollments"
+
+msgid "manager.setup.enableEnrollmentMastheadReviewers.enable"
+msgstr "Enable listing of reviewers on the masthead"

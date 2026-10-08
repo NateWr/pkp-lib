@@ -21,6 +21,7 @@ use APP\notification\NotificationManager;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use Exception;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -349,7 +350,8 @@ abstract class Repository
     /** @copydoc DAO::update() */
     public function edit(
         SubmissionFile $submissionFile,
-        array $params
+        array $params,
+        bool $log = true
     ): void {
         $newSubmissionFile = clone $submissionFile;
         $newSubmissionFile->setAllData(array_merge($newSubmissionFile->_data, $params));
@@ -367,14 +369,18 @@ abstract class Repository
 
         $this->dao->update($newSubmissionFile);
 
+        if (!$log) {
+            return;
+        }
+
         $newFileUploaded = !empty($params['fileId']) && $params['fileId'] !== $submissionFile->getData('fileId');
 
-        $logData = $this->getSubmissionFileLogData($submissionFile);
+        $logData = $this->getSubmissionFileLogData($newSubmissionFile);
         $logEntry = Repo::eventLog()->newDataObject(array_merge(
             $logData,
             [
                 'assocType' => PKPApplication::ASSOC_TYPE_SUBMISSION_FILE,
-                'assocId' => $submissionFile->getId(),
+                'assocId' => $newSubmissionFile->getId(),
                 'eventType' => $newFileUploaded ? SubmissionFileEventLogEntry::SUBMISSION_LOG_FILE_REVISION_UPLOAD : SubmissionFileEventLogEntry::SUBMISSION_LOG_FILE_EDIT,
                 'message' => $newFileUploaded ? 'submission.event.revisionUploaded' : 'submission.event.fileEdited',
                 'isTranslated' => false,
@@ -385,17 +391,47 @@ abstract class Repository
 
         $submission = Repo::submission()->get($submissionFile->getData('submissionId'));
 
-        Repo::eventLog()->newDataObject(array_merge(
+        $submissionLogEntry = Repo::eventLog()->newDataObject(array_merge(
             $logData,
             [
                 'assocType' => PKPApplication::ASSOC_TYPE_SUBMISSION,
                 'assocId' => $submission->getId(),
                 'eventType' => $newFileUploaded ? SubmissionFileEventLogEntry::SUBMISSION_LOG_FILE_REVISION_UPLOAD : SubmissionFileEventLogEntry::SUBMISSION_LOG_FILE_EDIT,
                 'message' => $newFileUploaded ? 'submission.event.revisionUploaded' : 'submission.event.fileEdited',
-                'isTranslate' => false,
+                'isTranslated' => false,
                 'dateLogged' => Core::getCurrentDate(),
             ]
         ));
+        Repo::eventLog()->add($submissionLogEntry);
+    }
+
+    /**
+     * Delete the event log entries that describe one revision of a submission file.
+     *
+     * Used when a revision upload is cancelled before it was confirmed which(as revision) never
+     * became part of the file's history, and its entries would otherwise survive pointing at a
+     * file that the same operation deletes, which leaves a broken download link in the event log.
+     *
+     * Matches on the `submissionFileId` and `fileId` recorded by getSubmissionFileLogData(), so it
+     * covers both the submission file and the submission scoped entries.
+     */
+    public function deleteRevisionLogEntries(SubmissionFile $submissionFile, int $fileId): void
+    {
+        $logIds = DB::table('event_log_settings as submissionFileSetting')
+            ->join('event_log_settings as fileSetting', function (JoinClause $join) {
+                $join->on('fileSetting.log_id', '=', 'submissionFileSetting.log_id')
+                    ->where('fileSetting.setting_name', '=', 'fileId');
+            })
+            ->where('submissionFileSetting.setting_name', '=', 'submissionFileId')
+            ->where('submissionFileSetting.setting_value', '=', (string) $submissionFile->getId())
+            ->where('fileSetting.setting_value', '=', (string) $fileId)
+            ->pluck('submissionFileSetting.log_id');
+
+        foreach ($logIds as $logId) {
+            if ($logEntry = Repo::eventLog()->get((int) $logId)) {
+                Repo::eventLog()->delete($logEntry);
+            }
+        }
     }
 
     /**
@@ -863,6 +899,7 @@ abstract class Repository
 
         return [
             'userId' => Validation::loggedInAs() ?: $user?->getId(),
+            'impersonatedUserId' => Validation::loggedInAs() ? $user?->getId() : null,
             'fileStage' => $submissionFile->getData('fileStage'),
             'submissionFileId' => $submissionFile->getId(),
             'sourceSubmissionFileId' => $submissionFile->getData('sourceSubmissionFileId'),

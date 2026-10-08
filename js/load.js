@@ -13,13 +13,13 @@ import {createApp} from 'vue';
 import * as vue from 'vue';
 
 import {createPinia} from 'pinia';
+import * as pinia from 'pinia';
 import GlobalMixins from '@/mixins/global.js';
 import VueAnnouncer from '@vue-a11y/announcer';
 import FloatingVue from 'floating-vue';
 
 import PrimeVue from 'primevue/config';
 
-import VueScrollTo from 'vue-scrollto';
 import emitter from 'tiny-emitter/instance';
 
 // Mixins exposed for plugins
@@ -48,6 +48,9 @@ import * as useSideMenu from '@/composables/useSideMenu.js';
 import * as useSorting from '@/composables/useSorting.js';
 import * as useSubmission from '@/composables/useSubmission.js';
 import * as useUrl from '@/composables/useUrl.js';
+
+// Store helpers exposed for plugins
+import * as defineComponentStore from '@/utils/defineComponentStore.js';
 
 // Directives
 import {stripUnsafeHtml} from '@/directives/stripUnsafeHtml';
@@ -95,6 +98,7 @@ import List from '@/components/List/List.vue';
 import ListItem from '@/components/List/ListItem.vue';
 import Modal from '@/components/Modal/Modal.vue';
 import MultilingualProgress from '@/components/MultilingualProgress/MultilingualProgress.vue';
+import MultiSelect from '@/components/MultiSelect/MultiSelect.vue';
 import Orderer from '@/components/Orderer/Orderer.vue';
 import Pagination from '@/components/Pagination/Pagination.vue';
 import ProgressBar from '@/components/ProgressBar/ProgressBar.vue';
@@ -123,6 +127,7 @@ import FieldControlledVocab from '@/components/Form/fields/FieldControlledVocab.
 import FieldDate from '@/components/Form/fields/FieldDate.vue';
 import FieldHtml from '@/components/Form/fields/FieldHtml.vue';
 import FieldMetadataSetting from '@/components/Form/fields/FieldMetadataSetting.vue';
+import FieldMultiSelect from '@/components/Form/fields/FieldMultiSelect.vue';
 import FieldOptions from '@/components/Form/fields/FieldOptions.vue';
 import FieldOrcid from '@/components/Form/fields/FieldOrcid.vue';
 import FieldPreparedContent from '@/components/Form/fields/FieldPreparedContent.vue';
@@ -140,6 +145,7 @@ import FieldTextarea from '@/components/Form/fields/FieldTextarea.vue';
 import FieldUpload from '@/components/Form/fields/FieldUpload.vue';
 import FieldUploadImage from '@/components/Form/fields/FieldUploadImage.vue';
 import FieldSlider from '@/components/Form/fields/FieldSlider.vue';
+import ContributorsListPanel from '@/components/ListPanel/contributors/ContributorsListPanel.vue';
 import CategoryManager from '@/managers/CategoryManager/CategoryManager.vue';
 import ContributorRoleManager from '@/managers/ContributorRoleManager/ContributorRoleManager.vue';
 import NavigationMenuManagerFormModal from '@/managers/NavigationMenuManager/NavigationMenuManagerFormModal.vue';
@@ -157,6 +163,7 @@ import SelectReviewerListPanel from '@/components/ListPanel/users/SelectReviewer
 import SubmissionsListPanel from '@/components/ListPanel/submissions/SubmissionsListPanel.vue';
 import ReviewerManagerReadReviewModal from '@/managers/ReviewerManager/ReviewerManagerReadReviewModal.vue';
 import DiscussionManagerReviewer from '@/managers/DiscussionManager/DiscussionManagerReviewer.vue';
+import ReviewerSubmissionDetailsModal from '@/pages/reviewerSubmission/ReviewerSubmissionDetailsModal.vue';
 
 // Page components (registered globally, resolved by name in Page.vue)
 import DashboardPage from '@/pages/dashboard/DashboardPage.vue';
@@ -234,6 +241,7 @@ VueRegistry.registerComponent('PkpListItem', ListItem);
 VueRegistry.registerComponent('PkpFormModal', FormModal);
 VueRegistry.registerComponent('PkpModal', Modal);
 VueRegistry.registerComponent('PkpMultilingualProgress', MultilingualProgress);
+VueRegistry.registerComponent('PkpMultiSelect', MultiSelect);
 VueRegistry.registerComponent('PkpOrderer', Orderer);
 VueRegistry.registerComponent('PkpPagination', Pagination);
 VueRegistry.registerComponent('PkpProgressBar', ProgressBar);
@@ -250,6 +258,7 @@ VueRegistry.registerComponent('PkpTableColumn', TableColumn);
 VueRegistry.registerComponent('PkpTableHeader', TableHeader);
 VueRegistry.registerComponent('PkpTableRow', TableRow);
 VueRegistry.registerComponent('PkpTooltip', Tooltip);
+VueRegistry.registerComponent('ContributorsListPanel', ContributorsListPanel);
 VueRegistry.registerComponent('CategoryManager', CategoryManager);
 VueRegistry.registerComponent('ContributorRoleManager', ContributorRoleManager);
 VueRegistry.registerComponent('NavigationMenuManagerFormModal', NavigationMenuManagerFormModal);
@@ -270,6 +279,7 @@ VueRegistry.registerComponent('PkpFieldDate', FieldDate);
 VueRegistry.registerComponent('PkpFieldHtml', FieldHtml);
 VueRegistry.registerComponent('PkpFieldOrcid', FieldOrcid);
 VueRegistry.registerComponent('PkpFieldMetadataSetting', FieldMetadataSetting);
+VueRegistry.registerComponent('PkpFieldMultiSelect', FieldMultiSelect);
 VueRegistry.registerComponent('PkpFieldOptions', FieldOptions);
 VueRegistry.registerComponent('PkpFieldPreparedContent', FieldPreparedContent);
 VueRegistry.registerComponent('PkpFieldPubId', FieldPubId);
@@ -310,6 +320,7 @@ VueRegistry.registerComponent('SelectReviewerListPanel', SelectReviewerListPanel
 VueRegistry.registerComponent('SubmissionsListPanel', SubmissionsListPanel);
 VueRegistry.registerComponent('ReviewerManagerReadReviewModal', ReviewerManagerReadReviewModal);
 VueRegistry.registerComponent('DiscussionManagerReviewer', DiscussionManagerReviewer);
+VueRegistry.registerComponent('ReviewerSubmissionDetailsModal', ReviewerSubmissionDetailsModal);
 
 // Register Page components (resolved by name in Page.vue)
 VueRegistry.registerComponent('DashboardPage', DashboardPage);
@@ -326,14 +337,14 @@ VueRegistry.registerComponent(
 	RequestReviewRoundAuthorResponse,
 );
 
-const pinia = createPinia();
+const piniaInstance = createPinia();
 
-VueRegistry.attachPiniaInstance(pinia);
+VueRegistry.attachPiniaInstance(piniaInstance);
 
 function pkpCreateVueApp(createAppArgs, rootProps) {
 	// Initialize Vue
 	const vueApp = createApp(createAppArgs, rootProps);
-	vueApp.use(pinia);
+	vueApp.use(piniaInstance);
 	vueApp.use(PrimeVue, {
 		unstyled: true,
 	});
@@ -344,7 +355,6 @@ function pkpCreateVueApp(createAppArgs, rootProps) {
 
 	// For compatibility with vue2 to preserve spaces between html tags
 	vueApp.config.compilerOptions.whitespace = 'preserve';
-	vueApp.use(VueScrollTo);
 	vueApp.use(VueAnnouncer);
 	vueApp.use(FloatingVue, {
 		themes: {
@@ -382,7 +392,9 @@ export default {
 	// especially useful when using composition api
 	modules: {
 		vue,
-		piniaInstance: pinia,
+		pinia,
+		piniaInstance,
+		defineComponentStore,
 		useAnnouncer,
 		useApp,
 		useContainerStateManager,

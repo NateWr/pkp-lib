@@ -371,6 +371,14 @@ abstract class Invitation
         return $contextDao->getById($this->invitationModel->contextId);
     }
 
+    /**
+     * The context path to use when building urls for this invitation.
+     */
+    public function getContextPath(): string
+    {
+        return $this->getContext()?->getPath() ?? Application::SITE_CONTEXT_PATH;
+    }
+
     public function getMailableReceiver(?string $locale = null): Identity
     {
         $locale = $this->getUsedLocale($locale);
@@ -458,6 +466,14 @@ abstract class Invitation
     public function getContextId(): ?int
     {
         return $this->invitationModel->contextId;
+    }
+
+    /**
+     * Whether this invitation belongs to the given context.
+     */
+    public function belongsToContext(?int $contextId): bool
+    {
+        return $this->getContextId() === $contextId;
     }
 
     public function getEmail(): ?string

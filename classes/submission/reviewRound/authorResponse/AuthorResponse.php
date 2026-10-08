@@ -114,7 +114,7 @@ class AuthorResponse extends Model
     {
         return Attribute::make(
             get: function () {
-                return Repo::user()->get($this->userId);
+                return Repo::user()->get($this->userId, true);
             }
         )->shouldCache();
     }
@@ -149,7 +149,10 @@ class AuthorResponse extends Model
                     ->pluck('author_id')
                     ->all();
 
-                return array_map(fn ($authorId) => Repo::Author()->get($authorId), $authorIds);
+                return Repo::author()->getCollector()
+                    ->filterByAuthorIds($authorIds)
+                    ->getMany()
+                    ->toArray();
             }
         )->shouldCache();
     }

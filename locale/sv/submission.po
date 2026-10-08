@@ -2039,6 +2039,7 @@ msgstr ""
 "Redaktören {$editorName} har bekräftat granskning av bidraget {$submissionId} "
 "för granskningsomgång {$round}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} har granskat bidraget {$submissionId}, granskningsomgång "
@@ -2672,3 +2673,6 @@ msgstr "Bidragsfil"
 
 #~ msgid "editor.submission.decision.backToSubmission"
 #~ msgstr "Tillbaka till inskickat-steget"
+
+msgid "reviewer.competingInterests"
+msgstr "Intressekonflikter"

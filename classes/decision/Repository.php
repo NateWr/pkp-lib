@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file classes/decision/Repository.php
  *
@@ -86,6 +87,21 @@ abstract class Repository
     public function getCollector(): Collector
     {
         return App::make(Collector::class);
+    }
+
+    /**
+     * Whether a submission has ever been moved into the Done stage.
+     *
+     * NB: A MOVE_TO_DONE or RETURN_TO_DONE in the decision history means
+     * the submission has previously been in the DONE stage.
+     * This is required for a Return to Done decision from an active stage.
+     */
+    public function hasDoneHistory(int $submissionId): bool
+    {
+        return $this->getCollector()
+            ->filterBySubmissionIds([$submissionId])
+            ->filterByDecisionTypes([Decision::MOVE_TO_DONE, Decision::RETURN_TO_DONE])
+            ->getCount() > 0;
     }
 
     /**
@@ -243,6 +259,7 @@ abstract class Repository
                 ? PKPSubmissionEventLogEntry::SUBMISSION_LOG_EDITOR_RECOMMENDATION
                 : PKPSubmissionEventLogEntry::SUBMISSION_LOG_EDITOR_DECISION,
             'userId' => Validation::loggedInAs() ?? $this->request->getUser()?->getId(),
+            'impersonatedUserId' => Validation::loggedInAs() ? $this->request->getUser()?->getId() : null,
             'editorName' => $editor->getFullName(),
             'message' => $decisionType->getLog(),
             'isTranslated' => false,

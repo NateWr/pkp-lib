@@ -1987,6 +1987,7 @@ msgstr ""
 "المحرر {$editorName} قد أكد إجراء الجولة {$round} لتحكيم طلب التقديم "
 "{$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} قد أكمل الجولة {$round} من تحكيم طلب التقديم {$submissionId}."
@@ -3120,3 +3121,6 @@ msgstr "تحذير: هذا الإصدار قد تم نشره. تعديله قد 
 
 msgid "dashboard.reviewAssignment.statusReceived.withoutRecommendation.description"
 msgstr "تم إكمال التحكيم في {$date}"
+
+msgid "reviewer.competingInterests"
+msgstr "مصالح تنافسية"

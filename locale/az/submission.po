@@ -2116,6 +2116,7 @@ msgstr ""
 "incələməsi üçün bir dəyərləndirmə təsdiqləndi için bir değerlendirme "
 "doğruladı."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} {$submissionId} nömrəli bildirişi üçün {$round}. tur "
@@ -2587,3 +2588,6 @@ msgstr "Zəhmət olmasa etibarlı bir uzaq URL daxil edin (http:// daxil)."
 
 msgid "submission.wizard.sectionClosed"
 msgstr "Bölmə bağlandı"
+
+msgid "reviewer.competingInterests"
+msgstr "Maraqların ziddiyyəti"

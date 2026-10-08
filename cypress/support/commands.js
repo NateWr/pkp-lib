@@ -21,7 +21,7 @@ function getPassword(username) {
 	if (username === undefined || username === null) {
 		throw new Error('must provide a username');
 	}
-	
+
 	// admin keeps original password
 	if (username === 'admin') {
 		return username;
@@ -611,7 +611,7 @@ Cypress.Commands.add('assignReviewer', (name, reviewMethod) => {
 	cy.get('[data-cy="active-modal"] button:contains("Add Reviewer")').click();
 	cy.waitJQuery();
 	cy.wait(5000); // Additional wait needed to reduce failures due to form not being fully initialized
-	cy.get('.listPanel--selectReviewer .pkpSearch__input', {timeout: 20000}).type(name, {delay: 0});
+	cy.get('.listPanel--selectReviewer .pkpSearch__input', {timeout: 20000}).type(name + '{enter}', {delay: 0});
 	cy.contains('Select ' + name).click();
 	cy.waitJQuery();
 	if (reviewMethod) {
@@ -728,13 +728,13 @@ Cypress.Commands.add('checkTable', (articleDetails, articles, authors, submissio
 	authors.forEach(author => {
 		cy.get('.pkpStats__panel .pkpStats__itemAuthors:contains("' + author + '")');
 	});
-	cy.get('input.pkpSearch__input').type('shouldreturnzeromatches', {delay: 0});
+	cy.get('input.pkpSearch__input').type('shouldreturnzeromatches{enter}', {delay: 0});
 	cy.get('div:contains("No ' + articles + ' were found with usage statistics matching these parameters.")');
 	cy.get('div:contains("0 of 0 ' + articles + '")');
-	cy.get('input.pkpSearch__input').clear().type(authors[0], {delay: 0});
+	cy.get('input.pkpSearch__input').clear().type(authors[0] + '{enter}', {delay: 0});
 	cy.get('.pkpStats__panel .pkpStats__itemAuthors:contains("' + authors[0] + '")');
 	cy.get(`div:contains("${submissionCountFromAuthor} of ${submissionCountFromAuthor} ${articles}")`);
-	cy.get('input.pkpSearch__input').clear();
+	cy.get('.pkpSearch button').click();
 });
 
 Cypress.Commands.add('checkFilters', filters => {
@@ -959,7 +959,7 @@ Cypress.Commands.add('confirmEmail', user => {
 	cy.visit(emailServer);
 	cy.get('#messages').contains(user.username + '@mailinator.com').first().click();
 	cy.frameLoaded('#message-body')
-	cy.iframe().find('.btn-accept').should('have.text', 'Accept Invitation').invoke('attr', 'href').then((url) => {
+	cy.iframe().find('.btn-accept a').should('have.text', 'Accept Invitation').invoke('attr', 'href').then((url) => {
 		cy.visit(url);
 	});
 });
@@ -1017,27 +1017,6 @@ Cypress.Commands.add('createUserByInvitation', user => {
 
 });
 
-
-Cypress.Commands.add('openEmailTemplate', (mailableName, templateName) => {
-	// Select the mailable
-	cy.contains('li.listPanel__item', mailableName)
-		.find('button')
-		.contains('Edit')
-		.click();
-
-	// Select the template
-	cy.contains('.listPanel', 'Templates')
-		.find('li.listPanel__item')
-		.contains(templateName)
-		.parents('li.listPanel__item')
-		.find('button')
-		.contains('Edit')
-		.click();
-});
-
-Cypress.Commands.add('setEmailTemplateUnrestrictedTo', (value) => {
-	cy.get(`input[name="isUnrestricted"][value="${value}"]`).check({force: true})
-});
 
 Cypress.Commands.add('addCategory', (title, path, parentName) => {
 	if (parentName) {

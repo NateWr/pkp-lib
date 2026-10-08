@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:49+00:00\n"
-"PO-Revision-Date: 2026-03-20 19:09+0000\n"
+"PO-Revision-Date: 2026-10-02 15:20+0000\n"
 "Last-Translator: Jean-Blaise Claivaz <jean-blaise.claivaz@unige.ch>\n"
 "Language-Team: French <http://translate.pkp.sfu.ca/projects/pkp-lib/grid/fr/>"
 "\n"
@@ -113,19 +113,19 @@ msgid "grid.action.moreInformation"
 msgstr "Plus d'information"
 
 msgid "grid.action.restoreDefaults"
-msgstr "Réinitialiser aux valeurs par défaut"
+msgstr "Réinitialiser les valeurs par défaut"
 
 msgid "grid.action.restoreDefaults.confirm"
 msgstr "Vous voulez vraiment réinstaurer les valeurs par défaut ?"
 
 msgid "grid.action.addAuthor"
-msgstr "Ajouter un·e auteur·e"
+msgstr "Ajouter un/e auteur/ice"
 
 msgid "grid.action.editAuthor"
-msgstr "Modifier l'auteur·e"
+msgstr "Modifier l'auteur/ice"
 
 msgid "grid.action.deleteAuthor"
-msgstr "Supprimer l'auteur·e"
+msgstr "Supprimer l'auteur/ice"
 
 msgid "grid.action.addAuditor"
 msgstr "Ajouter un vérificateur"
@@ -224,7 +224,7 @@ msgid "grid.action.expandAll"
 msgstr "Élargir tout"
 
 msgid "grid.action.requestAccount"
-msgstr "Ajouter un participant"
+msgstr "Ajouter un/e participant/e"
 
 msgid "grid.action.expand"
 msgstr "Élargir"
@@ -287,7 +287,7 @@ msgid "grid.action.addAnnouncementType"
 msgstr "Ajouter un type d'annonce"
 
 msgid "grid.action.addAnnouncement"
-msgstr "Ajouter une actualité"
+msgstr "Ajouter une annonce"
 
 msgid "grid.action.addInstitution"
 msgstr "Ajouter un établissement"
@@ -318,8 +318,7 @@ msgid "grid.action.exportAllUsers"
 msgstr "Exporter tous/tes les utilisateur/ices"
 
 msgid "grid.users.confirmExportAllUsers"
-msgstr ""
-"Vous voulez vraiment exporter tous/tes les utilisateurs et utilisatrices ?"
+msgstr "Vous voulez vraiment exporter tous/tes les utilisateur/ices ?"
 
 msgid "grid.action.activate"
 msgstr "Activer"
@@ -467,7 +466,7 @@ msgstr "Aperçu"
 
 msgid "contributor.listPanel.preview.description"
 msgstr ""
-"Les contributeur/ices à cette publication seront identifié/es dans les "
+"Les contributeur/ices à cette publication seront identifiées dans les "
 "formats suivants."
 
 msgid "contributor.listPanel.preview.format"
@@ -486,16 +485,16 @@ msgid "contributor.listPanel.preview.full"
 msgstr "Complet"
 
 msgid "grid.roles.currentRoles"
-msgstr "Rôles actuels"
+msgstr "Rôles"
 
 msgid "grid.roles.add"
 msgstr "Créer un nouveau rôle"
 
 msgid "grid.roles.stageAssignment"
-msgstr "Affectation d'étape"
+msgstr "Étape d'affectation"
 
 msgid "grid.user.currentUsers"
-msgstr "Utilisateur/ices actuel/les"
+msgstr "Utilisateur/ices"
 
 msgid "grid.user.currentEnrollment"
 msgstr "Inscriptions actuelles"
@@ -700,12 +699,12 @@ msgid "grid.userGroup.unassignedStage"
 msgstr "Le rôle {$userGroupName} est désassigner de l'étape {$stageName}."
 
 msgid "grid.submission.itemTitle"
-msgstr "Auteur·e ; Titre"
+msgstr "Auteur/ice ; Titre"
 
 msgid "grid.submission.active.selectOrphaned"
 msgstr ""
-"Inclure les soumissions incomplètes qui n'ont pas été soumises par un·e "
-"auteur·e."
+"Inclure les soumissions incomplètes qui n'ont pas été soumises par un/e "
+"auteur/ice."
 
 msgid "grid.action.addNavigationMenu"
 msgstr "Ajouter un menu"
@@ -783,7 +782,7 @@ msgstr "Modifier un/e contributeur/ice"
 #~ "modèles peut facilement être modifée ci-dessous."
 
 msgid "grid.user.userRoles.masthead"
-msgstr "Apparaît dans l'en-tête"
+msgstr "Apparaît sur la page Responsabilités"
 
 msgid "grid.user.logInAs"
 msgstr "Se connecter en tant que"
@@ -793,9 +792,8 @@ msgstr "Retirer l'utilisateur/ice"
 
 msgid "grid.user.disableReasonDescription"
 msgstr ""
-"Veuillez noter qu'une fois qu'un/e utilisateur/ice est désactivé/e, vous ne "
-"pourrez plus l'ajouter à aucun rôle tant qu'il/elle n'aura pas été "
-"réactivé/e."
+"Veuillez noter qu'une fois la personne désactivée, vous ne pourrez plus lui "
+"attribuer un rôle tant qu'elle n'aura pas été réactivée."
 
 msgid "grid.action.deleteReviewerSuggestion.confirmationMessage"
 msgstr ""
@@ -810,5 +808,5 @@ msgstr "Supprimer la suggestion d'un/e nouveau/elle évaluateur/ice"
 
 msgid "grid.user.enableReasonDescription"
 msgstr ""
-"Une fois que l'utilisateur/ice est activé/e, il/elle retrouvera l'accès au "
+"Une fois que l'utilisateur/ice est activée, il/elle retrouvera l'accès au "
 "site et vous pourrez l'inviter à occuper des rôles selon vos besoins."

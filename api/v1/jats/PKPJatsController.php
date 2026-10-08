@@ -19,6 +19,8 @@ namespace PKP\API\v1\jats;
 
 use APP\core\Application;
 use APP\facades\Repo;
+use APP\observers\events\UsageEvent;
+use DOMDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -26,18 +28,16 @@ use Illuminate\Support\Facades\Route;
 use PKP\core\PKPBaseController;
 use PKP\core\PKPRequest;
 use PKP\db\DAORegistry;
+use PKP\middleware\RedirectGuestToLogin;
 use PKP\publication\PKPPublication;
 use PKP\security\authorization\ContextAccessPolicy;
-use PKP\security\authorization\internal\SubmissionFileStageAccessPolicy;
-use PKP\security\authorization\PublicationAccessPolicy;
-use PKP\security\authorization\PublicationWritePolicy;
-use PKP\security\authorization\SubmissionFileAccessPolicy;
-use PKP\security\authorization\UserRolesRequiredPolicy;
-use PKP\security\authorization\internal\SubmissionCompletePolicy;
-use PKP\security\authorization\internal\SubmissionRequiredPolicy;
-use PKP\security\authorization\ContextRequiredPolicy;
 use PKP\security\authorization\internal\PublicationIsSubmissionPolicy;
 use PKP\security\authorization\internal\PublicationRequiredPolicy;
+use PKP\security\authorization\internal\SubmissionCompletePolicy;
+use PKP\security\authorization\internal\SubmissionRequiredPolicy;
+use PKP\security\authorization\PublicationAccessPolicy;
+use PKP\security\authorization\PublicationWritePolicy;
+use PKP\security\authorization\UserRolesRequiredPolicy;
 use PKP\security\Role;
 use PKP\services\PKPSchemaService;
 use PKP\submissionFile\SubmissionFile;
@@ -64,7 +64,7 @@ class PKPJatsController extends PKPBaseController
 
     public function getGroupRoutes(): void
     {
-        // Authenticated routes for JATS management
+        // Read access: authors may view JATS content (read-only)
         Route::middleware([
             'has.user',
             self::roleAuthorizer([
@@ -79,6 +79,19 @@ class PKPJatsController extends PKPBaseController
             Route::get('', $this->get(...))
                 ->name('publication.jats.get');
 
+        })->whereNumber(['submissionId', 'publicationId']);
+
+        // Write access: JATS is a production artifact editable by editorial roles only (no author)
+        Route::middleware([
+            'has.user',
+            self::roleAuthorizer([
+                Role::ROLE_ID_MANAGER,
+                Role::ROLE_ID_SITE_ADMIN,
+                Role::ROLE_ID_SUB_EDITOR,
+                Role::ROLE_ID_ASSISTANT,
+            ]),
+        ])->group(function () {
+
             Route::post('', $this->add(...))
                 ->name('publication.jats.add');
 
@@ -90,8 +103,12 @@ class PKPJatsController extends PKPBaseController
 
         })->whereNumber(['submissionId', 'publicationId']);
 
-        // Public route for JATS download which requires no authentication
-        Route::get('download', $this->publicDownload(...))
+        // Apply restrictive middleware only if content access is restricted without authorization
+        Route::middleware(
+            $this->getRequest()->getContext()?->getData('restrictArticleAccess')
+                ? [RedirectGuestToLogin::class, 'has.user']
+                : []
+        )->get('download', $this->publicDownload(...))
             ->name('publication.jats.publicDownload')
             ->whereNumber(['submissionId', 'publicationId']);
     }
@@ -104,7 +121,6 @@ class PKPJatsController extends PKPBaseController
         $illuminateRequest = $args[0]; /** @var \Illuminate\Http\Request $illuminateRequest */
         $actionName = static::getRouteActionName($illuminateRequest);
 
-        $this->addPolicy(new ContextRequiredPolicy($request));
         $this->addPolicy(new SubmissionRequiredPolicy($request, $args));
         $this->addPolicy(new SubmissionCompletePolicy($request, $args));
 
@@ -124,18 +140,6 @@ class PKPJatsController extends PKPBaseController
             $this->addPolicy(new PublicationAccessPolicy($request, $args, $roleAssignments));
         } else {
             $this->addPolicy(new PublicationWritePolicy($request, $args, $roleAssignments));
-        }
-
-        if ($actionName === 'add') {
-            $params = $illuminateRequest->input();
-            $fileStage = isset($params['fileStage']) ? (int) $params['fileStage'] : SubmissionFile::SUBMISSION_FILE_JATS;
-            $this->addPolicy(
-                new SubmissionFileStageAccessPolicy(
-                    $fileStage,
-                    SubmissionFileAccessPolicy::SUBMISSION_FILE_ACCESS_MODIFY,
-                    'api.submissionFiles.403.unauthorizedFileStageIdWrite'
-                )
-            );
         }
 
         return parent::authorize($request, $args, $roleAssignments);
@@ -325,6 +329,20 @@ class PKPJatsController extends PKPBaseController
             return response('', Response::HTTP_NOT_MODIFIED)
                 ->header('ETag', $etag)
                 ->header('Cache-Control', $cacheControl);
+        }
+
+        // Auto-generated JATS with no underlying galley to draw text from is metadata only
+        // (no <body>) — that's not "full text or content" by COUNTER's own definition of a
+        // request, and not meaningful usage of the article, so don't track it at all.
+        $jatsDom = new DOMDocument();
+        $jatsDom->loadXML($jatsContent);
+        if ($jatsDom->getElementsByTagName('body')->length > 0) {
+            event(new UsageEvent(
+                assocType: Application::ASSOC_TYPE_JATS,
+                context: Application::get()->getRequest()->getContext(),
+                submission: $submission,
+                publication: $publication,
+            ));
         }
 
         return response($jatsContent, Response::HTTP_OK)

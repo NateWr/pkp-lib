@@ -20,11 +20,16 @@ use APP\core\Application;
 use APP\facades\Repo;
 use APP\notification\NotificationManager;
 use APP\submission\Submission;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use PKP\context\Context;
 use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
+use PKP\db\XMLDAO;
 use PKP\editorialTask\enums\EditorialTaskType;
+use PKP\facades\Locale;
 use PKP\mail\Mailable;
 use PKP\note\Note;
 use PKP\notification\Notification;
@@ -32,6 +37,7 @@ use PKP\notification\NotificationSubscriptionSettingsDAO;
 use PKP\security\Role;
 use PKP\stageAssignment\StageAssignment;
 use PKP\user\User;
+use PKP\userGroup\UserGroup;
 
 class Repository
 {
@@ -105,6 +111,7 @@ class Repository
             'assocId' => $task->id,
             'contents' => $content,
             'userId' => $fromUser->getId(),
+            'isHeadnote' => true,
         ]);
 
         // Add task for assigned participants
@@ -198,18 +205,13 @@ class Repository
         $contextId = (int) $submission->getData('contextId');
 
         $templates = Template::query()
-            ->byContextId($contextId)
-            ->filterByStageId($stageId)
-            ->filterByInclude(true)
+            ->withContextId($contextId)
+            ->withStageId($stageId)
+            ->withInclude(true)
+            ->isNotAlreadyCreated($submission->getId())
             ->get();
 
         foreach ($templates as $template) {
-            $templateId = (int) $template->id;
-
-            if ($this->taskAlreadyCreatedFromTemplate($submission->getId(), $templateId)) {
-                continue;
-            }
-
             $task = $template->promote($submission, false); // no participants
 
             $maxSeq = (float) (EditorialTask::query()
@@ -224,16 +226,6 @@ class Repository
         }
     }
 
-    private function taskAlreadyCreatedFromTemplate(int $submissionId, int $templateId): bool
-    {
-        return DB::table('edit_tasks')
-            ->where('assoc_type', PKPApplication::ASSOC_TYPE_SUBMISSION)
-            ->where('assoc_id', $submissionId)
-            ->where('edit_task_template_id', $templateId)
-            ->exists();
-    }
-
-
     /**
      * Deletes all tasks, notes, and notifications associated with the given submission ID.
      */
@@ -245,8 +237,8 @@ class Repository
 
         if (!empty($taskIds)) {
             EditorialTask::whereIn($primaryKeyName, $taskIds)->delete();
-            Note::whereIn('assoc_id', $taskIds)->delete();
-            Notification::whereIn('assoc_id', $taskIds)->delete();
+            Note::whereIn('assoc_id', $taskIds)->where('assoc_type', PKPApplication::ASSOC_TYPE_QUERY)->delete();
+            Notification::whereIn('assoc_id', $taskIds)->where('assoc_type', PKPApplication::ASSOC_TYPE_QUERY)->delete();
         }
     }
 
@@ -273,5 +265,189 @@ class Repository
             ->whereIn('edit_task_id', $taskIds)
             ->where('user_id', $userId)
             ->delete();
+    }
+
+    /**
+     * Check if the given template is accessible by the given user
+     */
+    public function isTemplateAccessibleToUser(Template $template, User $user): bool
+    {
+        if ($user->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN], $template->contextId)) {
+            return true;
+        }
+
+        if (!$template->restrictToUserGroups) {
+            return true;
+        }
+
+        $userGroupIds = UserGroup::withUserIds([$user->getId()])
+            ->withContextIds([$template->contextId])
+            ->pluck((new UserGroup())->getPrimaryKeyName())
+            ->toArray();
+
+        $template->loadMissing('userGroups');
+
+        return $template->userGroups->whereIn((new UserGroup())->getPrimaryKeyName(), $userGroupIds)->isNotEmpty();
+    }
+
+    /**
+     * Get the main email template path and filename.
+     */
+    public function getDefaultTemplatesFilename()
+    {
+        return 'registry/taskTemplates.xml';
+    }
+
+    /**
+     * Install default task templates
+     *
+     */
+    public function installTaskTemplates(?Context $context = null, ?array $addedLocales = null): bool
+    {
+        $xmlDao = new XMLDAO();
+        $data = $xmlDao->parseStruct($this->getDefaultTemplatesFilename(), ['template']);
+
+        if (!isset($data['template'])) {
+            return false;
+        }
+
+        // Set data from a template
+        $templatesData = [];
+        foreach ($data['template'] as $entry) {
+            $attrs = [
+                'title' => Arr::get($entry, 'attributes.title'),
+                'description' => Arr::get($entry, 'attributes.description'),
+            ];
+
+            $attrs['key'] = Arr::get($entry, 'attributes.key');
+            $stageId = Arr::get($entry, 'attributes.stageId');
+            if (defined($stageId)) {
+                $attrs['stageId'] = $stageId;
+            }
+
+            $templatesData[] = array_filter($attrs);
+        }
+
+        $siteDao = DAORegistry::getDAO('SiteDAO'); /** @var \PKP\site\SiteDAO $siteDao */
+        $siteLocales = $siteDao->getSite()->getSupportedLocales();
+
+        $contexts = [];
+        if ($context) {
+            $contexts[] = $context;
+        } else {
+            $contextDao = Application::getContextDAO();
+            $contexts = $contextDao->getAll()->toArray();
+        }
+
+        foreach ($contexts as $context) {
+            foreach ($templatesData as $templateData) {
+                $fillables = [];
+                $localizedTitle = $localizedDescription = [];
+                foreach ($templateData as $key => $data) {
+                    $locales = $addedLocales ?? $siteLocales;
+                    foreach ($locales as $locale) {
+                        $previous = Locale::getMissingKeyHandler();
+                        Locale::setMissingKeyHandler(fn (string $localeKey): string => '');
+                        switch ($key) {
+                            case 'title':
+                                $localizedTitle[$locale] = __($data, [], $locale);
+                                break;
+                            case 'description':
+                                $localizedDescription[$locale] = __($data, [], $locale);
+                                break;
+                        }
+                        Locale::setMissingKeyHandler($previous);
+                    }
+
+                    switch ($key) {
+                        case 'stageId':
+                            $fillables['stageId'] = constant($data);
+                            break;
+                        case 'key':
+                            $fillables['key'] = $data;
+                            break;
+                    }
+                }
+
+                $fillables['title'] = $localizedTitle;
+                $fillables['description'] = $localizedDescription;
+
+                $fillables = array_merge($fillables, [
+                    'contextId' => $context->getId(),
+                    'type' => EditorialTaskType::DISCUSSION->value, // Only discussions are implemented as default templates.
+                ]);
+
+                // If exists by email key, just add new localizations, if available
+                $template = null;
+                if (isset($fillables['key'])) {
+                    $template = Template::withkeys([$fillables['key']], $fillables['contextId'])->first();
+                }
+
+                if ($template) {
+                    $fillables['title'] = array_merge($template->title, $fillables['title']);
+                    $fillables['description'] = array_merge($template->description, $fillables['description']);
+                    $template->fill($fillables);
+                } else {
+                    // This is a new template. Add data in all available locales
+                    foreach ($siteLocales as $locale) {
+                        $previous = Locale::getMissingKeyHandler();
+                        Locale::setMissingKeyHandler(fn (string $localeKey): string => '');
+
+                        if (!isset($fillables['title'][$locale])) {
+                            $fillables['title'][$locale] = __($templateData['title'], [], $locale);
+                        }
+                        if (!isset($fillables['description'][$locale])) {
+                            $fillables['description'][$locale] = __($templateData['description'], [], $locale);
+                        }
+                        Locale::setMissingKeyHandler($previous);
+                    }
+                    $template = new Template($fillables);
+                }
+
+                $template->save();
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Uninstall localized data on email task templates
+     *
+     * @param array<string> $locales
+     */
+    public function deleteTemplateLocaleData(array $locales): void
+    {
+        DB::table('edit_task_template_settings')
+            ->whereIn('locale', $locales)
+            ->delete();
+    }
+
+    /**
+     * Get the keys of the default discussion templates.
+     */
+    public function getDiscussionTemplateKeys(): array
+    {
+        return [
+            'DISCUSSION_NOTIFICATION_SUBMISSION',
+            'DISCUSSION_NOTIFICATION_REVIEW',
+            'DISCUSSION_NOTIFICATION_INTERNAL_REVIEW',
+            'DISCUSSION_NOTIFICATION_COPYEDITING',
+            'DISCUSSION_NOTIFICATION_PRODUCTION',
+        ];
+    }
+
+    /**
+     * Get the map of the localized discussion titles for a workflow stage.
+     */
+    public function getDiscussionTitles(): Collection
+    {
+        return collect([
+            WORKFLOW_STAGE_ID_SUBMISSION => __('mailable.discussionSubmission.name'),
+            WORKFLOW_STAGE_ID_INTERNAL_REVIEW => __('mailable.discussionReview.name'),
+            WORKFLOW_STAGE_ID_EXTERNAL_REVIEW => __('mailable.discussionReview.name'),
+            WORKFLOW_STAGE_ID_EDITING => __('mailable.discussionCopyediting.name'),
+            WORKFLOW_STAGE_ID_PRODUCTION => __('mailable.discussionProduction.name'),
+        ]);
     }
 }

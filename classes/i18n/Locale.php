@@ -44,6 +44,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RecursiveRegexIterator;
 use RegexIterator;
+use ResourceBundle;
 use Sokil\IsoCodes\Database\Countries;
 use Sokil\IsoCodes\Database\Currencies;
 use Sokil\IsoCodes\Database\LanguagesInterface;
@@ -135,7 +136,14 @@ class Locale implements LocaleInterface
 
         $request = $this->_getRequest();
 
-        $locale = $request->getUserVar('setLocale')
+        // The setLocale request var is only honoured while sessions are disabled (install,
+        // CLI, unit tests - see PKPApplication::__construct()), where the cookie/session
+        // can't be relied on and the new locale must take effect immediately, in the same
+        // request, before it's written out. Trusting it unconditionally let a stray
+        // ?setLocale= on any ordinary URL permanently override the URL's own locale segment
+        // and loop forever against PKPPageRouter::_setLocale() (see pkp/pkp-lib#12375).
+        $locale = (PKPSessionGuard::isSessionDisable() ? $request->getUserVar('setLocale') : null)
+            ?: $this->_getUrlLocale()
             ?: $request->getSession()->get('currentLocale')
             ?: $request->getCookieVar('currentLocale')
             ?: $this->getPreferredLocale();
@@ -143,6 +151,22 @@ class Locale implements LocaleInterface
         $this->setLocale($locale);
 
         return (string)$this->locale;
+    }
+
+    /**
+     * Get the locale segment of the request URL, if it is one this installation supports.
+     *
+     * Since 3.5 the locale is part of the URL, but getLocale() only consulted
+     * setLocale/session/cookie. A client that keeps no cookies (crawlers, uptime monitors,
+     * curl) therefore never matched the locale in the URL, and PKPPageRouter::_setLocale()
+     * redirected it to the very same URL forever - an infinite 302 loop on every supported
+     * non-primary locale. Honouring the URL also makes the page render in the requested
+     * language on the first hit, with no redirect.
+     */
+    private function _getUrlLocale(): ?string
+    {
+        $locale = Core::getLocalization($this->_getRequest()->getPathInfo());
+        return $locale !== '' && $this->isSupported($locale) ? $locale : null;
     }
 
     /**
@@ -159,8 +183,13 @@ class Locale implements LocaleInterface
 
         $this->locale = $locale;
         setlocale(LC_ALL, 'C.utf8', 'C');
-        $locales = array_keys($this->getWeblateLocaleNames());
-        \Locale::setDefault(\Locale::lookup($locales, $locale, true));
+        // ICU's own list (not Weblate's) avoids "und" and similar tags breaking Locale::lookup(). Falls
+        // back to DEFAULT_LOCALE (not $locale) when ICU has no data at all for $locale (e.g. a real OJS
+        // locale like "cnr") - never passes an ICU-unrecognized locale to setDefault(), which would
+        // silently stick as the process-wide default until something using it without an explicit
+        // locale (e.g. NumberFormatter) crashes. Kept as a backup for any future/third-party code
+        // relying on this implicit default - nothing in the codebase currently reads Locale::getDefault().
+        \Locale::setDefault(\Locale::lookup(ResourceBundle::getLocales(''), $locale, true) ?: LocaleInterface::DEFAULT_LOCALE);
     }
 
     /**
@@ -294,7 +323,13 @@ class Locale implements LocaleInterface
      */
     public function getSupportedLocales(): array
     {
-        return $this->supportedLocaleNames ??= array_map(fn (string $locale) => $this->getMetadata($locale)?->getDisplayName() ?? $locale, $this->_getSupportedLocales());
+        if (!isset($this->supportedLocaleNames)) {
+            $supportedLocales = $this->_getSupportedLocales();
+            $localeNames = $this->getFormattedDisplayNames(array_keys($supportedLocales), null, LocaleMetadata::LANGUAGE_LOCALE_WITHOUT);
+            $this->supportedLocaleNames = array_map(fn (string $locale) => $localeNames[$locale] ?? $locale, $supportedLocales);
+        }
+
+        return $this->supportedLocaleNames;
     }
 
     /**

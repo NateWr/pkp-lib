@@ -115,6 +115,7 @@ msgstr ""
 "บรรณาธิการ {$userName} ได้ยืนยันการทบทวนสำหรับรอบที่ {$round} ของการส่"
 "งบทความหมายเลข {$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} ได้ทำการทบทวนเสร็จสมบูรณ์สำหรับรอบที่ {$round} ของการส่"
@@ -2402,3 +2403,6 @@ msgstr "คุณต้องอัปโหลดไฟล์อย่างน
 
 msgid "publication.version"
 msgstr "เวอร์ชัน {$version}"
+
+msgid "reviewer.competingInterests"
+msgstr "ผลประโยชน์ทับซ้อน"

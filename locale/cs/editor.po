@@ -1,10 +1,11 @@
-# Jiří Dlouhý <jiri.dlouhy@czp.cuni.cz>, 2021, 2022, 2023, 2025.
+# Jiří Dlouhý <jiri.dlouhy@czp.cuni.cz>, 2021, 2022, 2023, 2025, 2026.
+# Michal Jelínek <jelinek@synetix.cz>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:49:40+00:00\n"
-"PO-Revision-Date: 2025-04-09 19:41+0000\n"
+"PO-Revision-Date: 2026-09-04 12:25+0000\n"
 "Last-Translator: Jiří Dlouhý <jiri.dlouhy@czp.cuni.cz>\n"
 "Language-Team: Czech <http://translate.pkp.sfu.ca/projects/pkp-lib/editor/cs/"
 ">\n"
@@ -53,8 +54,8 @@ msgstr "K zápisu tohoto rozhodnutí k tomuto příspěvku nemáte oprávnění.
 
 msgid "editor.submission.workflowDecision.invalidEditor"
 msgstr ""
-"Editor nebyl rozpoznán a nemusí mít oprávnění zaznamenat rozhodnutí o tomto "
-"příspěvku."
+"Redaktor nebyl rozpoznán a nemusí mít oprávnění zaznamenat rozhodnutí o "
+"tomto příspěvku."
 
 msgid "editor.submission.workflowDecision.invalidRecipients"
 msgstr "Následujícím příjemcům nelze odeslat e-mail: {$names}."
@@ -72,8 +73,8 @@ msgstr "Toto kolo recenzí není součástí tohoto příspěvku."
 
 msgid "editor.submission.workflowDecision.invalidStage"
 msgstr ""
-"Příspěvek se nenachází ve vhodné fázi pracovního postupu, aby bylo možné "
-"toto rozhodnutí přijmout."
+"Příspěvek se nachází ve fázi redakčního procesu, která není vhodná pro "
+"přijetí tohoto rozhodnutí."
 
 msgid "editor.submission.workflowDecision.noUnassignedDecisions"
 msgstr ""
@@ -116,7 +117,7 @@ msgid "editor.submission.fileAuditor.form.messageRequired"
 msgstr "Musíte zahrnout osobní zprávu."
 
 msgid "editor.submission.fileAuditor.skipEmail"
-msgstr "Neposílat email auditorovi"
+msgstr "Neposílat e-mail auditorovi"
 
 msgid "editor.submission.fileAuditor.form.userRequired"
 msgstr "Musíte vybrat uživatele, kterého chcete přiřadit."
@@ -148,7 +149,7 @@ msgid "editor.submission.findAndSelectUser"
 msgstr "Vyhledat uživatele"
 
 msgid "editor.submission.fileList.includeAllStages"
-msgstr "Ukázat soubory ze všech přístupných etap workflow."
+msgstr "Ukázat soubory ze všech přístupných etap redakčního procesu."
 
 msgid "editor.submission.review.currentFiles"
 msgstr "Současné soubory k recenzi pro {$round}. kolo"
@@ -178,13 +179,13 @@ msgid "editor.submissionReview.reviewType"
 msgstr "Typ recenze"
 
 msgid "editor.submissionReview.sendEmail"
-msgstr "Odeslání emailového upozornění autorovi/autorům: {$authorName}"
+msgstr "Odeslání e-mailového upozornění autorovi/autorům: {$authorName}"
 
 msgid "editor.submissionReview.sendEmail.editors"
-msgstr "Odeslání emailového upozornění redaktorovi/redaktorům: {$editorNames}"
+msgstr "Odeslání e-mailového upozornění redaktorovi/redaktorům: {$editorNames}"
 
 msgid "editor.submissionReview.skipEmail"
-msgstr "Neposílat emailové upozornění"
+msgstr "Neposílat e-mailové upozornění"
 
 msgid "editor.submissionReview.open"
 msgstr "Otevřený"
@@ -254,7 +255,7 @@ msgid "editor.review.thankReviewerError"
 msgstr "Chyba při odesílání poděkování recenzentovi"
 
 msgid "editor.review.skipEmail"
-msgstr "Neposílat email recenzentovi."
+msgstr "Neposílat e-mail recenzentovi."
 
 msgid "editor.review.sendReminder"
 msgstr "Odeslat připomenutí"
@@ -284,7 +285,7 @@ msgid "editor.review.requestDeclined.tooltip"
 msgstr "Recenzent tuto žádost o recenzi odmítl."
 
 msgid "editor.review.requestCancelled.tooltip"
-msgstr "Editor žádost o recenzi zrušil."
+msgstr "Redaktor žádost o recenzi zrušil."
 
 msgid "editor.review.revertDecision"
 msgstr "Vrátit rozhodnutí"
@@ -350,6 +351,7 @@ msgstr ""
 msgid "editor.review.unconsiderReview"
 msgstr "Tato recenze není brána v úvahu"
 
+#, fuzzy
 msgid "editor.review.readConfirmation"
 msgstr ""
 "Po přečtení této recenze stiskněte tlačítko \"Potvrdit\" a označte, že "
@@ -369,7 +371,7 @@ msgid "editor.submission.schedulePublication"
 msgstr "Naplánovat k publikování"
 
 msgid "editor.submission.selectCopyedingFiles"
-msgstr "Soubory pro copyediting"
+msgstr "Soubory pro jazykové úpravy"
 
 msgid "editor.submission.selectReviewer"
 msgstr "Vybrat recenzenta"
@@ -394,13 +396,13 @@ msgstr "Připomínka korektury"
 
 msgid "editor.submission.editorial.approveCopyeditDescription"
 msgstr ""
-"Soubor pro copyediting musí být schválen před odesláním do produkční fáze. "
-"Chcete tento soubor schválit?"
+"Soubor pro jazykové úpravy musí být schválen před odesláním do produkční "
+"fáze. Chcete tento soubor schválit?"
 
 msgid "editor.submission.editorial.disapproveCopyeditDescription"
 msgstr ""
-"Zrušení schválení copyeditingu souboru způsobí, že nebude možné ho poslat do "
-"produkční fáze. Chcete skutečně zrušit schválení tohoto souboru?"
+"Zrušení schválení jazykových úprav souboru způsobí, že nebude možné ho "
+"poslat do produkční fáze. Chcete skutečně zrušit schválení tohoto souboru?"
 
 msgid "editor.submission.addAuditor"
 msgstr "Přiřadit posuzovatele"
@@ -408,10 +410,10 @@ msgstr "Přiřadit posuzovatele"
 msgid "editor.submission.copyedit.manageCopyeditFilesDescription"
 msgstr ""
 "Všechny soubory, které již byly nahrány do libovolné fáze odeslání, lze "
-"přidat do seznamu souborů pro copyediting zaškrtnutím políčka Zahrnout a "
-"klepnutím na tlačítko Hledat: budou uvedeny všechny dostupné soubory a mohou "
-"být vybrány k zařazení. Další soubory, které ještě nebyly nahrané do této "
-"fáze, lze přidat do seznamu kliknutím na odkaz Nahrát soubor."
+"přidat do seznamu souborů pro jazykovou redakci zaškrtnutím políčka Zahrnout "
+"a klepnutím na tlačítko Hledat: budou uvedeny všechny dostupné soubory a "
+"mohou být vybrány k zařazení. Další soubory, které ještě nebyly nahrané do "
+"této fáze, lze přidat do seznamu kliknutím na odkaz Nahrát soubor."
 
 msgid "editor.review"
 msgstr "Recenze"
@@ -435,16 +437,16 @@ msgid "editor.submission.newRound"
 msgstr "Nové kolo recenzí"
 
 msgid "editor.submissionReview.recordDecision"
-msgstr "Nahrát rozhodnutí editora"
+msgstr "Nahrát rozhodnutí redaktora"
 
 msgid "editor.submissionReview.recordRecommendation"
 msgstr "Záznam doporučení redakce"
 
 msgid "editor.submissionReview.recordRecommendation.notifyEditors"
-msgstr "Upozornit editory"
+msgstr "Upozornit redaktory"
 
 msgid "editor.submissionReview.recordRecommendation.skipEmail"
-msgstr "Neposílat email editorům."
+msgstr "Neposílat e-mail redaktorům."
 
 msgid "editor.submissionReview.recordRecommendation.createDiscussion"
 msgstr "Vytvořit diskusi recenzentů o tomto doporučení."
@@ -576,7 +578,7 @@ msgstr ""
 "procesu. Chcete přesto tohoto recenzenta odemknout?"
 
 msgid "reviewer.list.warnOnAssignUnlock"
-msgstr "Odmčen/a"
+msgstr "Odemknout"
 
 msgid "reviewer.list.reviewInterests"
 msgstr "Oblasti zájmu pro recenze"
@@ -609,7 +611,7 @@ msgid "editor.decision.recordDecision"
 msgstr "Nahrát rozhodnutí"
 
 msgid "editor.decision.skipEmail"
-msgstr "Přeskočit tento email"
+msgstr "Přeskočit tento e-mail"
 
 msgid "editor.decision.stepError"
 msgstr "V kroku {$stepName} došlo k problému."

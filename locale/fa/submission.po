@@ -2001,6 +2001,7 @@ msgstr ""
 msgid "log.review.reviewConfirmed"
 msgstr ""
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 
@@ -2831,3 +2832,6 @@ msgstr "فهرست مؤلفین ارسال کننده دست نوشته"
 
 msgid "editor.submission.roundStatus.returnedToReview"
 msgstr "بازگشت به داوری."
+
+msgid "reviewer.competingInterests"
+msgstr "تضاد منافع"

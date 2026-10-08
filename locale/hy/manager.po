@@ -4,7 +4,7 @@
 # Martin Brändle <martin.braendle@uzh.ch>, 2023.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-04-17 11:27+0000\n"
+"PO-Revision-Date: 2026-08-20 12:54+0000\n"
 "Last-Translator: Tigran Zargaryan <tigran@flib.sci.am>\n"
 "Language-Team: Armenian <http://translate.pkp.sfu.ca/projects/pkp-lib/"
 "manager/hy/>\n"
@@ -424,11 +424,6 @@ msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
 "Հետևյալ սխալն է վերադարձվել {$registrationAgency} -ի կողմից և պարունակում է "
 "մանրամասներ սխալի պատճառի մասին:"
-
-msgid "manager.dois.registrationAgency.registeredMessagePreamble"
-msgstr ""
-"Հետևյալ հաղորդագրությունն է վերադարձվել {$registrationAgency} -ի կողմից և "
-"պարունակում է մանրամասներ գրանցման մասին:"
 
 msgid "manager.emails.addEmail"
 msgstr "Ավելացնել ձևանմուշ"
@@ -3961,3 +3956,11 @@ msgid "manager.categories.form.removeCoverImageFileNotFound"
 msgstr ""
 "Շապիկի պատկերի և մանրապատկերի նիշքերը չգտնվեցին։ Հնարավոր է՝ դրանք արդեն "
 "ջնջված լինեն։ Փորձեք վերաբեռնել էջը։"
+
+msgid "doi.manager.settings.doiSuffixPattern.required"
+msgstr "DOI վերջածանցի ձևանմուշը պարտադիր է։"
+
+msgid "mailable.changeProfileEmailInvitationNotify.description"
+msgstr ""
+"Օգտատերերը, ովքեր իրենց օգտատիրոջ էջում խնդրում են փոխել էլեկտրոնային փոստի "
+"իրենց հասցեն, կստանան այս հաստատման հարցումը։"

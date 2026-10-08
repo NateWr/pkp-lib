@@ -2056,6 +2056,7 @@ msgstr ""
 "{$editorName} editoreak baieztatu du {$submissionId} lanaren berrikuspena "
 "{$round} berrikuspen-errondarako."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName}-ek amaitu du berrikuspena {$submissionId} bidalketaren "
@@ -3197,3 +3198,6 @@ msgstr ""
 
 msgid "fileManager.revisionsUploadedDescription"
 msgstr "Fitxategi hauek egileak bidali ditu berrikuspenak eskatu ondoren"
+
+msgid "reviewer.competingInterests"
+msgstr "Interes-gatazka"

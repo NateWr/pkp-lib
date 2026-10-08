@@ -26,11 +26,16 @@ use PKP\core\JSONMessage;
 use PKP\core\PKPApplication;
 use PKP\core\PKPRequest;
 use PKP\core\PKPString;
+use PKP\db\DAORegistry;
 use PKP\log\EmailLogEntry;
 use PKP\log\event\EventLogEntry;
+use PKP\log\event\PKPSubmissionEventLogEntry;
 use PKP\security\authorization\internal\UserAccessibleWorkflowStageRequiredPolicy;
 use PKP\security\authorization\SubmissionAccessPolicy;
 use PKP\security\Role;
+use PKP\submission\reviewAssignment\ReviewAssignment;
+use PKP\submission\SubmissionComment;
+use PKP\submission\SubmissionCommentDAO;
 
 class SubmissionEventLogGridHandler extends GridHandler
 {
@@ -208,7 +213,8 @@ class SubmissionEventLogGridHandler extends GridHandler
         $emailLogEntries = EmailLogEntry::withAssocId($submission->getId())
             ->withAssocType(Application::ASSOC_TYPE_SUBMISSION)->get();
 
-        $entries = array_merge($eventLogEntries->toArray(), $emailLogEntries->all());
+        $reviewLogEntries = $this->getReviewChangeEntries($submission);
+        $entries = array_merge($eventLogEntries->toArray(), $reviewLogEntries, $emailLogEntries->all());
 
         // Sort the merged data by date, most recent first
         usort($entries, function ($a, $b) {
@@ -226,16 +232,17 @@ class SubmissionEventLogGridHandler extends GridHandler
     }
 
     /**
-     * Get the contents of the email
-     *
-     * @param array $args
-     * @param PKPRequest $request
-     *
-     * @return JSONMessage JSON object
+     * Get the contents of an email
      */
-    public function viewEmail($args, $request)
+    public function viewEmail(array $args, PKPRequest $request) : JSONMessage
     {
-        $emailLogEntry = EmailLogEntry::find((int) $args['emailLogEntryId']);
+        $emailLogEntry = EmailLogEntry::withAssocType(Application::ASSOC_TYPE_SUBMISSION)
+            ->withAssocId($this->getSubmission()->getId())
+            ->find((int) $args['emailLogEntryId']);
+
+        if (!$emailLogEntry) {
+            return new JSONMessage(false, __('api.404.resourceNotFound'));
+        }
         return new JSONMessage(true, $this->_formatEmail($emailLogEntry));
     }
 
@@ -263,5 +270,73 @@ class SubmissionEventLogGridHandler extends GridHandler
             . nl2br(join(PHP_EOL, $text)) . '<br><br>'
             . PKPString::stripUnsafeHtml($emailLogEntry->body)
             . '</div>';
+    }
+
+    /**
+     * Get the logs related to the editing of a review.
+     */
+    protected function getReviewChangeEntries(Submission $submission): array
+    {
+        $reviewAssignments = Repo::reviewAssignment()->getCollector()
+            ->filterBySubmissionIds([$submission->getId()])
+            ->getMany();
+
+        $reviewsWithFormIds = $reviewAssignments->filter(function (ReviewAssignment $reviewAssignment) {
+            return !!$reviewAssignment->getReviewFormId();
+        })
+            ->map(function (ReviewAssignment $reviewAssignment) {
+                return $reviewAssignment->getId();
+            })->toArray();
+
+        $reviewsWithCommentsIds = $reviewAssignments->filter(function (ReviewAssignment $reviewAssignment) {
+            return !$reviewAssignment->getReviewFormId();
+        })
+            ->map(function (ReviewAssignment $reviewAssignment) {
+                return $reviewAssignment->getId();
+            })->toArray();
+
+        /** @var SubmissionCommentDAO $submissionCommentDao */
+        $submissionCommentDao = DAORegistry::getDAO('SubmissionCommentDAO');
+        $reviewComments = $submissionCommentDao->getSubmissionComments($submission->getId(), SubmissionComment::COMMENT_TYPE_PEER_REVIEW);
+        $reviewCommentIds = [];
+
+        /** @var SubmissionComment $reviewComment */
+        while ($reviewComment = $reviewComments->next()) {
+            if ($reviewComment->getViewable()) {
+                $reviewCommentIds[] = $reviewComment->getId();
+            }
+        }
+
+        $commentLogEntries = $reviewCommentIds ? Repo::eventLog()->getCollector()
+            ->filterByAssoc(PKPApplication::ASSOC_TYPE_SUBMISSION_REVIEW_COMMENT, $reviewCommentIds)
+            ->filterByEventType(PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_COMMENTS_MODIFIED)
+            ->getMany()
+            ->toArray() : [];
+
+        $formResponseLogEntries = $reviewsWithFormIds ? Repo::eventLog()->getCollector()
+            ->filterByAssoc(PKPApplication::ASSOC_TYPE_REVIEW_ASSIGNMENT, $reviewsWithFormIds)
+            ->filterByEventType(PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_FORM_RESPONSE_MODIFIED)
+            ->getMany()
+            ->toArray() : [];
+
+        $allReviewAssignmentIds = array_merge($reviewsWithCommentsIds, $reviewsWithFormIds);
+        $recommendationLogEntries = $allReviewAssignmentIds ? Repo::eventLog()->getCollector()
+            ->filterByAssoc(PKPApplication::ASSOC_TYPE_REVIEW_ASSIGNMENT, $allReviewAssignmentIds)
+            ->filterByEventType(PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_RECOMMENDATION_MODIFIED)
+            ->getMany()
+            ->toArray() : [];
+
+        $competingInterestLogEntries = $allReviewAssignmentIds ? Repo::eventLog()->getCollector()
+            ->filterByAssoc(PKPApplication::ASSOC_TYPE_REVIEW_ASSIGNMENT, $allReviewAssignmentIds)
+            ->filterByEventType(PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_COMPETING_INTERESTS_MODIFIED)
+            ->getMany()
+            ->toArray() : [];
+
+        return array_merge(
+            $commentLogEntries,
+            $formResponseLogEntries,
+            $recommendationLogEntries,
+            $competingInterestLogEntries,
+        );
     }
 }

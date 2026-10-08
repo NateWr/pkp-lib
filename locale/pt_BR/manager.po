@@ -6,13 +6,15 @@
 # Martin Brändle <martin.braendle@uzh.ch>, 2023.
 # Carolina Miki Tanigushi <carolina.tanigushi@scielo.org>, 2025.
 # Lívia Carolina Gouvêa de Faria <livia@mail.mayfirst.org>, 2025.
+# Leandro Muniz de Lima <leandro.m.lima@ufes.br>, 2026.
+# Andre Moura Melgarejo <melgarejo.andre@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-09-30T11:54:13-07:00\n"
-"PO-Revision-Date: 2026-05-13 20:36+0000\n"
-"Last-Translator: Diego José Macêdo <diegojmacedo@gmail.com>\n"
+"PO-Revision-Date: 2026-08-31 17:05+0000\n"
+"Last-Translator: Andre Moura Melgarejo <melgarejo.andre@gmail.com>\n"
 "Language-Team: Portuguese (Brazil) <http://translate.pkp.sfu.ca/projects/"
 "pkp-lib/manager/pt_BR/>\n"
 "Language: pt_BR\n"
@@ -426,11 +428,6 @@ msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
 "O seguinte erro foi retornado por {$registrationAgency} e contém detalhes "
 "sobre a causa do erro:"
-
-msgid "manager.dois.registrationAgency.registeredMessagePreamble"
-msgstr ""
-"A seguinte mensagem foi retornada por {$registrationAgency} e contém "
-"detalhes sobre o registro:"
 
 msgid "manager.emails.addEmail"
 msgstr "Adicionar modelo"
@@ -1945,7 +1942,7 @@ msgid "manager.reviewForms.description"
 msgstr "Detalhes e instruções"
 
 msgid "manager.reviewForms.edit"
-msgstr "Forumlário de avaliação"
+msgstr "Formulário de avaliação"
 
 msgid "manager.reviewForms.form.titleRequired"
 msgstr "É necessário informar o título do formulário."
@@ -3124,7 +3121,7 @@ msgstr ""
 "notificação por e-mail enviada aos avaliadores sobre essa decisão"
 
 msgid "mailable.decision.notifyReviewer.variable.decisionDescription.accept"
-msgstr "Optamos por aceitar esta submissão sem revisões."
+msgstr "Optamos por aceitar esta submissão sem correções."
 
 msgid "mailable.decision.notifyReviewer.variable.decisionDescription.decline"
 msgstr "Optamos por recusar esta submissão."

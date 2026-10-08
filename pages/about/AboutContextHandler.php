@@ -21,8 +21,7 @@ use APP\facades\Repo;
 use APP\handler\Handler;
 use APP\template\TemplateManager;
 use DateTime;
-use Illuminate\Support\Collection;
-use PKP\context\Context;
+use PKP\core\PKPRequest;
 use PKP\facades\Locale;
 use PKP\orcid\OrcidManager;
 use PKP\plugins\Hook;
@@ -30,7 +29,6 @@ use PKP\security\authorization\ContextRequiredPolicy;
 use PKP\security\Role;
 use PKP\userGroup\relationships\enums\UserUserGroupStatus;
 use PKP\userGroup\relationships\UserUserGroup;
-use PKP\userGroup\UserGroup;
 
 class AboutContextHandler extends Handler
 {
@@ -62,38 +60,24 @@ class AboutContextHandler extends Handler
         $templateMgr->display('frontend/pages/about.tpl');
     }
 
-
-    private function getSortedMastheadUserGroups(Context $context): Collection
-    {
-        $mastheadUserGroups = UserGroup::withContextIds([$context->getId()])
-            ->masthead(true)
-            ->excludeRoles([Role::ROLE_ID_REVIEWER])
-            ->get();
-
-        $savedOrder = (array) $context->getData('mastheadUserGroupIds');
-
-        $sortedUserGroups = $mastheadUserGroups->sortBy(function ($userGroup) use ($savedOrder) {
-            return array_search($userGroup->id, $savedOrder);
-        });
-
-        return $sortedUserGroups;
-    }
-
-
     /**
      * Display editorial masthead page.
      *
-     * @param array $args
-     * @param \PKP\core\PKPRequest $request
-     *
      * @hook AboutContextHandler::editorialMasthead [[$mastheadRoles, $mastheadUsers, $reviewers, $previousYear]]
      */
-    public function editorialMasthead($args, $request)
+    public function editorialMasthead(array $args, PKPRequest $request)
     {
+        $this->setupTemplate($request);
         $context = $request->getContext();
 
-        // Get sorted masthead roles using the extracted method
-        $mastheadRoles = $this->getSortedMastheadUserGroups($context);
+        if (!$context->getData('enableEnrollmentMasthead')) {
+            $templateMgr = TemplateManager::getManager($request);
+            $templateMgr->display('frontend/pages/editorialMastheadDisabled.tpl');
+            return;
+        }
+
+        // Get sorted masthead roles
+        $mastheadRoles = Repo::userGroup()->getSortedMastheadUserGroups($context);
 
         // Get all user IDs grouped by user group ID for the masthead roles
         $allUsersIdsGroupedByUserGroupId = Repo::userGroup()->getMastheadUserIdsByRoleIds(
@@ -104,15 +88,19 @@ class AboutContextHandler extends Handler
         $mastheadUsers = [];
         foreach ($mastheadRoles as $userGroupId => $mastheadUserGroup) {
             foreach ($allUsersIdsGroupedByUserGroupId[$userGroupId] ?? [] as $userId) {
-                $user = Repo::user()->get($userId);
+                $user = Repo::user()->get($userId, true);
+                // The cached user IDs can include a user deleted since
+                if (!$user) {
+                    continue;
+                }
                 $userUserGroup = UserUserGroup::withUserId($user->getId())
-                    ->withUserGroupIds([$userGroupId])
+                    ->withUserGroupIds([$mastheadUserGroup->id])
                     ->withActive()
                     ->withMasthead()
                     ->first();
                 if ($userUserGroup) {
                     $startDatetime = $userUserGroup->dateStart ? new DateTime($userUserGroup->dateStart) : null;
-                    $mastheadUsers[$userGroupId][$user->getId()] = [
+                    $mastheadUsers[$mastheadUserGroup->id][$user->getId()] = [
                         'user' => $user,
                         'dateStart' => $startDatetime ? $startDatetime->format('Y') : '',
                     ];
@@ -121,21 +109,24 @@ class AboutContextHandler extends Handler
         }
 
         $previousYear = date('Y') - 1;
-        $reviewerIds = Repo::reviewAssignment()->getExternalReviewerIdsByCompletedYear($context->getId(), $previousYear);
-        $usersCollector = Repo::user()->getCollector();
-        $reviewers = $usersCollector
-            ->filterByUserIds($reviewerIds->toArray())
-            ->orderBy(
-                $usersCollector::ORDERBY_FAMILYNAME,
-                $usersCollector::ORDER_DIR_ASC,
-                [Locale::getLocale(), Application::get()->getRequest()->getSite()->getPrimaryLocale()]
-            )
-            ->getMany();
+        $reviewers = collect();
+        if ($context->getData('enableEnrollmentMastheadReviewers')) {
+            $reviewerIds = Repo::reviewAssignment()->getExternalReviewerIdsByCompletedYear($context->getId(), $previousYear);
+            $usersCollector = Repo::user()->getCollector();
+            $reviewers = $usersCollector
+                ->filterByUserIds($reviewerIds->toArray())
+                ->filterByStatus($usersCollector::STATUS_ALL)
+                ->orderBy(
+                    $usersCollector::ORDERBY_FAMILYNAME,
+                    $usersCollector::ORDER_DIR_ASC,
+                    [Locale::getLocale(), Application::get()->getRequest()->getSite()->getPrimaryLocale()]
+                )
+                ->getMany();
+        }
 
         Hook::call('AboutContextHandler::editorialMasthead', [$mastheadRoles, $mastheadUsers, $reviewers, $previousYear]);
 
         $templateMgr = TemplateManager::getManager($request);
-        $this->setupTemplate($request);
         $templateMgr->assign([
             'mastheadRoles' => $mastheadRoles,
             'mastheadUsers' => $mastheadUsers,
@@ -149,17 +140,21 @@ class AboutContextHandler extends Handler
     /**
      * Display editorial history page.
      *
-     * @param array $args
-     * @param \PKP\core\PKPRequest $request
-     *
      * @hook AboutContextHandler::editorialHistory [[$mastheadRoles, $mastheadUsers]]
      */
-    public function editorialHistory($args, $request)
+    public function editorialHistory(array $args, PKPRequest $request)
     {
         $context = $request->getContext();
+        $enableEnrollmentMasthead = $context->getData('enableEnrollmentMasthead');
 
-        // get sorted masthead roles using the extracted method
-        $mastheadRoles = $this->getSortedMastheadUserGroups($context);
+        // If the masthead is disabled, redirect to ".../editorialMasthead" instead of ".../editorialHistory"
+        if (!$enableEnrollmentMasthead) {
+            $request->redirect(null, null, 'editorialMasthead');
+            exit();
+        }
+
+        // get sorted masthead roles
+        $mastheadRoles = Repo::userGroup()->getSortedMastheadUserGroups($context);
 
         // get all user IDs grouped by user group ID for the masthead roles with ended status
         $allUsersIdsGroupedByUserGroupId = Repo::userGroup()->getMastheadUserIdsByRoleIds(
@@ -171,9 +166,13 @@ class AboutContextHandler extends Handler
         $mastheadUsers = [];
         foreach ($mastheadRoles as $userGroupId => $mastheadUserGroup) {
             foreach ($allUsersIdsGroupedByUserGroupId[$userGroupId] ?? [] as $userId) {
-                $user = Repo::user()->get($userId);
+                $user = Repo::user()->get($userId, true);
+                // The cached user IDs can include a user deleted since
+                if (!$user) {
+                    continue;
+                }
                 $userUserGroups = UserUserGroup::withUserId($user->getId())
-                    ->withUserGroupIds([$userGroupId])
+                    ->withUserGroupIds([$mastheadUserGroup->id])
                     ->withEnded()
                     ->withMasthead()
                     ->orderBy('date_start', 'desc')
@@ -188,7 +187,7 @@ class AboutContextHandler extends Handler
                     ];
                 }
                 if (!empty($services)) {
-                    $mastheadUsers[$userGroupId][$user->getId()] = [
+                    $mastheadUsers[$mastheadUserGroup->id][$user->getId()] = [
                         'user' => $user,
                         'services' => $services
                     ];

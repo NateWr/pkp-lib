@@ -129,8 +129,7 @@ class InvitationController extends PKPBaseController
             self::roleAuthorizer([
                 Role::ROLE_ID_SITE_ADMIN,
                 Role::ROLE_ID_MANAGER,
-                Role::ROLE_ID_SUB_EDITOR,
-                ROLE::ROLE_ID_ASSISTANT,
+                // WARNING: See pkp/pkp-lib#13339 before extending this list
             ]),
         ])->group(function () {
 
@@ -208,6 +207,11 @@ class InvitationController extends PKPBaseController
             }
 
             $invitation = app(Invitation::class)->getExisting($invitationModel->type, $invitationModel);
+
+            // An invitation that belongs to another context is treated as not found
+            if (isset($invitation) && !$invitation->belongsToContext($request->getContext()?->getId())) {
+                throw new Exception('Invitation not found');
+            }
         } elseif (in_array($actionName, $this->requiresIdAndKey)) {
             if (!isset($invitationId) || !isset($invitationKey)) {
                 throw new Exception("Parameters with the names '" . self::PARAM_ID . "' and '" . self::PARAM_KEY . "' need to be declared");

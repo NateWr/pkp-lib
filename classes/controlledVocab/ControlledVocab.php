@@ -15,14 +15,14 @@
 namespace PKP\controlledVocab;
 
 use Eloquence\Behaviours\HasCamelCasing;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Builder;
-use PKP\controlledVocab\ControlledVocabEntry;
 use PKP\facades\Locale;
+use PKP\submission\PKPSubmission;
 
 class ControlledVocab extends Model
 {
@@ -99,7 +99,7 @@ class ControlledVocab extends Model
      */
     public function controlledVocabEntries(): HasMany
     {
-        return $this->hasMany(ControlledVocabEntry::class, 'controlled_vocab_id', 'controlled_vocab_id');
+        return $this->hasMany(ControlledVocabEntry::class, 'controlled_vocab_id', 'controlled_vocab_id')->chaperone();
     }
 
     /**
@@ -111,36 +111,33 @@ class ControlledVocab extends Model
     }
 
     /**
-     * Scope a query to only include vocabs with a specific assoc type and assoc ID.
+     * Scope a query to only include vocabs with a specific assoc type(s) and assoc ID(s).
      */
-    public function scopeWithAssoc(Builder $query, int $assocType, ?int $assocId): Builder
+    public function scopeWithAssoc(Builder $query, int|array $assocType, int|array|null $assocId): Builder
     {
-        return $query->where('assoc_type', $assocType)->where('assoc_id', $assocId);
+        return $query->whereIn('assoc_type', (array) $assocType)
+            ->when($assocId !== null, fn ($q) => $q->whereIn('assoc_id', (array) $assocId));
     }
 
     /**
-     * Scope a query to only include vocabs associated with given context id
+     * Scope a query to only include vocabs associated with a published publication in the given context
      */
-    public function scopeWithContextId(Builder $query, int $contextId): Builder
+    public function scopeWithContextIdAndPublishedPublications(Builder $query, int $contextId): Builder
     {
-        return $query
-            ->where(
-                fn ($query) => $query
-                    ->select('context_id')
-                    ->from('submissions')
-                    ->whereColumn(
-                        DB::raw(
-                            "(SELECT publications.submission_id 
-                            FROM publications 
-                            INNER JOIN {$this->table} 
-                            ON publications.publication_id = {$this->table}.assoc_id 
-                            LIMIT 1)"
-                        ),
-                        '=',
-                        'submissions.submission_id'
-                    ), 
-                $contextId
-            );
+        return $query->whereIn(
+            'assoc_id',
+            fn ($query) => $query
+                ->select('publication_id')
+                ->from('publications')
+                ->where('status', PKPSubmission::STATUS_PUBLISHED)
+                ->whereIn(
+                    'submission_id',
+                    fn ($query) => $query
+                        ->select('submission_id')
+                        ->from('submissions')
+                        ->where('context_id', $contextId)
+                )
+        );
     }
 
     /**
@@ -149,7 +146,7 @@ class ControlledVocab extends Model
      * @return array $controlledVocabEntryId => name
      */
     public function enumerate(string $settingName = 'name'): array
-    {    
+    {
         return DB::table('controlled_vocab_entries AS e')
             ->leftJoin(
                 'controlled_vocab_entry_settings AS l',

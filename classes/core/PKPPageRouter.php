@@ -178,7 +178,10 @@ class PKPPageRouter extends PKPRouter
             $user = $request->getUser();
             $currentContext = $request->getContext();
             if ($currentContext && !$currentContext->getEnabled() && !$user instanceof \PKP\user\User) {
-                if ($page != 'login') {
+                // Invitation accept/decline links are emailed to people who may not
+                // have an account yet and are validated by a secret key, so they must
+                // stay reachable on a disabled context (check also RestrictedSiteAccessPolicy::_getLoginExemptions).
+                if (!in_array($page, ['login', 'invitation'])) {
                     $request->redirect(null, 'login');
                 }
             }
@@ -498,15 +501,22 @@ class PKPPageRouter extends PKPRouter
         $contextPath = $this->_getRequestedUrlParts(Core::getContextPath(...), $request);
         $urlLocale = $this->_getRequestedUrlParts(Core::getLocalization(...), $request);
         $multiLingual = count($this->_getContextAndLocales($request, $contextPath)[1]) > 1;
-        // Quit if there's no new locale to be set and the request URL is already well-formed
-        if (!$setLocale && ($multiLingual ? $urlLocale === Locale::getLocale() : !$urlLocale)) {
-            return;
-        }
 
         $session = $request->getSession();
         $currentLocale = $session->get('currentLocale') ?? '';
         if (!Locale::isSupported($currentLocale ?? '')) {
             $currentLocale = null;
+        }
+
+        // Quit if there's no new locale to be set and the request URL is already well-formed.
+        // Still sync the session/cookie to the URL locale so it survives session resets and
+        // session-disabled requests, which never get a chance to write it themselves otherwise.
+        if (!$setLocale && ($multiLingual ? $urlLocale === Locale::getLocale() : !$urlLocale)) {
+            if ($multiLingual && $urlLocale !== $currentLocale) {
+                $session->put('currentLocale', $urlLocale);
+                $request->setCookieVar('currentLocale', $urlLocale);
+            }
+            return;
         }
 
         $newLocale = $setLocale ?? $urlLocale;

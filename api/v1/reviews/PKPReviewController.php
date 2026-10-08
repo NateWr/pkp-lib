@@ -153,11 +153,10 @@ class PKPReviewController extends PKPBaseController
 
         Route::middleware([
             self::roleAuthorizer([
+                Role::ROLE_ID_SITE_ADMIN,
                 Role::ROLE_ID_MANAGER,
                 Role::ROLE_ID_SUB_EDITOR,
                 Role::ROLE_ID_ASSISTANT,
-                Role::ROLE_ID_REVIEWER,
-                Role::ROLE_ID_AUTHOR,
             ]),
         ])->group(function () {
             Route::get('{submissionId}/{reviewAssignmentId}/export-pdf', $this->exportReviewPDF(...))
@@ -399,7 +398,9 @@ class PKPReviewController extends PKPBaseController
         $submissionCommentsPrivate = $submissionCommentDao->getReviewerCommentsByReviewerId($submissionId, $reviewAssignment->getReviewerId(), $reviewId, false);
         $title = $submission->getCurrentPublication()->getLocalizedTitle(null, 'html');
         $cleanTitle = str_replace('&nbsp;', ' ', strip_tags($title));
+        $fileManager = new TemporaryFileManager();
         $mpdf = new Mpdf([
+            'tempDir' => $fileManager->getBasePath(),
             'default_font' => 'NotoSansSC',
             'mode' => '+aCJK',
             'autoScriptToLang' => true,
@@ -461,7 +462,6 @@ class PKPReviewController extends PKPBaseController
         $mpdf->WriteHTML($reviewHtml);
         $exportFileName = "submission_review_{$submissionId}-{$reviewId}.pdf";
         $pdfContent = $mpdf->Output($exportFileName, 'S');
-        $fileManager = new TemporaryFileManager();
         $tempFilename = $fileManager->getBasePath() . $exportFileName;
         $fileManager->writeFile($tempFilename, $pdfContent);
         $user = Application::get()->getRequest()->getUser();

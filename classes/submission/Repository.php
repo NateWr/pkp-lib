@@ -160,8 +160,11 @@ abstract class Repository
      * The returned URL will point to the correct workflow page based on whether
      * the user should be treated as an author, reviewer or editor/assistant for
      * this submission.
+     *
+     * @param array $params Additional query params to add to the dashboard
+     *   URLs, e.g. a `workflowMenuKey` to select an item in the workflow menu.
      */
-    public function getWorkflowUrlByUserRoles(Submission $submission, ?int $userId = null): string
+    public function getWorkflowUrlByUserRoles(Submission $submission, ?int $userId = null, array $params = []): string
     {
         $request = Application::get()->getRequest();
 
@@ -229,7 +232,7 @@ abstract class Repository
                 'dashboard',
                 'mySubmissions',
                 null,
-                ['workflowSubmissionId' => $submission->getId()]
+                array_merge(['workflowSubmissionId' => $submission->getId()], $params)
             );
         }
 
@@ -260,7 +263,7 @@ abstract class Repository
             'dashboard',
             'editorial',
             null,
-            ['workflowSubmissionId' => $submission->getId()]
+            array_merge(['workflowSubmissionId' => $submission->getId()], $params)
         );
     }
 
@@ -426,6 +429,13 @@ abstract class Repository
             }
         }
 
+        // Required funders
+        if ($context->getData('funders') == $context::METADATA_REQUIRE) {
+            if ($submission->getData('funders')->isEmpty()) {
+                $errors['funders'] = [$submission->getData('locale') => __('submission.funders.required')];
+            }
+        }
+
         // Required metadata
         $publicationSchema = $this->schemaService->get(PKPSchemaService::SCHEMA_PUBLICATION);
         foreach ($context->getRequiredMetadata() as $metadata) {
@@ -436,6 +446,9 @@ abstract class Repository
             // The `supportingAgencies` metadata is called `agencies` on the context
             if ($metadata === 'agencies') {
                 $metadata = 'supportingAgencies';
+            }
+            if ($metadata === 'funders') {
+                continue; // Handled above
             }
             $schema = $publicationSchema->properties?->{$metadata};
             if (!$schema) {
@@ -532,41 +545,28 @@ abstract class Repository
     /**
      * Check if a user can edit the publication metadata of a submission
      */
-    public function canEditPublication(int $submissionId, int $userId): bool
+    public function canEditPublication(Publication $publication, User $user): bool
     {
-        // block authors can never edit a published publication even if an editor granted them canChangeMetadata
+        $userId = $user->getId();
+        $submissionId = $publication->getData('submissionId');
         $assignments = StageAssignment::withSubmissionIds([$submissionId])
             ->withUserId($userId)
             ->get();
 
-        $submission = $this->get($submissionId);
-
-        // if user has no stage assigments, check if user can edit anyway ie. is manager
+        // if user has no stage assignments, check if user can edit anyway i.e. is manager
         $context = Application::get()->getRequest()->getContext();
         if ($this->_canUserAccessUnassignedSubmissions($context->getId(), $userId)) {
             return true;
         }
 
-        // any published or scheduled then probe
-        $hasLockedPublication = $submission?->getData('publications')
-            ->contains(
-                fn (Publication $p) =>
-                    in_array(
-                        $p->getData('status'),
-                        [PKPPublication::STATUS_PUBLISHED, PKPPublication::STATUS_SCHEDULED]
-                    )
-            );
+        $lockedPublication = in_array($publication->getData('status'), [PKPPublication::STATUS_PUBLISHED, PKPPublication::STATUS_SCHEDULED]);
 
-        if ($hasLockedPublication && !$assignments->contains(fn (StageAssignment $sa) => $sa->userGroup && $sa->userGroup->roleId != Role::ROLE_ID_AUTHOR)) {
+        // Don't allow authors to change metadata of published publications
+        if ($lockedPublication && !$assignments->contains(fn (StageAssignment $sa) => $sa->userGroup && $sa->userGroup->roleId != Role::ROLE_ID_AUTHOR)) {
             return false;
         }
 
         if ($assignments->contains(fn ($sa) => $sa->canChangeMetadata)) {
-            return true;
-        }
-        // If user has no stage assigments, check if user can edit anyway ie. is manager
-        $context = Application::get()->getRequest()->getContext();
-        if ($assignments->isEmpty() && $this->_canUserAccessUnassignedSubmissions($context->getId(), $userId)) {
             return true;
         }
         // Else deny access
@@ -903,6 +903,43 @@ abstract class Repository
     }
 
     /**
+     * Free-text search view for the editorial dashboard.
+     *
+     * Same role logic as the "active" view but with no status/stage filter, so it searches
+     * everything the user can reach - managers/admins across the whole context, sub-editors and
+     * assistants only their assigned submissions (via the 'assigned' op).
+     */
+    public function getSearchView(Context $context, User $user, array $selectedRoleIds = []): DashboardView
+    {
+        $roleDao = DAORegistry::getDAO('RoleDAO'); /** @var RoleDAO $roleDao */
+        $roles = $roleDao->getByUserId($user->getId(), $context->getId());
+        $roleIds = [];
+        foreach ($roles as $role) {
+            $roleIds[] = $role->getRoleId();
+        }
+        if ($selectedRoleIds) {
+            $roleIds = array_values(array_intersect($roleIds, $selectedRoleIds));
+        }
+
+        $canAccessUnassignedSubmission = !empty(array_intersect([Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER], $roleIds));
+        $assignedWithRoles = $canAccessUnassignedSubmission ? null : $selectedRoleIds;
+
+        $collector = Repo::submission()->getCollector()
+            ->filterByContextIds([$context->getId()]);
+
+        return new DashboardView(
+            DashboardView::VIEW_SEARCH,
+            __('search.searchResults'),
+            [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT],
+            $canAccessUnassignedSubmission
+                ? $collector
+                : $collector->assignedTo([$user->getId()], $assignedWithRoles),
+            $canAccessUnassignedSubmission ? null : 'assigned',
+            $canAccessUnassignedSubmission ? [] : ['assignedWithRoles' => $assignedWithRoles],
+        );
+    }
+
+    /**
      * Return a collection of all existing Versions
      * for the submission's publications
      *
@@ -945,6 +982,44 @@ abstract class Repository
         }
 
         return $nextVersion;
+    }
+
+    /**
+     * Always resolves to an editor to attribute a system-initiated decision to
+     * (e.g. the cron-triggered move-to-done, which runs with no acting user).
+     *
+     */
+    public function resolveSystemEditorId(Submission $submission): int
+    {
+        // Prefer an editor assigned to the submission (earliest assignment).
+        $assignedEditorId = StageAssignment::withSubmissionIds([$submission->getId()])
+            ->withRoleIds([Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_MANAGER])
+            ->orderBy('stage_assignments.stage_assignment_id')
+            ->value('stage_assignments.user_id');
+        if ($assignedEditorId) {
+            return (int) $assignedEditorId;
+        }
+
+        // Fall back to a journal manager.
+        $managerId = Repo::user()->getCollector()
+            ->filterByContextIds([$submission->getData('contextId')])
+            ->filterByRoleIds([Role::ROLE_ID_MANAGER])
+            ->getIds()
+            ->first();
+        if ($managerId) {
+            return $managerId;
+        }
+
+        // Terminal fallback: a site administrator *should* always exists on a functioning install.
+        $adminId = Repo::user()->getCollector()
+            ->filterByRoleIds([Role::ROLE_ID_SITE_ADMIN])
+            ->getIds()
+            ->first();
+        if (!$adminId) {
+            throw new \RuntimeException("No editor, manager, or site administrator could be resolved for submission ID {$submission->getId()}.");
+        }
+
+        return $adminId;
     }
 
     /**
@@ -1155,7 +1230,7 @@ abstract class Repository
 
                     $collector = Repo::submission()->getCollector()
                         ->filterByContextIds([$context->getId()])
-                        ->filterByStatus([PKPSubmission::STATUS_PUBLISHED]);
+                        ->filterByStageIds([WORKFLOW_STAGE_ID_DONE]);
                     return new DashboardView(
                         $key,
                         __('submission.dashboard.view.published'),
@@ -1164,7 +1239,7 @@ abstract class Repository
                             ? $collector
                             : $collector->assignedTo([$user->getId()], $assignedWithRoles),
                         $canAccessUnassignedSubmission ? null : 'assigned',
-                        ['status' => [PKPSubmission::STATUS_PUBLISHED], 'assignedWithRoles' => $assignedWithRoles]
+                        ['stageIds' => [WORKFLOW_STAGE_ID_DONE], 'assignedWithRoles' => $assignedWithRoles]
                     );
                 case DashboardView::TYPE_DECLINED:
                     $assignedWithRoles = $canAccessUnassignedSubmission ? null : $selectedRoleIds;
@@ -1398,16 +1473,22 @@ abstract class Repository
             return Submission::STATUS_DECLINED;
         }
 
-        // Any published publication sends the submission to the "published" queue.
+        // Only a published VoR sends the submission to the "published" queue.
         foreach ($publications as $publication) {
-            if ($publication->getData('status') == Publication::STATUS_PUBLISHED) {
+            if (
+                $publication->getData('status') == Publication::STATUS_PUBLISHED &&
+                $publication->getData('versionStage') === VersionStage::finalVersionStage()->value
+            ) {
                 return Submission::STATUS_PUBLISHED;
             }
         }
 
-        // If there is a "scheduled" publication, the status will be "queued".
+        // If there is a "scheduled" VoR publication, the status will be "queued".
         foreach ($publications as $publication) {
-            if ($publication->getData('status') == Publication::STATUS_SCHEDULED) {
+            if (
+                $publication->getData('status') == Publication::STATUS_SCHEDULED &&
+                $publication->getData('versionStage') === VersionStage::finalVersionStage()->value
+            ) {
                 return Submission::STATUS_SCHEDULED;
             }
         }

@@ -1839,6 +1839,7 @@ msgstr ""
 msgid "log.review.reviewConfirmed"
 msgstr ""
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 
@@ -2357,3 +2358,6 @@ msgstr ""
 msgid "submission.submissionFile"
 msgstr "Datoteka s prilogom"
 
+
+msgid "reviewer.competingInterests"
+msgstr "Sukob interesa"

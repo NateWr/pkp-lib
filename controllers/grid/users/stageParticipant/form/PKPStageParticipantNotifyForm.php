@@ -23,29 +23,34 @@ use APP\notification\NotificationManager;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
 use Illuminate\Support\Facades\Mail;
-use PKP\controllers\grid\queries\traits\StageMailable;
+use PKP\context\Context;
 use PKP\core\Core;
 use PKP\core\PKPApplication;
 use PKP\core\PKPRequest;
 use PKP\editorialTask\EditorialTask;
 use PKP\editorialTask\enums\EditorialTaskType;
 use PKP\editorialTask\Participant;
+use PKP\editorialTask\Template;
+use PKP\editorialTask\TemplateVariables;
 use PKP\form\Form;
 use PKP\form\validation\FormValidator;
 use PKP\form\validation\FormValidatorCSRF;
 use PKP\form\validation\FormValidatorPost;
 use PKP\log\event\EventLogEntry;
 use PKP\log\SubmissionEmailLogEventType;
+use PKP\mail\Mailable;
+use PKP\mail\traits\Discussion;
+use PKP\mail\traits\Recipient;
+use PKP\mail\traits\Sender;
 use PKP\note\Note;
 use PKP\notification\Notification;
 use PKP\security\Role;
 use PKP\security\Validation;
+use PKP\userGroup\UserGroup;
 use Symfony\Component\Mailer\Exception\TransportException;
 
 class PKPStageParticipantNotifyForm extends Form
 {
-    use StageMailable;
-
     /** @var int The file/submission ID this form is for */
     public $_itemId;
 
@@ -95,37 +100,34 @@ class PKPStageParticipantNotifyForm extends Form
      */
     public function fetch($request, $template = null, $display = false)
     {
-        $submission = Repo::submission()->get($this->_submissionId);
         $context = $request->getContext();
         $user = $request->getUser();
+        $templateData = [];
 
         // Add the templates that can be used for this message
         if ($user->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT], $context->getId())) {
-            $mailable = $this->getStageMailable($context, $submission);
-            $data = $mailable->getData();
-            $defaultTemplate = Repo::emailTemplate()->getByKey($context->getId(), $mailable::getEmailTemplateKey());
+            $userGroupIds = UserGroup::withUserIds([$user->getId()])
+                ->withContextIds([$context->getId()])
+                ->pluck((new UserGroup())->getPrimaryKeyName())
+                ->toArray();
 
-            $templates = [];
-            if (Repo::emailTemplate()->isTemplateAccessibleToUser($user, $defaultTemplate, $context->getId())) {
-                $templates[$mailable::getEmailTemplateKey()] = $defaultTemplate->getLocalizedData('name');
-            }
-            $alternateTemplates = Repo::emailTemplate()->getCollector($context->getId())
-                ->alternateTo([$mailable::getEmailTemplateKey()])
-                ->getMany();
+            $collector = Template::withContextId($context->getId())
+                ->withStageId($this->_stageId)
+                ->withType(EditorialTaskType::DISCUSSION->value);
 
-            foreach ($alternateTemplates as $alternateTemplate) {
-                if (Repo::emailTemplate()->isTemplateAccessibleToUser($user, $alternateTemplate, $context->getId())) {
-                    $templates[$alternateTemplate->getData('key')] = Mail::compileParams(
-                        $alternateTemplate->getLocalizedData('name'),
-                        $data
-                    );
-                }
-            }
+            $user->hasRole([Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER], $context->getId()) ?
+                $templates = $collector->get() :
+                $templates = $collector->withUserGroupsAccess($userGroupIds)->get();
+
+            $templateData = $templates->mapWithKeys(
+                fn (Template $template, int $key) =>
+                [$template->id => $template->getLocalizedData('title')]
+            )->toArray();
         }
 
         $templateMgr = TemplateManager::getManager($request);
         $templateMgr->assign([
-            'templates' => $templates,
+            'templates' => $templateData,
             'stageId' => $this->getStageId(),
             'submissionId' => $this->_submissionId,
             'itemId' => $this->_itemId,
@@ -171,27 +173,49 @@ class PKPStageParticipantNotifyForm extends Form
      */
     public function sendMessage(int $userId, Submission $submission, Request $request)
     {
-        $user = Repo::user()->get($userId);
-        if (!isset($user)) {
+        $recipient = Repo::user()->get($userId);
+        if (!isset($recipient)) {
             return;
         }
-
+        $sender = $request->getUser();
         $contextDao = Application::getContextDAO();
         $context = $contextDao->getById($submission->getData('contextId'));
-        $mailable = $this->getStageMailable($context, $submission);
-        $templateKey = $this->getData('template');
-        $template = Repo::emailTemplate()->getByKey($context->getId(), $templateKey);
-        if (!$template) {
-            $template = Repo::emailTemplate()->getByKey($context->getId(), $mailable::getEmailTemplateKey());
+        $templateId = $this->getData('template');
+
+        $template = null;
+
+        if ($templateId) {
+            $template = Template::withContextId($context->getId())->find($templateId);
         }
+
+        // Template is used to create a mailable, title for the message, identify the type of the notification. Fallback to the default one if it's not accessible
+        if (!is_a($template, Template::class) || !Repo::editorialTask()->isTemplateAccessibleToUser($template, $sender)) {
+            $template = Template::withKeys(Repo::editorialTask()->getDiscussionTemplateKeys(), $context->getId())
+                ->withStageId($this->_stageId)
+                ->withType(EditorialTaskType::DISCUSSION->value)
+                ->first();
+        }
+
+        // If no template exists, use a default mailable.
+        $mailable = $template ? new TemplateVariables($template->promote($submission), $submission, $context) : new class($submission, $context) extends Mailable
+        {
+            use Sender;
+            use Recipient;
+            use Discussion;
+
+            public function __construct(protected Submission $submission, protected Context $context)
+            {
+                parent::__construct(func_get_args());
+            }
+        };
 
         // Populate mailable with data before compiling headNote
         $mailable
-            ->addData(['authorName' => $user->getFullName()]) // For compatibility with removed AUTHOR_ASSIGN and AUTHOR_NOTIFY
-            ->sender($request->getUser())
-            ->recipients([$user])
+            ->addData(['authorName' => $recipient->getFullName()]) // For compatibility with removed AUTHOR_ASSIGN and AUTHOR_NOTIFY
+            ->sender($sender)
+            ->recipients([$recipient])
             ->body($this->getData('message'))
-            ->subject($template->getLocalizedData('subject'));
+            ->subject($this->getDiscussionTitle($template));
 
         // Create a query
         $query = EditorialTask::create([
@@ -199,12 +223,9 @@ class PKPStageParticipantNotifyForm extends Form
             'assocId' => $submission->getId(),
             'stageId' => $this->_stageId,
             'seq' => REALLY_BIG_NUMBER,
-            'createdBy' => $user->getId(),
+            'createdBy' => $sender->getId(),
             'type' => EditorialTaskType::DISCUSSION,
-            'title' => Mail::compileParams(
-                $template->getLocalizedData('subject'),
-                $mailable->getData()
-            ),
+            'title' => $this->getDiscussionTitle($template),
         ]);
 
         Repo::editorialTask()->resequence(PKPApplication::ASSOC_TYPE_SUBMISSION, $submission->getId());
@@ -212,21 +233,24 @@ class PKPStageParticipantNotifyForm extends Form
         // Add the current user and message recipient as participants.
         Participant::create([
             'editTaskId' => $query->id,
-            'userId' => $user->getId()
+            'userId' => $recipient->getId()
         ]);
-        if ($user->getId() != $request->getUser()->getId()) {
+        if ($recipient->getId() != $request->getUser()->getId()) {
             Participant::create([
                 'editTaskId' => $query->id,
                 'userId' => $request->getUser()->getId()
             ]);
         }
 
-        //Substitute email template variables not available before form being executed
-        $additionalVariables = $this->getEmailVariableNames($template->getData('key'));
+        $additionalVariables = [];
+        if ($template) {
+            $templateKey = $template->key;
+            $additionalVariables = $this->getEmailVariableNames($templateKey);
+        }
 
         // Create a head note
-        $headNote = Note::create([
-            'userId' => $request->getUser()->getId(),
+        Note::create([
+            'userId' => $sender->getId(),
             'assocType' => PKPApplication::ASSOC_TYPE_QUERY,
             'assocId' => $query->id,
             'contents' => Mail::compileParams(
@@ -238,7 +262,7 @@ class PKPStageParticipantNotifyForm extends Form
         // Send the email
         $notificationMgr = new NotificationManager();
         $notification = $notificationMgr->createNotification(
-            $userId,
+            $recipient->getId(),
             Notification::NOTIFICATION_TYPE_NEW_QUERY,
             $request->getContext()->getId(),
             PKPApplication::ASSOC_TYPE_QUERY,
@@ -256,7 +280,7 @@ class PKPStageParticipantNotifyForm extends Form
             } catch (TransportException $e) {
                 $notificationMgr = new NotificationManager();
                 $notificationMgr->createTrivialNotification(
-                    $request->getUser()->getId(),
+                    $sender->getId(),
                     Notification::NOTIFICATION_TYPE_ERROR,
                     ['contents' => __('email.compose.error')]
                 );
@@ -265,21 +289,22 @@ class PKPStageParticipantNotifyForm extends Form
         }
 
         // remove the INDEX_ and LAYOUT_ tasks if a user has sent the appropriate _COMPLETE email
-        switch ($templateKey) {
+
+        switch ($templateKey ?? '') {
             case 'EDITOR_ASSIGN':
-                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_EDITOR_ASSIGN, $user->getId(), $submission->getId());
+                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_EDITOR_ASSIGN, $recipient->getId(), $submission->getId());
                 !$logRepository ?: $logRepository->logMailable(SubmissionEmailLogEventType::EDITOR_ASSIGN, $mailable, $submission);
                 break;
             case 'COPYEDIT_REQUEST':
-                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_COPYEDIT_ASSIGNMENT, $user->getId(), $submission->getId());
+                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_COPYEDIT_ASSIGNMENT, $recipient->getId(), $submission->getId());
                 !$logRepository ?: $logRepository->logMailable(SubmissionEmailLogEventType::COPYEDIT_NOTIFY_COPYEDITOR, $mailable, $submission);
                 break;
             case 'LAYOUT_REQUEST':
-                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_LAYOUT_ASSIGNMENT, $user->getId(), $submission->getId());
+                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_LAYOUT_ASSIGNMENT, $recipient->getId(), $submission->getId());
                 !$logRepository ?: $logRepository->logMailable(SubmissionEmailLogEventType::LAYOUT_NOTIFY_EDITOR, $mailable, $submission);
                 break;
             case 'INDEX_REQUEST':
-                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_INDEX_ASSIGNMENT, $user->getId(), $submission->getId());
+                $this->_addAssignmentTaskNotification($request, Notification::NOTIFICATION_TYPE_INDEX_ASSIGNMENT, $recipient->getId(), $submission->getId());
                 !$logRepository ?: $logRepository->logMailable(SubmissionEmailLogEventType::INDEX_NOTIFY_INDEXER, $mailable, $submission);
                 break;
             case 'LAYOUT_COMPLETE':
@@ -314,7 +339,7 @@ class PKPStageParticipantNotifyForm extends Form
     /**
      * Get the available email template variable names for the given template name.
      */
-    public function getEmailVariableNames(string $emailKey): array
+    public function getEmailVariableNames(?string $emailKey): array
     {
         switch ($emailKey) {
             case 'COPYEDIT_REQUEST':
@@ -394,6 +419,7 @@ class PKPStageParticipantNotifyForm extends Form
             'assocId' => $submission->getId(),
             'eventType' => EventLogEntry::SUBMISSION_LOG_MESSAGE_SENT,
             'userId' => Validation::loggedInAs() ?? $currentUser->getId(),
+            'impersonatedUserId' => Validation::loggedInAs() ? $currentUser->getId() : null,
             'message' => 'informationCenter.history.messageSent',
             'isTranslated' => false,
             'dateLogged' => Core::getCurrentDate()
@@ -413,5 +439,20 @@ class PKPStageParticipantNotifyForm extends Form
     public function isMessageRequired()
     {
         return true;
+    }
+
+    /**
+     * Get the discussion title for the current stage.
+     * It's used if no template is available.
+     *
+     * @return string
+     */
+    protected function getDiscussionTitle(?Template $template = null): string
+    {
+        if (!is_null($template)) {
+            return $template->getLocalizedData('title');
+        }
+
+        return Repo::editorialTask()->getDiscussionTitles()->get($this->_stageId, '');
     }
 }

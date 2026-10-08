@@ -36,6 +36,8 @@ use PKP\identity\Identity;
 use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\AjaxModal;
 use PKP\notification\Notification;
+use PKP\security\AuditEvent;
+use PKP\security\AuditLog;
 use PKP\security\authorization\CanAccessSettingsPolicy;
 use PKP\security\authorization\ContextAccessPolicy;
 use PKP\security\Role;
@@ -43,7 +45,7 @@ use PKP\security\RoleDAO;
 use PKP\security\Validation;
 use PKP\user\User;
 use PKP\userGroup\UserGroup;
-use PKP\userGroup\relationships\UserUserGroup;
+use Psr\Log\LogLevel;
 
 class UserGridHandler extends GridHandler
 {
@@ -165,15 +167,15 @@ class UserGridHandler extends GridHandler
 
                     // fetch user groups where the user is assigned in the current context
                     $userGroups = UserGroup::query()
-                    ->withContextIds($contextId)
-                    ->whereHas('userUserGroups', function ($query) use ($user) {
-                        $query->withUserId($user->getId())
-                              ->withActiveAndActiveInFuture();
-                    })
-                    ->get();
+                        ->withContextIds($contextId)
+                        ->whereHas('userUserGroups', function ($query) use ($user) {
+                            $query->withUserId($user->getId())
+                                ->withActiveAndActiveInFuture();
+                        })
+                        ->get();
 
-                $roles = $userGroups->map(fn (UserGroup $userGroup) => $userGroup->getLocalizedData('name'))->join(__('common.commaListSeparator'));
-                return ['label' => $roles];
+                    $roles = $userGroups->map(fn (UserGroup $userGroup) => $userGroup->getLocalizedData('name'))->join(__('common.commaListSeparator'));
+                    return ['label' => $roles];
                 }
             }
         );
@@ -575,13 +577,12 @@ class UserGridHandler extends GridHandler
             return new JSONMessage(false, __('grid.user.userNoRoles'));
         } else {
             // End all active user group assignments for this context.
-            UserUserGroup::query()
-                ->withUserId($userId)
-                ->withActive()
-                ->whereHas('userGroup', function ($query) use ($context) {
-                    $query->withContextIds($context->getId());
-                })
-                ->update(['date_end' => now()]);
+            Repo::userGroup()->endAssignments($context->getId(), (int) $userId);
+
+            AuditLog::log(AuditEvent::USER_CONTEXT_REMOVED, LogLevel::NOTICE, [
+                'targetUserId' => (int) $userId,
+                'contextId' => $context->getId(),
+            ]);
 
             return \PKP\db\DAO::getDataChangedEvent($userId);
         }
