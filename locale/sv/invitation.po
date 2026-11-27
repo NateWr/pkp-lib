@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-12-04 13:32+0000\n"
-"Last-Translator: Ramana Fragola <ramana.fragola@kb.se>\n"
+"PO-Revision-Date: 2026-09-09 14:59+0000\n"
+"Last-Translator: Magnus Annemark <magnus.annemark@ub.lu.se>\n"
 "Language-Team: Swedish <http://translate.pkp.sfu.ca/projects/pkp-lib/"
 "invitation/sv/>\n"
 "Language: sv\n"
@@ -14,27 +14,9 @@ msgstr ""
 msgid "invitation.userRoleAssignment.validation.error.addUserRoles.userGroupAssignedToUser"
 msgstr "Användargruppen tilldelas den inbjudna användaren"
 
-msgid "invitation.userRoleAssignment.validation.error.removeUserRoles.cantRemoveFromNonExistingUser"
-msgstr "Roller kan inte tas bort för användare som inte finns."
-
 msgid "invitation.userRoleAssignment.validation.error.username.alreadyExisting"
 msgstr ""
 "Det finns redan en användare med användarnamnet {$username}. Välj ett annat."
-
-msgid "invitation.userRoleAssignment.validation.error.username.mandatory"
-msgstr "Ett användarnamn måste anges"
-
-msgid "invitation.userRoleAssignment.validation.error.password.mandatory"
-msgstr "Ett lösenord måste anges"
-
-msgid "invitation.userRoleAssignment.validation.error.country.mandatory"
-msgstr "Ett land måste anges"
-
-msgid "invitation.userRoleAssignment.validation.error.familyName.mandatory"
-msgstr "Ett efternamn måste anges"
-
-msgid "invitation.validation.required"
-msgstr "Fältet {$attribute} är obligatoriskt."
 
 msgid "invitation.userRoleAssignment.validation.error.userRoles.unexpectedProperties"
 msgstr ""
@@ -47,19 +29,10 @@ msgstr "Den här inbjudan kan inte avbrytas"
 msgid "invitation.api.error.initialization.noUserIdAndEmailTogether"
 msgstr "Du kan inte ange både e-postadress och användar-ID samtidigt."
 
-msgid "invitation.userRoleAssignment.validation.error.addUserRoles.notExisting"
-msgstr "Minst en användargrupp måste vara definierad för att kunna läggas till"
-
-msgid "invitation.userRoleAssignment.validation.error.removeUserRoles.notExisting"
-msgstr "Minst en användargrupp som ska tas bort måste vara definierad"
-
 msgid "invitation.userRoleAssignment.validation.error.noUserGroupChanges"
 msgstr ""
 "Inbjudan kan inte skickas eftersom du inte har definierat några ändringar av "
 "användargrupper"
-
-msgid "invitation.userRoleAssignment.validation.error.addUserRoles.duplicateUserGroupId"
-msgstr "De angivna användargrupperna innehåller dubbletter."
 
 msgid "invitation.userRoleAssignment.validation.error.user.mustExist"
 msgstr ""
@@ -71,18 +44,6 @@ msgstr ""
 "När en inbjudan har en e-postadress ({$email}) kopplad till sig får den inte "
 "redan användas av en annan användare."
 
-msgid "invitation.userRoleAssignment.validation.error.affiliation.mandatory"
-msgstr "En affiliering måste anges"
-
-msgid "invitation.userRoleAssignment.validation.error.givenName.mandatory"
-msgstr "Ett förnamn måste anges"
-
-msgid "invitation.userRoleAssignment.validation.error.addUserRoles.userGroupIdMandatory"
-msgstr "Ett användargrupps-ID måste anges för tillagda användargrupper"
-
-msgid "invitation.userRoleAssignment.validation.error.addUserRoles.dateStartMandatory"
-msgstr "Ett startdatum måste anges för tillagda användargrupper"
-
 msgid "invitation.api.error.invitationTypeNotHasMailable"
 msgstr "Den här typen av inbjudan har ingen e-postmall definierad"
 
@@ -93,4 +54,212 @@ msgid "invitation.userRoleAssignment.validation.error.addUserRoles.userGroupNotE
 msgstr "Det angivna användargrupps-ID:t {$userGroupId} finns inte"
 
 msgid "invitation.reviewerAccess.validation.error.reviewAssignmentId.notExisting"
-msgstr "ID:t {reviewAssignmentId} motsvarar inte en giltig granskningsuppgift"
+msgstr "ID:t {$reviewAssignmentId} motsvarar inte en giltig granskningsuppgift"
+
+msgid "invitation.validation.error.propertyProhibited"
+msgstr "Fältet :attribute är förbjudet"
+
+msgid "invitation.step"
+msgstr "STEG"
+
+msgid "invitation.header"
+msgstr "Inbjudningar"
+
+msgid "invitation.inviteToRole.btn"
+msgstr "Bjud in till en roll"
+
+msgid "invitation.wizard.pageTitle"
+msgstr "Bjud in användare till en roll"
+
+msgid "userInvitation.searchUser.stepLabel"
+msgstr "{$step} - Sök användare"
+
+msgid "userInvitation.searchUser.nextButtonLabel"
+msgstr "Sök användare"
+
+msgid "userInvitation.searchField.description"
+msgstr "t.ex. aeinstein@example.com eller aeinstein eller 0000-0002-1825-0097"
+
+msgid "userInvitation.enterDetails.stepName"
+msgstr "Ange uppgifter"
+
+msgid "userInvitation.enterDetails.stepLabel"
+msgstr "{$step} - Ange uppgifter och bjud in till roller"
+
+msgid "userInvitation.enterDetails.nextButtonLabel"
+msgstr "Spara och fortsätt"
+
+msgid "invitation.role.selectRole"
+msgstr "Välj en ny roll"
+
+msgid "invitation.role.dateStart"
+msgstr "Startdatum"
+
+msgid "invitation.role.addRole.button"
+msgstr "Lägg till ytterligare roll"
+
+msgid "userInvitation.roleTable.role"
+msgstr "Roll"
+
+msgid "userInvitation.roleTable.startDate"
+msgstr "Startdatum"
+
+msgid "userInvitation.roleTable.endDate"
+msgstr "Slutdatum"
+
+msgid "userInvitation.sendMail.nextButtonLabel"
+msgstr "Bjud in användare till rollen"
+
+msgid "userInvitation.sendMail.stepLabel"
+msgstr "{$step} - Ändra i e-postmeddelandet till användaren"
+
+msgid "userInvitation.modal.title"
+msgstr "Inbjudan skickad"
+
+msgid "userInvitation.modal.button"
+msgstr "Visa alla användare"
+
+msgid "invitation.role.removeRole.button"
+msgstr "Ta bort roll"
+
+msgid "invitation.email.description"
+msgstr "t.ex. aeinstein@example.com"
+
+msgid "invitation.orcid.description"
+msgstr ""
+"När användaren accepterar inbjudan kommer de att omdirigeras till ORCID för "
+"att verifiera sitt konto."
+
+msgid "invitation.givenName.description"
+msgstr ""
+"Om du känner till användarens förnamn kan du ange det här. Denna uppgift kan "
+"sedermera ändras av användaren."
+
+msgid "invitation.familyName.description"
+msgstr ""
+"Om du känner till användarens efternamn kan du ange det här. Denna uppgift "
+"kan sedermera ändras av användaren."
+
+msgid "invitation.decline.confirm.title"
+msgstr "Avböj inbjudan"
+
+msgid "invitation.decline.confirm"
+msgstr "Bekräfta att du vill avböja inbjudan"
+
+msgid "acceptInvitation.verifyOrcid.stepName"
+msgstr "Verifiera ORCID-iD"
+
+msgid "acceptInvitation.verifyOrcid.stepLabel"
+msgstr "{$step} - Verifiera ORCID-iD"
+
+msgid "acceptInvitation.verifyOrcid.nextButtonLabel"
+msgstr "Spara och fortsätt"
+
+msgid "acceptInvitation.accountDetails.nextButtonLabel"
+msgstr "Spara och fortsätt"
+
+msgid "acceptInvitation.userDetails.stepName"
+msgstr "Ange uppgifter"
+
+msgid "acceptInvitation.userDetails.stepLabel"
+msgstr "{$step} - Ange uppgifter"
+
+msgid "acceptInvitation.userDetails.nextButtonLabel"
+msgstr "Spara och fortsätt"
+
+msgid "acceptInvitation.userDetails.form.name"
+msgstr "Acceptera användaruppgifter i inbjudan"
+
+msgid "acceptInvitation.userDetails.form.description"
+msgstr ""
+"Vänligen ange följande uppgifter för att underlätta hanteringen av ditt konto"
+
+msgid "acceptInvitation.detailsReview.stepName"
+msgstr "Granska och skapa konto"
+
+msgid "acceptInvitation.detailsReview.stepLabel"
+msgstr "{$step} - Granska och skapa konto"
+
+msgid "acceptInvitation.skipVerifyOrcid"
+msgstr "Hoppa över ORCID-verifiering"
+
+msgid "acceptInvitation.verifyOrcid"
+msgstr "Verifiera ORCID-iD"
+
+msgid "acceptInvitation.passwordField.description"
+msgstr ""
+"Det ska vara minst 6 tecken långt och kan vara en kombination av versaler, "
+"gemener, siffror och symboler"
+
+msgid "acceptInvitation.privacyStatement.btn"
+msgstr "Integritetspolicy"
+
+msgid "acceptInvitation.userDetailsForm.affiliation.description"
+msgstr ""
+
+msgid "acceptInvitation.review.accountDetails"
+msgstr "Kontouppgifter"
+
+msgid "acceptInvitation.review.userDetails"
+msgstr "Användaruppgifter"
+
+msgid "acceptInvitation.modal.button"
+msgstr "Visa alla bidrag"
+
+msgid "invitation.tableHeader.name"
+msgstr "Namn"
+
+msgid "invitation.searchForm.emptyError"
+msgstr "Ange minst ett sökkriterium"
+
+msgid "invitation.wizard.viewPageTitleDescription"
+msgstr "Visar {$name}s användaruppgifter"
+
+msgid "invitation.cancelInvite.actionName"
+msgstr "Avbryt inbjudan"
+
+msgid "invitation.cancelInvite.title"
+msgstr "Avbryt inbjudan"
+
+msgid "invitation.masthead.show"
+msgstr "Visa på redaktionssidan"
+
+msgid "invitation.masthead.hidden"
+msgstr "Visas inte på redaktionssidan"
+
+msgid "invitation.userRoleAssignment.validation.error.multilingual.primaryLocaleRequired"
+msgstr "Ett värde för språket '{$primaryLocale}' är obligatoriskt"
+
+msgid "userInvitation.searchUser.stepName"
+msgstr "Sök användare"
+
+msgid "userInvitation.searchUser.stepDescription"
+msgstr ""
+"Du kan bjuda in icke-existerande användare till en roll i tidskriften. Om "
+"användaren redan finns kan du se deras uppgifter och tilldela demytterligare "
+"roller."
+
+msgid "invitation.decline.confirm.description"
+msgstr ""
+"Är du säker på att du vill avböja denna inbjudan? Bekräfta genom att klicka "
+"på knappen nedan."
+
+msgid "acceptInvitation.userDetails.stepDescription"
+msgstr ""
+"Ange dina uppgifter så som e-postadress, affiliering, etc. I enlighet med "
+"GDPR kan denna information endast ändras av dig. Du kan också välja om du "
+"vill att denna information ska vara synlig för redaktören i din profil."
+
+msgid "acceptInvitation.usernameField.description"
+msgstr "Det kan vara en kombination av versaler, gemener eller siffror"
+
+msgid "acceptInvitation.privacyStatement.label"
+msgstr ""
+"Ja, jag godkänner att mina uppgifter samlas in och sparas i enlighet med "
+"{$url}"
+
+msgid "invitation.cancelInvite.message"
+msgstr ""
+"Att avbryta inbjudan till {$givenName} {$familyName} kommer "
+"accepteringslänken som skickats via e-post att inaktiveras. Här är "
+"informationen om inbjudan: "

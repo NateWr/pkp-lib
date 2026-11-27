@@ -3,8 +3,8 @@
 /**
  * @file classes/citation/externalServices/openalex/Inbound.php
  *
- * Copyright (c) 2025 Simon Fraser University
- * Copyright (c) 2025 John Willinsky
+ * Copyright (c) 2025-2026 Simon Fraser University
+ * Copyright (c) 2025-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class OpenAlexInbound
@@ -28,6 +28,9 @@ class Inbound
     /** @var int Status code of external service response. */
     public int $statusCode = 200;
 
+    /** @var int|null Retry-After value (in seconds) sent by the external service, if any. */
+    public ?int $retryAfter = null;
+
     /** @var string Email address of journal contact. */
     public string $contactEmail = '';
 
@@ -41,10 +44,12 @@ class Inbound
      */
     public function getWork(Citation $citation): ?Citation
     {
-        $response = ExternalServicesHelper::apiRequest(
-            $this->url . '/works/doi:' . urlencode($citation->getData('doi')),
-            ['headers' => ['mailto' => $this->contactEmail]]
-        );
+        $url = $this->url . '/works/doi:' . urlencode($citation->getData('doi'));
+        if ($this->contactEmail !== '') {
+            $url .= '?mailto=' . urlencode($this->contactEmail);
+        }
+
+        $response = ExternalServicesHelper::apiRequest($url, [], $this->retryAfter);
 
         if (is_int($response)) {
             $this->statusCode = $response;
@@ -59,8 +64,8 @@ class Inbound
             switch ($key) {
                 case 'authors':
                     $newValue = [];
-                    $authorships = ExternalServicesHelper::getValueFromArrayPath($response, $mappedKey);
-                    foreach ($authorships as $index => $authorship) {
+                    $authorships = ExternalServicesHelper::getValueFromArrayPath($response, $mappedKey) ?? [];
+                    foreach ($authorships as $authorship) {
                         $newValue[] = $this->getAuthor($authorship);
                     }
                     break;
@@ -120,6 +125,9 @@ class Inbound
         if (count($authorDisplayNameParts) > 1) {
             $author['familyName'] = array_pop($authorDisplayNameParts);
             $author['givenName'] = implode(' ', $authorDisplayNameParts);
+        } elseif (trim($displayName) !== '') {
+            // A mononym or an organisation: as for PKP authors, the given name is the required one.
+            $author['givenName'] = trim($displayName);
         }
 
         return $author;

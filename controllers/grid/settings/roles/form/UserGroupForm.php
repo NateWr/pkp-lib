@@ -25,12 +25,15 @@ use PKP\core\JSONMessage;
 use PKP\db\DAORegistry;
 use PKP\facades\Locale;
 use PKP\form\Form;
+use PKP\security\AuditEvent;
+use PKP\security\AuditLog;
 use PKP\security\Role;
 use PKP\security\RoleDAO;
 use PKP\stageAssignment\StageAssignment;
 use PKP\userGroup\relationships\UserGroupStage;
 use PKP\userGroup\UserGroup;
 use PKP\workflow\WorkflowStageDAO;
+use Psr\Log\LogLevel;
 
 class UserGroupForm extends Form
 {
@@ -174,6 +177,7 @@ class UserGroupForm extends Form
         $templateMgr->assign('selfRegistrationRoleIds', $this->getPermitSelfRegistrationRoles());
         $templateMgr->assign('permitSettingsRoleIds', $this->getPermitSettingsRoles());
         $templateMgr->assign('recommendOnlyRoleIds', $this->getRecommendOnlyRoles());
+        $templateMgr->assign('enableEnrollmentMasthead', $request->getContext()->getData('enableEnrollmentMasthead'));
         $repository = Repo::userGroup();
         $templateMgr->assign('notChangeMetadataEditPermissionRoles', $repository::NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES);
         return parent::fetch($request, $template, $display);
@@ -239,6 +243,9 @@ class UserGroupForm extends Form
             }
 
             $userGroup->recommendOnly = $this->getData('recommendOnly') && in_array($userGroup->roleId, $this->getRecommendOnlyRoles());
+
+            // The masthead checkbox will not be present on the form if the masthead feature is disabled; this will
+            // result in a false value here, which is correct.
             $userGroup->masthead = (bool) $this->getData('masthead');
 
             // set localized fields
@@ -247,9 +254,24 @@ class UserGroupForm extends Form
             // save the user group
             $userGroup->save();
             $userGroupId = $userGroup->id;
+
+            AuditLog::log(AuditEvent::USER_GROUP_CREATED, LogLevel::NOTICE, [
+                'userGroupId' => $userGroupId,
+                'roleId' => $userGroup->roleId,
+                'assignedStages' => $this->getData('assignedStages') ?: [],
+            ]);
         } else {
             // editing an existing UserGroup
             $userGroup = UserGroup::findById($userGroupId, $this->getContextId());
+
+            // Capture the permission flags before they are overwritten, to log which ones actually change.
+            $previousPermissions = [
+                'permitSelfRegistration' => $userGroup->permitSelfRegistration,
+                'permitSettings' => $userGroup->permitSettings,
+                'permitMetadataEdit' => $userGroup->permitMetadataEdit,
+                'recommendOnly' => $userGroup->recommendOnly,
+                'masthead' => $userGroup->masthead,
+            ];
 
             // update localized fields
             $userGroup = $this->_setUserGroupLocaleFields($userGroup, $request);
@@ -278,8 +300,25 @@ class UserGroupForm extends Form
             }
 
             $userGroup->recommendOnly = $this->getData('recommendOnly') && in_array($userGroup->roleId, $this->getRecommendOnlyRoles());
-            $userGroup->masthead = (bool) $this->getData('masthead');
+
+            // The masthead checkbox on the user group is only presented when the feature is enabled; do not change it otherwise.
+            $contextDao = Application::get()->getContextDAO();
+            $context = $contextDao->getById($this->getContextId());
+            if ($context->getData('enableEnrollmentMasthead')) {
+                $userGroup->masthead = (bool) $this->getData('masthead');
+            }
             $userGroup->save();
+
+            $changedPermissions = array_values(array_filter(
+                array_keys($previousPermissions),
+                fn ($key) => $previousPermissions[$key] != $userGroup->{$key}
+            ));
+            if ($changedPermissions) {
+                AuditLog::log(AuditEvent::USER_GROUP_UPDATED, LogLevel::NOTICE, [
+                    'userGroupId' => $userGroupId,
+                    'changedPermissions' => $changedPermissions,
+                ]);
+            }
         }
 
         // After we have created/edited the user group, we assign/update its stages.

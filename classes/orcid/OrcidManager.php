@@ -17,11 +17,12 @@ namespace PKP\orcid;
 use APP\author\Author;
 use APP\core\Application;
 use APP\facades\Repo;
-use PKP\config\Config;
+use Illuminate\Support\Facades\Log;
 use PKP\context\Context;
 use PKP\core\Core;
 use PKP\jobs\orcid\RevokeOrcidToken;
 use PKP\user\User;
+use Psr\Log\LogLevel;
 
 class OrcidManager
 {
@@ -46,6 +47,7 @@ class OrcidManager
     public const ENABLED = 'orcidEnabled';
     public const CLIENT_ID = 'orcidClientId';
     public const CLIENT_SECRET = 'orcidClientSecret';
+    public const CUSTOM_REDIRECT_BASE_URL = 'orcidCustomRedirectBaseUrl';
     public const SEND_MAIL_TO_AUTHORS_ON_PUBLICATION = 'orcidSendMailToAuthorsOnPublication';
     public const LOG_LEVEL = 'orcidLogLevel';
     public const CITY = 'orcidCity';
@@ -174,6 +176,16 @@ class OrcidManager
             urlLocaleForPage: '',
         );
 
+        // Overwrite redirect base url if variable is configured
+        $customRedirectUrl = self::getCustomRedirectUrl();
+        if (!empty($customRedirectUrl)) {
+            $redirectUrl = preg_replace(
+                '#^https?://[^/]+/#',
+                rtrim($customRedirectUrl, '/') . '/',
+                $redirectUrl
+            );
+        }
+
         return self::getOauthPath($context) . 'authorize?' . http_build_query(
             [
                 'client_id' => self::getClientId($context),
@@ -292,15 +304,26 @@ class OrcidManager
     }
 
     /**
+     * Gets configured ORCID-specific custom redirect URl.
+     *
+     * NB: Only applicable as a site-wide setting. Can be configured without overwriting other context-specific settings.
+     */
+    public static function getCustomRedirectUrl(): string
+    {
+        return Application::get()->getRequest()->getSite()->getData(self::CUSTOM_REDIRECT_BASE_URL) ?? '';
+    }
+
+    /**
      * Remove all data fields, which belong to an ORCID access token from the
      * given Author or User object. Also updates fields in the db.
      *
      * @param bool $updateDb If true, update the underlying fields in the database.
      *      Use only if not called from a function, which will already update the object.
      */
-    public static function removeOrcidAccessToken(Author|User $identity, bool $updateDb = false): void
+    public static function removeOrcidAccessToken(Author|User $identity, bool $updateDb = false, ?Context $context = null): void
     {
-        dispatch(new RevokeOrcidToken(Application::get()->getRequest()->getContext(), $identity));
+        $context ??= Application::get()->getRequest()->getContext();
+        dispatch(new RevokeOrcidToken($context, $identity));
 
         $identity->setData('orcidAccessToken', null);
         $identity->setData('orcidAccessScope', null);
@@ -324,7 +347,7 @@ class OrcidManager
         if (self::getLogLevel() !== self::LOG_LEVEL_INFO) {
             return;
         }
-        self::writeLog($message, self::LOG_LEVEL_INFO);
+        self::writeLog($message, LogLevel::INFO);
     }
 
     /**
@@ -335,7 +358,7 @@ class OrcidManager
         if (self::getLogLevel() !== self::LOG_LEVEL_ERROR) {
             return;
         }
-        self::writeLog($message, self::LOG_LEVEL_ERROR);
+        self::writeLog($message, LogLevel::ERROR);
     }
 
     /**
@@ -343,9 +366,7 @@ class OrcidManager
      */
     private static function writeLog(string $message, string $level): void
     {
-        $fineStamp = date('Y-m-d H:i:s') . substr(microtime(), 1, 4);
-        $logFilePath = Config::getVar('files', 'files_dir') . '/orcid.log';
-        error_log("{$fineStamp} {$level} {$message}\n", 3, $logFilePath);
+        Log::log($level, $message);
     }
 
     /**

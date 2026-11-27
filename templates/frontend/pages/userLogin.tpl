@@ -16,6 +16,9 @@
 		{translate key="user.login"}
 	</h1>
 
+	{call_hook name="Templates::User::Login::BeforeForm"}
+
+	{block name="userLoginForm"}
 	<p>
 		{translate key="common.requiredField"}
 	</p>
@@ -24,7 +27,7 @@
 	   before dowloading a file. *}
 	{if $loginMessage}
 		<p>
-			{translate key=$loginMessage}
+			{$loginMessage|strip_unsafe_html}
 		</p>
 	{/if}
 
@@ -112,6 +115,9 @@
 			</div>
 		</fieldset>
 	</form>
+	{/block}
+
+	{call_hook name="Templates::User::Login::AfterForm"}
 </div><!-- .page -->
 
 {include file="frontend/components/footer.tpl"}

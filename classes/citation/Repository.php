@@ -23,14 +23,16 @@ use APP\publication\Publication;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\LazyCollection;
 use PKP\citation\enum\CitationProcessingStatus;
 use PKP\citation\filter\CitationListTokenizerFilter;
+use PKP\citation\pid\ExtractPidsHelper;
+use PKP\context\Context;
 use PKP\jobs\citation\CrossrefJob;
 use PKP\jobs\citation\ExtractPidsJob;
 use PKP\jobs\citation\IsProcessedJob;
 use PKP\jobs\citation\OpenAlexJob;
 use PKP\jobs\citation\OrcidJob;
-use PKP\pid\Doi;
 use PKP\plugins\Hook;
 use PKP\services\PKPSchemaService;
 use PKP\validation\ValidatorFactory;
@@ -175,17 +177,16 @@ class Repository
     }
 
     /**
-     * Get all citations for a given publication.
+     * Get all citations for the given publication IDs.
      *
      * @return array<Citation>
      */
-    public function getByPublicationId(int $publicationId): array
+    public function getByPublicationIds(array $publicationIds): LazyCollection
     {
         return $this->getCollector()
-            ->filterByPublicationId($publicationId)
+            ->filterByPublicationIds($publicationIds)
             ->getMany()
-            ->values()
-            ->all();
+            ->remember();
     }
 
     /**
@@ -207,6 +208,8 @@ class Repository
     /**
      * Import and replace citations from a raw citation list of the particular publication.
      *
+     * @param bool $reprocess Whether to queue the metadata lookup, if the context has it enabled
+     *
      * @hook Citation::importCitations::before [[$publicationId, $existingCitations, $rawCitations]]
      * @hook Citation::importCitations::after [[$publicationId, $existingCitations, $importedCitations]]
      */
@@ -220,15 +223,17 @@ class Repository
         $citationsMetadataLookup = $context->getData('citationsMetadataLookup');
         $publicationId = $publication->getId();
 
-        $existingCitations = $this->getByPublicationId($publicationId);
+        $existingCitations = $this->getByPublicationIds([$publicationId]);
         Hook::call('Citation::importCitations::before', [$publicationId, $existingCitations, $rawCitationList]);
 
         $citationTokenizer = new CitationListTokenizerFilter();
         $citationStrings = $rawCitationList ? $citationTokenizer->execute($rawCitationList) : [];
 
-        $existingRawCitations = array_map(fn (Citation $citation) => $citation->getRawCitation(), $existingCitations);
+        $existingRawCitations = $existingCitations->map(fn (Citation $citation) => $citation->getRawCitation())->toArray();
 
-        if ($existingRawCitations !== $citationStrings) {
+        // Compare by value only: $existingRawCitations is keyed by citation ID, $citationStrings
+        // is sequential, so a raw !== comparison would false-mismatch even when nothing changed.
+        if (array_values($existingRawCitations) !== array_values($citationStrings)) {
             $importedCitations = [];
             $this->deleteByPublicationId($publicationId);
             if (is_array($citationStrings) && !empty($citationStrings)) {
@@ -239,16 +244,14 @@ class Repository
                         $citation->setData('publicationId', $publicationId);
                         $citation->setSequence($seq + 1);
                         $citation->setProcessingStatus(CitationProcessingStatus::NOT_PROCESSED->value);
+                        // No lookup is queued, so at least extract the PIDs
+                        if (!$citationsMetadataLookup || !$reprocess) {
+                            (new ExtractPidsHelper())->execute($citation);
+                        }
                         $newCitationId = $this->dao->insert($citation);
                         $citation->setId($newCitationId);
                         if ($citationsMetadataLookup && $reprocess) {
-                            $this->reprocessCitation($citation);
-                        } elseif (!$citationsMetadataLookup) {
-                            $rawString = str_ireplace('http://', 'https://', $rawCitationString);
-                            $doi = Doi::extractFromString($rawString);
-                            if (!empty($doi)) {
-                                $citation->setData('doi', $doi);
-                            }
+                            $this->reprocessCitation($citation, $context);
                         }
                         $importedCitations[] = $citation;
                     }
@@ -260,16 +263,28 @@ class Repository
     }
 
     /**
-     * Insert/cpopy citations as they are for a publication. Used at publication versioning.
+     * Insert/copy citations as they are for a publication. Used at publication versioning.
      */
     public function copyCitations(array $citations, int $publicationId): void
     {
+        $lookupInProgress = [
+            CitationProcessingStatus::QUEUED->value,
+            CitationProcessingStatus::PID_EXTRACTED->value,
+            CitationProcessingStatus::CROSSREF->value,
+            CitationProcessingStatus::OPEN_ALEX->value,
+            CitationProcessingStatus::ORCID->value,
+        ];
+
         foreach ($citations as $citation) {
             /** @var Citation $citation */
             $citation->setData('publicationId', $publicationId);
             $this->dao->insert($citation);
+            // The queued jobs carry the original citation's ID, so the copy needs a lookup of its own.
+            // getData(), as citations from before 3.6 have no status and getProcessingStatus() requires one.
+            if (in_array($citation->getData('processingStatus'), $lookupInProgress, true)) {
+                $this->reprocessCitation($citation);
+            }
         }
-
     }
 
     /**
@@ -293,17 +308,14 @@ class Repository
                         $citation->setData('publicationId', $publicationId);
                         $citation->setSequence($lastSeq);
                         $citation->setProcessingStatus(CitationProcessingStatus::NOT_PROCESSED->value);
+                        $citationsMetadataLookup = $this->request->getContext()->getData('citationsMetadataLookup');
+                        if (!$citationsMetadataLookup) {
+                            (new ExtractPidsHelper())->execute($citation);
+                        }
                         $newCitationId = $this->dao->insert($citation);
                         $citation->setId($newCitationId);
-                        if ($this->request->getContext()->getData('citationsMetadataLookup')) {
-                            $this->reprocessCitation($citation);
-                        } else {
-                            $rawString = str_ireplace('http://', 'https://', $rawCitationString);
-                            $doi = Doi::extractFromString($rawString);
-                            if (!empty($doi)) {
-                                $citation->setData('doi', $doi);
-                                Repo::citation()->edit($citation, []);
-                            }
+                        if ($citationsMetadataLookup) {
+                            $this->reprocessCitation($citation, $this->request->getContext());
                         }
                     } else {
                         $rejectedCitations[] = $rawCitationString;
@@ -331,14 +343,21 @@ class Repository
 
     /**
      * Add a new job chain for a citation.
+     *
+     * @param ?Context $context The citation's context, if already known: saves loading it in bulk runs
      */
-    public function reprocessCitation(Citation $citation): void
+    public function reprocessCitation(Citation $citation, ?Context $context = null): void
     {
-        $publication = Repo::publication()->get($citation->getData('publicationId'));
-        $submission = Repo::submission()->get($publication->getData('submissionId'));
-        $context = Application::getContextDAO()->getById($submission->getData('contextId'));
+        if (!$context) {
+            $publication = Repo::publication()->get($citation->getData('publicationId'));
+            $submission = Repo::submission()->get($publication->getData('submissionId'));
+            $context = Application::getContextDAO()->getById($submission->getData('contextId'));
+        }
 
         $contactEmail = $context->getContactEmail();
+
+        $citation->setProcessingStatus(CitationProcessingStatus::QUEUED->value);
+        $this->edit($citation, []);
 
         $jobs = [
             new ExtractPidsJob($context->getId(), $citation->getId()),

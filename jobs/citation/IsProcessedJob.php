@@ -11,21 +11,16 @@
  *
  * @ingroup jobs
  *
- * @brief Job for retrieving structured metadata for citations from external services.
+ * @brief Job for marking a citation processed, once every lookup ahead of it in the chain has run.
  */
 
 namespace PKP\jobs\citation;
 
 use APP\facades\Repo;
 use PKP\citation\enum\CitationProcessingStatus;
-use PKP\job\exceptions\JobException;
-use PKP\jobs\BaseJob;
 
-class IsProcessedJob extends BaseJob
+class IsProcessedJob extends CitationJob
 {
-    protected int $contextId;
-    protected int $citationId;
-
     public function __construct(int $contextId, int $citationId)
     {
         parent::__construct();
@@ -35,15 +30,13 @@ class IsProcessedJob extends BaseJob
 
     /**
      * Handle the queue job execution process
-     *
-     * @throws JobException
      */
     public function handle(): void
     {
         $citation = Repo::citation()->get($this->citationId);
 
         if (!$citation) {
-            throw new JobException(JobException::INVALID_PAYLOAD);
+            return;
         }
 
         $citation->setProcessingStatus(CitationProcessingStatus::PROCESSED->value);

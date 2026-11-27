@@ -30,6 +30,7 @@ use PKP\site\SiteDAO;
 use PKP\stageAssignment\StageAssignment;
 use PKP\user\User;
 use PKP\userGroup\UserGroup;
+use Psr\Log\LogLevel;
 
 class Validation
 {
@@ -56,9 +57,22 @@ class Validation
             return false; // Failed CSRF check
         }
 
-        return Auth::attempt(['username' => $username, 'password' => $password], $remember)
-            ? static::registerUserSession(Auth::user(), $reason)
-            : false;
+        // A disabled account is refused before anything is written to the session; with the
+        // correct password, registerUserSession() still reports why it was refused
+        $disabledUser = null;
+        $signedIn = Auth::attemptWhen(
+            ['username' => $username, 'password' => $password],
+            function (User $user) use (&$disabledUser) {
+                if ($user->getDisabled()) {
+                    $disabledUser = $user;
+                    return false;
+                }
+                return true;
+            },
+            $remember
+        );
+
+        return static::registerUserSession($signedIn ? Auth::user() : $disabledUser, $reason);
     }
 
     /**
@@ -118,6 +132,10 @@ class Validation
         $user->setDateLastLogin(Core::getCurrentDate());
         Repo::user()->edit($user);
 
+        AuditLog::log(AuditEvent::AUTH_LOGIN, LogLevel::INFO, [
+            'userId' => $user->getId(),
+        ]);
+
         return $user;
     }
 
@@ -141,23 +159,27 @@ class Validation
 
         $request->getSessionGuard()->updateSession(null);
 
+        AuditLog::log(AuditEvent::AUTH_LOGOUT, LogLevel::INFO, [
+            'userId' => $user->getId(),
+        ]);
+
         return true;
     }
 
     /**
      * Redirect to the login page, appending the current URL as the source.
      *
-     * @param string $message Optional name of locale key to add to login page
+     * @param string $messageLocaleKey Optional locale key of message to show on login page
      */
-    public static function redirectLogin($message = null)
+    public static function redirectLogin($messageLocaleKey = null)
     {
         $args = [];
 
         if (isset($_SERVER['REQUEST_URI'])) {
             $args['source'] = $_SERVER['REQUEST_URI'];
         }
-        if ($message !== null) {
-            $args['loginMessage'] = $message;
+        if ($messageLocaleKey !== null) {
+            $args['loginMessage'] = $messageLocaleKey;
         }
 
         $request = Application::get()->getRequest();

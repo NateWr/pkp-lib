@@ -370,9 +370,6 @@ msgstr ""
 msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
 
-msgid "manager.dois.registrationAgency.registeredMessagePreamble"
-msgstr ""
-
 msgid "manager.emails.addEmail"
 msgstr "Engadir modelo"
 
@@ -803,7 +800,7 @@ msgid "manager.setup.dois.registration"
 msgstr ""
 
 msgid "doi.manager.settings.doiPrefix"
-msgstr ""
+msgstr "Prefixo DOI"
 
 msgid "doi.manager.setup.automaticDeposit"
 msgstr ""

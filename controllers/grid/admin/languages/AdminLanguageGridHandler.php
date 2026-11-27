@@ -33,6 +33,7 @@ use PKP\linkAction\LinkAction;
 use PKP\linkAction\request\AjaxModal;
 use PKP\notification\Notification;
 use PKP\security\authorization\PolicySet;
+use PKP\security\authorization\ReauthenticationRequiredPolicy;
 use PKP\security\authorization\RoleBasedHandlerOperationPolicy;
 use PKP\security\Role;
 use PKP\services\interfaces\EntityWriteInterface;
@@ -72,6 +73,8 @@ class AdminLanguageGridHandler extends LanguageGridHandler
             $rolePolicy->addPolicy(new RoleBasedHandlerOperationPolicy($request, $role, $operations));
         }
         $this->addPolicy($rolePolicy);
+
+        $this->addPolicy(new ReauthenticationRequiredPolicy($request));
 
         return parent::authorize($request, $args, $roleAssignments);
     }
@@ -241,16 +244,17 @@ class AdminLanguageGridHandler extends LanguageGridHandler
 
             $installedLocales = $site->getInstalledLocales();
             if (in_array($locale, $installedLocales)) {
-                $installedLocales = array_diff($installedLocales, [$locale]);
+                $installedLocales = array_values(array_diff($installedLocales, [$locale]));
                 $site->setInstalledLocales($installedLocales);
                 $supportedLocales = $site->getSupportedLocales();
-                $supportedLocales = array_diff($supportedLocales, [$locale]);
+                $supportedLocales = array_values(array_diff($supportedLocales, [$locale]));
                 $site->setSupportedLocales($supportedLocales);
                 $siteDao = DAORegistry::getDAO('SiteDAO'); /** @var SiteDAO $siteDao */
                 $siteDao->updateObject($site);
 
                 $this->_updateContextLocaleSettings($request);
                 Locale::uninstallLocale($locale);
+                Repo::editorialTask()->deleteTemplateLocaleData([$locale]);
 
                 $notificationManager = new NotificationManager();
                 $user = $request->getUser();
@@ -404,7 +408,7 @@ class AdminLanguageGridHandler extends LanguageGridHandler
         }
 
         $site = $request->getSite();
-        $site->setSupportedLocales($newSupportedLocales);
+        $site->setSupportedLocales(array_values($newSupportedLocales));
 
         $siteDao = DAORegistry::getDAO('SiteDAO'); /** @var SiteDAO $siteDao */
         $siteDao->updateObject($site);
@@ -434,7 +438,8 @@ class AdminLanguageGridHandler extends LanguageGridHandler
                 $localeList = $context->getData($settingName);
 
                 if (is_array($localeList)) {
-                    $params[$settingName] = array_intersect($localeList, $siteSupportedLocales);
+                    // array_intersect() preserves keys, so re-index to keep this a JSON array
+                    $params[$settingName] = array_values(array_intersect($localeList, $siteSupportedLocales));
                 }
             }
             if (!in_array($primaryLocale, $siteSupportedLocales)) {

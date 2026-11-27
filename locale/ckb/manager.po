@@ -371,9 +371,6 @@ msgstr ""
 msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
 
-msgid "manager.dois.registrationAgency.registeredMessagePreamble"
-msgstr ""
-
 msgid "manager.emails.addEmail"
 msgstr "زیادکردنی قاڵب"
 
@@ -907,7 +904,7 @@ msgid "manager.setup.advanced"
 msgstr ""
 
 msgid "manager.setup.copyrightNotice"
-msgstr ""
+msgstr "ئاگادارکردنەوەی وردبینی"
 
 msgid "manager.setup.copyrightNotice.description"
 msgstr ""

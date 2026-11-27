@@ -18,7 +18,7 @@ use APP\facades\Repo;
 use APP\orcid\actions\SendReviewToOrcid;
 use APP\publication\Publication;
 use Carbon\Carbon;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
+use PKP\author\contributorRole\ContributorType;
 use PKP\context\Context;
 use PKP\jobs\orcid\DepositOrcidSubmission;
 use PKP\orcid\OrcidManager;
@@ -56,7 +56,9 @@ abstract class PKPSendSubmissionToOrcid
         // Collect valid ORCID ids and access tokens from submission contributors
         $authorsWithOrcid = [];
         foreach ($authors as $author) {
-            if ($author->getOrcid() && $author->getData('orcidAccessToken')) {
+            if ($author->getOrcid()
+                && $author->getData('orcidAccessToken')
+                && in_array($author->getData('contributorType'), ContributorType::getTypesWithOrcid())) {
                 $orcidAccessExpiresOn = Carbon::parse($author->getData('orcidAccessExpiresOn'));
                 if ($orcidAccessExpiresOn->isFuture()) {
                     # Extract only the ORCID from the stored ORCID uri
@@ -64,7 +66,7 @@ abstract class PKPSendSubmissionToOrcid
                     $authorsWithOrcid[$orcid] = $author;
                 } else {
                     OrcidManager::logError("Token expired on {$orcidAccessExpiresOn} for author " . $author->getId() . ', deleting orcidAccessToken!');
-                    OrcidManager::removeOrcidAccessToken($author);
+                    OrcidManager::removeOrcidAccessToken(identity: $author, context: $this->context);
                 }
             }
         }

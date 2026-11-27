@@ -16,8 +16,12 @@
 namespace PKP\API\v1\reviews\resources;
 
 use APP\author\Author;
+use APP\core\Application;
+use APP\facades\Repo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use PKP\facades\Locale;
+use PKP\security\Role;
 use PKP\submission\reviewRound\authorResponse\AuthorResponse;
 use PKP\user\User;
 
@@ -32,22 +36,55 @@ class ReviewRoundAuthorResponseResource extends JsonResource
         $user = $this->submittedBy;
 
         $associatedAuthors = $response->associatedAuthors;
+        $reviewRound = $response->reviewRound;
+        $loggedInUser = Application::get()->getRequest()->getUser();
+
+        $canAccessEditorialData = $loggedInUser
+            ? $reviewRound->canUserAccessAuthorResponses($loggedInUser, [Role::ROLE_ID_SUB_EDITOR], Application::get()->getRequest()->getContext())
+            : false;
+
         return [
             'id' => $response->id,
             'reviewRoundId' => $response->reviewRoundId,
             'response' => $response->authorResponse,
+            'localizedResponse' => $response->getLocalizedData('authorResponse'),
             'associatedAuthors' => array_map(fn (Author $author) => [
                 'id' => $author->getId(),
                 'fullName' => $author->getFullName(),
+                'givenName' => $author->getLocalizedGivenName(),
+                'familyName' => $author->getLocalizedFamilyName(),
+                'preferredPublicName' => $author->getPreferredPublicName(Locale::getLocale()),
                 'orcid' => $author->getOrcid(),
-                'hasVerifiedOrcid' => (bool) $author->hasVerifiedOrcid(),
-            ], $associatedAuthors),
+                'hasVerifiedOrcid' => (bool)$author->hasVerifiedOrcid(),
+            ], array_values($associatedAuthors)),
             'submittedByUser' => [
                 'id' => $user->getId(),
                 'fullName' => $user->getFullName(),
             ],
             'isPublic' => $response->isPublic,
             'createdAt' => $response->created_at?->format('Y-m-d H:i:s'),
+            $this->mergeWhen($canAccessEditorialData, [
+                'dateConfirmed' => $response->dateConfirmed?->format('Y-m-d H:i:s'),
+                'dateReverted' => $response->dateReverted?->format('Y-m-d H:i:s'),
+                'confirmationChangedByUser' => $response->confirmationChangedByUserId ? $this->getEditorInfo($response->confirmationChangedByUserId) : null,
+            ]),
+        ];
+    }
+
+    /**
+     * Get editor info for a given editor ID.
+     */
+    private function getEditorInfo(int $editorId): ?array
+    {
+        $user = Repo::user()->get($editorId, true);
+
+        if (!$user) {
+            return null;
+        }
+
+        return [
+            'userId' => $user->getId(),
+            'fullName' => $user->getFullName(),
         ];
     }
 }

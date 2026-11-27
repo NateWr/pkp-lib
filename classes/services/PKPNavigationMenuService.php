@@ -48,6 +48,10 @@ class PKPNavigationMenuService
     public function getMenuItemTypes()
     {
         $types = [
+            NavigationMenuItem::NMI_TYPE_HOME => [
+                'title' => __('navigation.home'),
+                'description' => __('manager.navigationMenus.home.description'),
+            ],
             NavigationMenuItem::NMI_TYPE_CUSTOM => [
                 'title' => __('manager.navigationMenus.customPage'),
                 'description' => __('manager.navigationMenus.customPage.description'),
@@ -221,6 +225,16 @@ class PKPNavigationMenuService
 
             // Set the URL
             switch ($menuItemType) {
+                case NavigationMenuItem::NMI_TYPE_HOME:
+                    $navigationMenuItem->setUrl($dispatcher->url(
+                        $request,
+                        PKPApplication::ROUTE_PAGE,
+                        null,
+                        'index',
+                        null,
+                        null
+                    ));
+                    break;
                 case NavigationMenuItem::NMI_TYPE_ANNOUNCEMENTS:
                     $navigationMenuItem->setUrl($dispatcher->url(
                         $request,
@@ -302,7 +316,7 @@ class PKPNavigationMenuService
                     ));
                     break;
                 case NavigationMenuItem::NMI_TYPE_USER_DASHBOARD:
-                    if ($currentUser->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $contextId) || $currentUser->hasRole([Role::ROLE_ID_SITE_ADMIN], PKPApplication::SITE_CONTEXT_ID)) {
+                    if ($context && ($currentUser->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $contextId) || $currentUser->hasRole([Role::ROLE_ID_SITE_ADMIN], PKPApplication::SITE_CONTEXT_ID))) {
                         $pkpPageRouter = $request->getRouter();  /** @var \PKP\core\PKPPageRouter $pkpPageRouter */
 
                         if ($pkpPageRouter instanceof PageRouter) {

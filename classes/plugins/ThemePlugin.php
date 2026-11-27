@@ -92,7 +92,7 @@ abstract class ThemePlugin extends LazyLoadPlugin
      *
      * @var ThemePlugin $parent
      */
-    public bool $isVueRuntimeRequired = false;
+    protected bool $_isVueRuntimeRequired = false;
 
     /**
      * @copydoc Plugin::register
@@ -160,7 +160,7 @@ abstract class ThemePlugin extends LazyLoadPlugin
 
         $this->_registerTemplates();
 
-        if ($this->isVueRuntimeRequired) {
+        if ($this->isVueRuntimeRequired()) {
 
             $request = Application::get()->getRequest();
             $templateManager = TemplateManager::getManager($request);
@@ -195,6 +195,34 @@ abstract class ThemePlugin extends LazyLoadPlugin
         }
 
         return $activeTheme == basename($this->getPluginPath());
+    }
+
+    /**
+     * Get the theme that is active in the current context, or the site
+     * when there is no context
+     */
+    public static function getActive(): ?ThemePlugin
+    {
+        $themes = PluginRegistry::getPlugins('themes') ?: PluginRegistry::loadCategory('themes', true);
+        foreach ($themes as $theme) { /** @var ThemePlugin $theme */
+            if ($theme->isActive()) {
+                return $theme;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether this theme is the theme with the given name or, unless
+     * $includeParents is false, one of its parent themes is
+     *
+     * @param string $themeName Theme plugin name, e.g. `defaultthemeplugin`
+     */
+    public function isOrInheritsFrom(string $themeName, bool $includeParents = true): bool
+    {
+        return $this->getName() === $themeName
+            || ($includeParents && $this->parent?->isOrInheritsFrom($themeName));
     }
 
     /**
@@ -762,6 +790,20 @@ abstract class ThemePlugin extends LazyLoadPlugin
     }
 
     /**
+     * Get the root theme
+     *
+     * Gets the parent theme or any ancestor theme until
+     * it finds the root theme in the stack of child themes.
+     */
+    public function getRootTheme(): ThemePlugin
+    {
+        if (!isset($this->parent)) {
+            return $this;
+        }
+        return $this->parent->getRootTheme();
+    }
+
+    /**
      * Register directories to search for template files
      *
      */
@@ -776,6 +818,8 @@ abstract class ThemePlugin extends LazyLoadPlugin
         $request = Application::get()->getRequest();
         $templateManager = TemplateManager::getManager($request);
         $templateManager->addTemplateDir($this->_getBaseDir('templates'));
+
+        $this->_registerTemplateResource();
     }
 
     /**
@@ -890,16 +934,26 @@ abstract class ThemePlugin extends LazyLoadPlugin
      */
     public function isColourDark(string $color, $limit = 130)
     {
+        return $this->getColourBrightness($color) <= $limit;
+    }
+
+    /**
+     * Get the brightness of a color
+     *
+     * @see self::isColourDark()
+     * @return float 0 = black, 256 = white
+     */
+    public function getColourBrightness(string $color) : float
+    {
         $color = str_replace('#', '', $color);
         $r = hexdec(substr($color, 0, 2));
         $g = hexdec(substr($color, 2, 2));
         $b = hexdec(substr($color, 4, 2));
-        $contrast = sqrt(
+        return sqrt(
             $r * $r * .241 +
             $g * $g * .691 +
             $b * $b * .068
         );
-        return $contrast < $limit;
     }
 
     /**
@@ -907,8 +961,12 @@ abstract class ThemePlugin extends LazyLoadPlugin
      */
     public function getUsageStatsChartData(int $submissionId): array
     {
+        $chartType = $this->getOption('displayStats');
+        if ($chartType === false) {
+            $chartType = 'line';
+        }
         return [
-            'chartType' => $this->getOption('displayStats'),
+            'chartType' => $chartType,
             'statsData' => $this->getAllDownloadsStats($submissionId),
             'monthLabels' => explode(' ', __('plugins.themes.default.displayStats.monthInitials')),
             'noStatsMessage' => __('plugins.themes.default.displayStats.noStats'),
@@ -970,6 +1028,8 @@ abstract class ThemePlugin extends LazyLoadPlugin
         $script_data = 'var pkpUsageStats = pkpUsageStats || {};';
         $script_data .= 'pkpUsageStats.locale = pkpUsageStats.locale || {};';
         $script_data .= 'pkpUsageStats.locale.months = ' . json_encode(explode(' ', __('plugins.themes.default.displayStats.monthInitials'))) . ';';
+        $script_data .= 'pkpUsageStats.locale.lastYear = ' . json_encode(__('plugins.themes.default.displayStats.lastYear')) . ';';
+        $script_data .= 'pkpUsageStats.locale.allTime = ' . json_encode(__('plugins.themes.default.displayStats.allTime')) . ';';
         $script_data .= 'pkpUsageStats.config = pkpUsageStats.config || {};';
         $script_data .= 'pkpUsageStats.config.chartType = ' . json_encode($chartType) . ';';
 
@@ -1069,6 +1129,20 @@ abstract class ThemePlugin extends LazyLoadPlugin
      */
     protected function requiresVueRuntime()
     {
-        $this->isVueRuntimeRequired = true;
+        $this->_isVueRuntimeRequired = true;
+    }
+
+    /**
+     * Check if this theme or any parent them requires the Vue runtime
+     */
+    public function isVueRuntimeRequired() : bool
+    {
+        if ($this->_isVueRuntimeRequired) {
+            return $this->_isVueRuntimeRequired;
+        }
+        if ($this->parent) {
+            return $this->parent->isVueRuntimeRequired();
+        }
+        return false;
     }
 }

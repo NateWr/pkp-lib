@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file classes/services/PKPContextService.php
  *
@@ -24,11 +25,12 @@ use APP\services\queryBuilders\ContextQueryBuilder;
 use Illuminate\Support\Arr;
 use PKP\announcement\Announcement;
 use PKP\announcement\AnnouncementTypeDAO;
-use PKP\author\contributorRole\ContributorRoleIdentifier;
 use PKP\author\contributorRole\ContributorRole;
+use PKP\author\contributorRole\ContributorRoleIdentifier;
 use PKP\context\Context;
 use PKP\context\ContextDAO;
 use PKP\core\Core;
+use PKP\core\exceptions\StoreTemporaryFileException;
 use PKP\core\PKPApplication;
 use PKP\db\DAORegistry;
 use PKP\db\DAOResultFactory;
@@ -51,10 +53,11 @@ use PKP\services\interfaces\EntityPropertyInterface;
 use PKP\services\interfaces\EntityReadInterface;
 use PKP\services\interfaces\EntityWriteInterface;
 use PKP\submission\GenreDAO;
-use PKP\userGroup\Repository as UserGroupRepository;
-use PKP\validation\ValidatorFactory;
-use PKP\userGroup\UserGroup;
+use PKP\user\User;
 use PKP\userGroup\relationships\UserUserGroup;
+use PKP\userGroup\Repository as UserGroupRepository;
+use PKP\userGroup\UserGroup;
+use PKP\validation\ValidatorFactory;
 
 abstract class PKPContextService implements EntityPropertyInterface, EntityReadInterface, EntityWriteInterface
 {
@@ -355,6 +358,17 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
             }
         });
 
+        // Immediate DOI assignment is only possible with the default suffix
+        $validator->after(function ($validator) use ($props) {
+            $context = isset($props['id']) ? Application::getContextDAO()->getById($props['id']) : null;
+            $creationTime = $props[Context::SETTING_DOI_CREATION_TIME] ?? $context?->getData(Context::SETTING_DOI_CREATION_TIME);
+            $suffixType = $props[Context::SETTING_DOI_SUFFIX_TYPE] ?? $context?->getData(Context::SETTING_DOI_SUFFIX_TYPE);
+            if ($creationTime === Repo::doi()::CREATION_TIME_IMMEDIATE && $suffixType !== Repo::doi()::SUFFIX_DEFAULT) {
+                $field = isset($props[Context::SETTING_DOI_CREATION_TIME]) ? Context::SETTING_DOI_CREATION_TIME : Context::SETTING_DOI_SUFFIX_TYPE;
+                $validator->errors()->add($field, __('doi.manager.settings.doiCreationTime.immediate.requiresDefaultSuffix'));
+            }
+        });
+
         // If a new file has been uploaded, check that the temporary file exists and
         // the current user owns it
         $user = Application::get()->getRequest()->getUser();
@@ -435,14 +449,55 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
             });
         }
 
+        $context = Application::get()->getRequest()->getContext();
+
         // Disallow empty DOI Prefix when enableDois is true
         if (isset($props[Context::SETTING_ENABLE_DOIS]) || isset($props[Context::SETTING_DOI_PREFIX])) {
-            $context = Application::get()->getRequest()->getContext();
             $validator->after(function ($validator) use ($context, $props) {
                 $enableDois = $props[Context::SETTING_ENABLE_DOIS] ?? $context->getData(Context::SETTING_ENABLE_DOIS);
 
                 if ($enableDois && empty($props[Context::SETTING_DOI_PREFIX])) {
                     $validator->errors()->add(Context::SETTING_DOI_PREFIX, __('doi.manager.settings.doiPrefix.required'));
+                }
+            });
+        }
+
+        // Disallow empty custom DOI suffix patterns when the custom pattern type is selected
+        if (
+            isset($props[Context::SETTING_DOI_SUFFIX_TYPE]) ||
+            isset($props[Context::SETTING_ENABLED_DOI_TYPES]) ||
+            isset($props[Repo::doi()::CUSTOM_PUBLICATION_PATTERN]) ||
+            isset($props[Repo::doi()::CUSTOM_REPRESENTATION_PATTERN])
+        ) {
+            $validator->after(function ($validator) use ($context, $props) {
+                $suffixType = $props[Context::SETTING_DOI_SUFFIX_TYPE]
+                    ?? $context?->getData(Context::SETTING_DOI_SUFFIX_TYPE);
+                $enabledTypes = $props[Context::SETTING_ENABLED_DOI_TYPES]
+                    ?? $context?->getData(Context::SETTING_ENABLED_DOI_TYPES)
+                    ?? [];
+
+                if ($suffixType !== Repo::doi()::SUFFIX_CUSTOM_PATTERN) {
+                    return;
+                }
+
+                if (
+                    in_array(Repo::doi()::TYPE_PUBLICATION, $enabledTypes) &&
+                    empty($props[Repo::doi()::CUSTOM_PUBLICATION_PATTERN])
+                ) {
+                    $validator->errors()->add(
+                        Repo::doi()::CUSTOM_PUBLICATION_PATTERN,
+                        __('doi.manager.settings.doiSuffixPattern.required')
+                    );
+                }
+
+                if (
+                    in_array(Repo::doi()::TYPE_REPRESENTATION, $enabledTypes) &&
+                    empty($props[Repo::doi()::CUSTOM_REPRESENTATION_PATTERN])
+                ) {
+                    $validator->errors()->add(
+                        Repo::doi()::CUSTOM_REPRESENTATION_PATTERN,
+                        __('doi.manager.settings.doiSuffixPattern.required')
+                    );
                 }
             });
         }
@@ -541,12 +596,12 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
                 if (!array_key_exists($localeKey, $value)) {
                     continue;
                 }
-                $value[$localeKey] = $this->_saveFileParam($context, $value[$localeKey], $fileUploadProp, $currentUser->getId(), $localeKey, true);
+                $value[$localeKey] = $this->_saveFileParam($context, $value[$localeKey], $fileUploadProp, $currentUser, $localeKey, true);
             }
             $params[$fileUploadProp] = $value;
         }
         if (!empty($params['styleSheet'])) {
-            $params['styleSheet'] = $this->_saveFileParam($context, $params['styleSheet'], 'styleSheet', $currentUser->getId());
+            $params['styleSheet'] = $this->_saveFileParam($context, $params['styleSheet'], 'styleSheet', $currentUser, extension: '.css');
         }
         $context = $this->edit($context, $params, $request);
 
@@ -586,8 +641,6 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
         $navigationMenuDao->installSettings($context->getId(), 'registry/navigationMenus.xml');
 
         Repo::emailTemplate()->dao->installAlternateEmailTemplates($context->getId());
-        Repo::emailTemplate()->dao->setTemplateDefaultUnrestirctedSetting($context->getId());
-
         // Add contributor roles
         collect([
             'default.groups.name.author' => ContributorRoleIdentifier::AUTHOR->getName(),
@@ -617,7 +670,7 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
         $contextDao = Application::getContextDao();
 
         // Move uploaded files into place and update the params
-        $userId = $request->getUser() ? $request->getUser()->getId() : null;
+        $user = $request->getUser();
         $supportedLocales = $context->getSupportedFormLocales();
         $fileUploadParams = ['favicon', 'homepageImage', 'pageHeaderLogoImage'];
         foreach ($fileUploadParams as $fileUploadParam) {
@@ -628,11 +681,11 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
                 if (!array_key_exists($localeKey, $params[$fileUploadParam])) {
                     continue;
                 }
-                $params[$fileUploadParam][$localeKey] = $this->_saveFileParam($context, $params[$fileUploadParam][$localeKey], $fileUploadParam, $userId, $localeKey, true);
+                $params[$fileUploadParam][$localeKey] = $this->_saveFileParam($context, $params[$fileUploadParam][$localeKey], $fileUploadParam, $user, $localeKey, true);
             }
         }
         if (array_key_exists('styleSheet', $params)) {
-            $params['styleSheet'] = $this->_saveFileParam($context, $params['styleSheet'], 'styleSheet', $userId);
+            $params['styleSheet'] = $this->_saveFileParam($context, $params['styleSheet'], 'styleSheet', $user, extension: '.css');
         }
 
         $newContext = $contextDao->newDataObject();
@@ -754,17 +807,15 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
     /**
      * Move a temporary file to the context's public directory
      *
-     * @param Context $context
-     * @param TemporaryFile $temporaryFile
-     * @param string $fileNameBase Unique identifier to use for the filename. The
-     *  Extension and locale will be appended.
-     * @param int $userId ID of the user who uploaded the temporary file
-     * @param string $localeKey Example: en. Leave empty for a file that is
-     *  not localized.
+     * @param string $fileNameBase Unique identifier to use for the filename. The extension and locale will be appended.
+     * @param User $user The user who uploaded the temporary file
+     * @param string $localeKey Example: en. Leave empty for a file that is not localized.
+     * @param boolean $isImage True iff the setting is used to store data about an image (logo/icon).
+     * @param ?string $extension When specified, use this extension.
      *
      * @return string|boolean The new filename or false on failure
      */
-    public function moveTemporaryFile($context, $temporaryFile, $fileNameBase, $userId, $localeKey = '')
+    public function moveTemporaryFile(Context $context, TemporaryFile $temporaryFile, string $fileNameBase, User $user, string $localeKey = '', bool $isImage = false, ?string $extension = null)
     {
         $publicFileManager = new PublicFileManager();
         $temporaryFileManager = new TemporaryFileManager();
@@ -774,9 +825,13 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
             $fileName .= '_' . $localeKey;
         }
 
-        $extension = $publicFileManager->getDocumentExtension($temporaryFile->getFileType());
-        if (!$extension) {
-            $extension = $publicFileManager->getImageExtension($temporaryFile->getFileType());
+        if ($isImage) {
+            $extension ??= $publicFileManager->getImageExtension($temporaryFile->getFileType());
+            if (!$extension || !$temporaryFileManager->isValidImage($temporaryFile)) {
+                throw new StoreTemporaryFileException($temporaryFile, $fileNameBase, $user, $context);
+            }
+        } else {
+            $extension ??= $publicFileManager->getDocumentExtension($temporaryFile->getFileType());
         }
         $fileName .= $extension;
 
@@ -790,7 +845,7 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
             return false;
         }
 
-        $temporaryFileManager->deleteById($temporaryFile->getId(), $userId);
+        $temporaryFileManager->deleteById($temporaryFile->getId(), $user->getId());
 
         return $fileName;
     }
@@ -821,15 +876,16 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
      *  file ID if a new file has been uploaded.
      * @param string $settingName The name of the setting to save, typically used
      *  in the filename.
-     * @param int $userId ID of the user who owns the temporary file
+     * @param User $user The user who owns the temporary file
      * @param string $localeKey Optional. Used in the filename for multilingual
      *  properties.
      * @param bool $isImage Optional. For image files which return alt text,
      *  width, height, etc in the param value.
+     * @param ?string $extension When specified, use the specified file extension.
      *
      * @return string|array|null New param value or null on failure
      */
-    protected function _saveFileParam($context, $value, $settingName, $userId, $localeKey = '', $isImage = false)
+    protected function _saveFileParam($context, $value, $settingName, $user, $localeKey = '', $isImage = false, ?string $extension = null)
     {
         $temporaryFileManager = new TemporaryFileManager();
 
@@ -849,8 +905,8 @@ abstract class PKPContextService implements EntityPropertyInterface, EntityReadI
             return $value;
         }
 
-        $temporaryFile = $temporaryFileManager->getFile((int) $value['temporaryFileId'], $userId);
-        $fileName = $this->moveTemporaryFile($context, $temporaryFile, $settingName, $userId, $localeKey);
+        $temporaryFile = $temporaryFileManager->getFile((int) $value['temporaryFileId'], $user->getId());
+        $fileName = $this->moveTemporaryFile($context, $temporaryFile, $settingName, $user, $localeKey, $isImage, $extension);
 
         if ($fileName) {
             // Get the details for image uploads

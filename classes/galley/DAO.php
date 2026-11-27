@@ -21,8 +21,8 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\LazyCollection;
 use PKP\core\EntityDAO;
+use PKP\core\interfaces\CollectorInterface;
 use PKP\core\traits\EntityWithParent;
 use PKP\db\DAOResultFactory;
 use PKP\identity\Identity;
@@ -85,7 +85,7 @@ class DAO extends EntityDAO implements RepresentationDAOInterface
             ->where('publication_id', $publication->getId())
             ->where('url_path', $urlPath)
             ->first();
-        return $row ? $this->fromRow($row) : null;
+        return $row ? $this->fromRow($row, [$row->galley_id], (object) []) : null;
     }
 
     /**
@@ -112,26 +112,31 @@ class DAO extends EntityDAO implements RepresentationDAOInterface
     }
 
     /**
-     * Get a collection of galleys matching the configured query
+     * Get the publication id, best id and file mimetype of the galleys matching the configured query,
+     * without loading the galleys (see Galley::getBestGalleyId())
      *
-     * @return LazyCollection<int,T>
+     * @return Collection<int,object{publicationId:int,bestId:int|string,mimetype:?string}> Keyed by galley id
      */
-    public function getMany(Collector $query): LazyCollection
+    public function getBestIds(Collector $query): Collection
     {
-        return LazyCollection::make(function () use ($query) {
-            $rows = $query
-                ->getQueryBuilder()
-                ->get();
-
-            foreach ($rows as $row) {
-                yield $row->galley_id = $this->fromRow($row);
-            }
-        });
+        return $query
+            ->getQueryBuilder()
+            ->leftJoin('submission_files AS sf', 'sf.submission_file_id', '=', 'g.submission_file_id')
+            ->leftJoin('files AS f', 'f.file_id', '=', 'sf.file_id')
+            ->select(['g.galley_id', 'g.publication_id', 'g.url_path', 'f.mimetype'])
+            ->get()
+            ->mapWithKeys(fn (object $row) => [
+                (int) $row->galley_id => (object) [
+                    'publicationId' => (int) $row->publication_id,
+                    'bestId' => strlen((string) $row->url_path) ? $row->url_path : (int) $row->galley_id,
+                    'mimetype' => $row->mimetype,
+                ],
+            ]);
     }
 
-    public function fromRow(object $row): Galley
+    public function fromRow(object $row, array $ids, object $cache, ?CollectorInterface $query = null): Galley
     {
-        $galley = parent::fromRow($row);
+        $galley = parent::fromRow($row, $ids, $cache, $query);
 
         if (!empty($galley->getData('doiId'))) {
             $galley->setData('doiObject', Repo::doi()->get($galley->getData('doiId')));
@@ -166,7 +171,7 @@ class DAO extends EntityDAO implements RepresentationDAOInterface
         if (!$row) {
             return null;
         }
-        return $this->fromRow($row);
+        return $this->fromRow($row, [$id], (object) []);
     }
 
     /** @copydoc RepresentationDAOInterface::getByPublicationId() */
@@ -359,6 +364,14 @@ class DAO extends EntityDAO implements RepresentationDAOInterface
         );
 
         $result = $this->deprecatedDao->retrieveRange($q, [], $rangeInfo);
-        return new DAOResultFactory($result, $this, 'fromRow', [], $q, [], $rangeInfo);
+        return new DAOResultFactory($result, $this, 'fromRowDeprecated', [], $q, [], $rangeInfo);
+    }
+
+    /**
+     * DEPRECATED: Remove me once getExportable is refactored/removed
+     */
+    public function fromRowDeprecated(object $row): Galley
+    {
+        return $this->fromRow($row, [$row->galley_id], (object) []);
     }
 }

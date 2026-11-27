@@ -2123,6 +2123,7 @@ msgstr ""
 "Redaktorius {$editorName} patvirtino pateikto darbo {$submissionId} peržiūrą "
 "{$round} peržiūros etape."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} baigė {$round} peržiūros etapo pateiktą darbą "
@@ -2992,10 +2993,11 @@ msgstr ""
 msgid "dashboard.reviewAssignment.statusReviewOverdue.title"
 msgstr "Atsiliepimas vėluoja {$days} dienas"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusReviewOverdue.description"
 msgstr ""
-"Šis recenzentas nebaigė savo peržiūros. Atsakymo terminas buvo "
-"<b>{$date}.</b>"
+"Šis recenzentas nebaigė savo peržiūros. Peržiūros terminas buvo "
+"<b>{$date}</b>."
 
 msgid "dashboard.reviewAssignment.statusReceived.title"
 msgstr "Peržiūra baigta {$date}"
@@ -3013,11 +3015,13 @@ msgstr "Atsiliepimą patvirtino redaktorius"
 msgid "dashboard.reviewAssignment.statusComplete.description"
 msgstr "Recenziją redaktorius patvirtino <b>{$date</b>."
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.title"
-msgstr "Recenzentas atšaukė peržiūros užklausą"
+msgstr "Redaktorius atšaukė peržiūros užklausą"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.description"
-msgstr "Recenzentas atšaukė peržiūros užklausą <b>{$date</b>."
+msgstr "Redaktorius atšaukė šią peržiūros užklausą <b>{$date}</b>."
 
 msgid "dashboard.reviewAssignment.statusRequestResend.title"
 msgstr "Laukiama recenzento atsakymo"
@@ -3153,3 +3157,6 @@ msgstr ""
 
 msgid "dashboard.submissions.incomplete.bulkDelete.column.description"
 msgstr "Pasirinkite nepilnai pateiktus duomenis, kuriuos norite ištrinti."
+
+msgid "reviewer.competingInterests"
+msgstr "Dominančios sritys"

@@ -233,7 +233,7 @@ class SubmissionsMigration extends \PKP\migration\Migration
             $table->index(['author_id'], 'submission_comments_author_id');
 
             $table->text('comment_title');
-            $table->text('comments')->nullable();
+            $table->mediumText('comments')->nullable();
             $table->datetime('date_posted')->nullable();
             $table->datetime('date_modified')->nullable();
             $table->smallInteger('viewable')->nullable();
@@ -323,7 +323,6 @@ class SubmissionsMigration extends \PKP\migration\Migration
             $table->comment('Represents templates for the editorial tasks.');
             $table->unsignedBigInteger('edit_task_template_id')->autoIncrement()->primary();
             $table->unsignedSmallInteger('stage_id');
-            $table->string('title', 255); // template title
 
             // templates are journal/context scoped
             $table->bigInteger('context_id')->comment('Journal/press ID for scoping templates');
@@ -340,11 +339,19 @@ class SubmissionsMigration extends \PKP\migration\Migration
                 ->nullable()
                 ->comment('Interval after which the task is due, from the time it is created.');
             $table->enum('type', array_column(EditorialTaskType::cases(), 'value'))->default(EditorialTaskType::DISCUSSION);
-            $table->text('description')->nullable();
             $table->boolean('restrict_to_user_groups')->default(false)
                 ->comment('Whether the template is restricted to user groups defined in the many to many relationship.');
+            $table->string('key')->nullable()->comment('Indicates the unique key of the default template');
+            $table->unique(['key', 'context_id']);
 
             $table->timestamps();
+        });
+
+        Schema::table('edit_tasks', function (Blueprint $table) {
+            $table->foreign('edit_task_template_id', 'edit_task_task_template_id_fk')
+                ->references('edit_task_template_id')
+                ->on('edit_task_templates')
+                ->nullOnDelete();
         });
 
         Schema::create('edit_task_template_settings', function (Blueprint $table) {
@@ -388,12 +395,12 @@ class SubmissionsMigration extends \PKP\migration\Migration
      */
     public function down(): void
     {
-        Schema::drop('edit_task_template_user_groups');
-        Schema::drop('edit_task_template_settings');
-        Schema::drop('edit_task_templates');
         Schema::drop('edit_task_participants');
         Schema::drop('edit_task_settings');
         Schema::drop('edit_tasks');
+        Schema::drop('edit_task_template_user_groups');
+        Schema::drop('edit_task_template_settings');
+        Schema::drop('edit_task_templates');
         Schema::drop('subeditor_submission_group');
         Schema::drop('submission_comments');
         Schema::drop('edit_decisions');

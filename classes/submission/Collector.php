@@ -33,6 +33,7 @@ use PKP\identity\Identity;
 use PKP\plugins\Hook;
 use PKP\publication\PublicationCategory;
 use PKP\security\Role;
+use PKP\submission\reviewAssignment\DAO as ReviewAssignmentsDAO;
 use PKP\submission\reviewRound\ReviewRound;
 
 /**
@@ -52,6 +53,7 @@ abstract class Collector implements CollectorInterface, ViewsCount
 
     public DAO $dao;
     public ?array $categoryIds = null;
+    public ?string $funderValue = null;
     public ?array $contextIds = null;
     public ?array $submissionIds = null;
     public ?int $count = null;
@@ -69,6 +71,7 @@ abstract class Collector implements CollectorInterface, ViewsCount
     public ?array $doiStatuses = null;
     public ?bool $hasDois = null;
     public ?bool $onDoiPage = null;
+    public ?bool $inEditingOrPublished = null;
     public ?array $excludeIds = null;
     public bool $isUnassigned = false;
 
@@ -106,6 +109,12 @@ abstract class Collector implements CollectorInterface, ViewsCount
         return $this->dao->getIds($this);
     }
 
+    /** @copydoc DAO::getBestIds() */
+    public function getBestIds(): Collection
+    {
+        return $this->dao->getBestIds($this);
+    }
+
     /**
      * @copydoc DAO::getMany()
      *
@@ -131,6 +140,18 @@ abstract class Collector implements CollectorInterface, ViewsCount
     public function filterByCategoryIds(?array $categoryIds): AppCollector
     {
         $this->categoryIds = $categoryIds;
+        return $this;
+    }
+
+    /**
+     * Limit results to submissions with a funder matching this facet value.
+     *
+     * $funderValue must be either a funder's `ror`, or a funder name (any case), matching a
+     * `value` from \PKP\funder\Repository::getUniqueFunderNames().
+     */
+    public function filterByFunder(?string $funderValue): AppCollector
+    {
+        $this->funderValue = $funderValue;
         return $this;
     }
 
@@ -168,6 +189,15 @@ abstract class Collector implements CollectorInterface, ViewsCount
     {
         $this->onDoiPage = $onDoiPage;
         $this->enabledDoiTypes = $enabledDoiTypes;
+        return $this;
+    }
+
+    /**
+     * Limit DOI management page results to submissions in the copyediting or production stage, or with a published publication
+     */
+    public function filterByInEditingOrPublished(?bool $inEditingOrPublished): AppCollector
+    {
+        $this->inEditingOrPublished = $inEditingOrPublished;
         return $this;
     }
 
@@ -656,71 +686,70 @@ abstract class Collector implements CollectorInterface, ViewsCount
                 );
             }
             // Builds the filters
-            $q->where(
-                fn (Builder $q) => $keywords
-                    ->map(
-                        fn (string $keyword) => $q
+            $keywords->map(
+                fn ($keyword) => $q->where(
+                    fn ($q) => $q
                         // Search on the publication title or abstract
-                            ->orWhereIn(
-                                's.submission_id',
-                                fn (Builder $query) => $query
-                                    ->select('p.submission_id')->from('publications AS p')
-                                    ->join('publication_settings AS ps', 'p.publication_id', '=', 'ps.publication_id')
-                                    ->whereIn('ps.setting_name', ['title', 'abstract'])
-                                    ->where(DB::raw('LOWER(ps.setting_value)'), 'LIKE', $likePattern)
-                                    ->addBinding($keyword)
-                            )
+                        ->orWhereIn(
+                            's.submission_id',
+                            fn (Builder $query) => $query
+                                ->select('p.submission_id')->from('publications AS p')
+                                ->join('publication_settings AS ps', 'p.publication_id', '=', 'ps.publication_id')
+                                ->whereIn('ps.setting_name', ['title', 'abstract'])
+                                ->where(DB::raw('LOWER(ps.setting_value)'), 'LIKE', $likePattern)
+                                ->addBinding($keyword)
+                        )
                         // Search on the publication keywords, subjects, or discipline
-                            ->orWhereIn(
-                                's.submission_id',
-                                fn (Builder $query) => $query
-                                    ->select('p.submission_id')->from('publications AS p')
-                                    ->join('controlled_vocabs AS cv', function (Builder $q) {
-                                        $q->on('p.publication_id', '=', 'cv.assoc_id')
-                                            ->where('cv.assoc_type', ASSOC_TYPE_PUBLICATION)
-                                            ->whereIn('cv.symbolic', [ControlledVocab::CONTROLLED_VOCAB_SUBMISSION_DISCIPLINE, ControlledVocab::CONTROLLED_VOCAB_SUBMISSION_KEYWORD, ControlledVocab::CONTROLLED_VOCAB_SUBMISSION_SUBJECT]);
-                                    })
-                                    ->join('controlled_vocab_entries AS cve', 'cve.controlled_vocab_id', 'cv.controlled_vocab_id')
-                                    ->join('controlled_vocab_entry_settings AS cves', 'cves.controlled_vocab_entry_id', 'cve.controlled_vocab_entry_id')
-                                    ->where('cves.setting_name', 'name')
-                                    ->where(DB::raw('LOWER(cves.setting_value)'), 'LIKE', $likePattern)
-                                    ->addBinding($keyword)
-                            )
+                        ->orWhereIn(
+                            's.submission_id',
+                            fn (Builder $query) => $query
+                                ->select('p.submission_id')->from('publications AS p')
+                                ->join('controlled_vocabs AS cv', function (Builder $q) {
+                                    $q->on('p.publication_id', '=', 'cv.assoc_id')
+                                        ->where('cv.assoc_type', ASSOC_TYPE_PUBLICATION)
+                                        ->whereIn('cv.symbolic', [ControlledVocab::CONTROLLED_VOCAB_SUBMISSION_DISCIPLINE, ControlledVocab::CONTROLLED_VOCAB_SUBMISSION_KEYWORD, ControlledVocab::CONTROLLED_VOCAB_SUBMISSION_SUBJECT]);
+                                })
+                                ->join('controlled_vocab_entries AS cve', 'cve.controlled_vocab_id', 'cv.controlled_vocab_id')
+                                ->join('controlled_vocab_entry_settings AS cves', 'cves.controlled_vocab_entry_id', 'cve.controlled_vocab_entry_id')
+                                ->where('cves.setting_name', 'name')
+                                ->where(DB::raw('LOWER(cves.setting_value)'), 'LIKE', $likePattern)
+                                ->addBinding($keyword)
+                        )
                         // Search on the author name and ORCID
-                            ->orWhereIn(
-                                's.submission_id',
-                                fn (Builder $query) => $query
-                                    ->select('p.submission_id')
-                                    ->from('publications AS p')
-                                    ->join('authors AS au', 'au.publication_id', '=', 'p.publication_id')
-                                    ->join('author_settings AS aus', 'aus.author_id', '=', 'au.author_id')
-                                    ->whereIn('aus.setting_name', [
-                                        Identity::IDENTITY_SETTING_GIVENNAME,
-                                        Identity::IDENTITY_SETTING_FAMILYNAME,
-                                        'orcid'
-                                    ])
-                                // Don't permit reviewers to search on author names
-                                    ->when(
-                                        !empty($this->assignedTo),
-                                        fn (Builder $q) => $q
-                                            ->where(
-                                                fn (Builder $q) => $q
-                                                    ->whereNull('any_assignment.value')
-                                                    ->orWhereNotIn('aus.setting_name', [
-                                                        Identity::IDENTITY_SETTING_GIVENNAME,
-                                                        Identity::IDENTITY_SETTING_FAMILYNAME
-                                                    ])
-                                            )
-                                    )
-                                    ->where(DB::raw('LOWER(aus.setting_value)'), 'LIKE', $likePattern)
-                                    ->addBinding($keyword)
-                            )
+                        ->orWhereIn(
+                            's.submission_id',
+                            fn (Builder $query) => $query
+                                ->select('p.submission_id')
+                                ->from('publications AS p')
+                                ->join('authors AS au', 'au.publication_id', '=', 'p.publication_id')
+                                ->join('author_settings AS aus', 'aus.author_id', '=', 'au.author_id')
+                                ->whereIn('aus.setting_name', [
+                                    Identity::IDENTITY_SETTING_GIVENNAME,
+                                    Identity::IDENTITY_SETTING_FAMILYNAME,
+                                    'orcid'
+                                ])
+                            // Don't permit reviewers to search on author names
+                                ->when(
+                                    !empty($this->assignedTo),
+                                    fn (Builder $q) => $q
+                                        ->where(
+                                            fn (Builder $q) => $q
+                                                ->whereNull('any_assignment.value')
+                                                ->orWhereNotIn('aus.setting_name', [
+                                                    Identity::IDENTITY_SETTING_GIVENNAME,
+                                                    Identity::IDENTITY_SETTING_FAMILYNAME
+                                                ])
+                                        )
+                                )
+                                ->where(DB::raw('LOWER(aus.setting_value)'), 'LIKE', $likePattern)
+                                ->addBinding($keyword)
+                        )
                         // Search for the exact submission ID
-                            ->when(
-                                ($numericWords = $keywords->filter(fn (string $keyword) => ctype_digit($keyword)))->count(),
-                                fn (Builder $query) => $query->orWhereIn('s.submission_id', $numericWords)
-                            )
-                    )
+                        ->when(
+                            ($numericWords = $keywords->filter(fn (string $keyword) => ctype_digit($keyword)))->count(),
+                            fn (Builder $query) => $query->orWhereIn('s.submission_id', $numericWords)
+                        )
+                )
             );
         } elseif (strlen($this->searchPhrase ?? '') && !$isSearchPhraseDoi) {
             // If there's search text, but no keywords could be extracted from it, force the query to return nothing
@@ -733,6 +762,22 @@ abstract class Collector implements CollectorInterface, ViewsCount
                 ->toBase();
 
             $q->whereIn('s.current_publication_id', $publicationIds);
+        }
+
+        if (isset($this->funderValue)) {
+            $funderSubmissionIds = DB::table('funders as f')
+                ->leftJoin('funder_settings as fs', function (JoinClause $join) {
+                    $join->on('fs.funder_id', '=', 'f.funder_id')->where('fs.setting_name', '=', 'name');
+                })
+                ->where(function (Builder $w) {
+                    // Lowercase/trim both sides in SQL to match getUniqueFunderNames()'s `value`.
+                    $w->where('f.ror', $this->funderValue)
+                        ->orWhereRaw('LOWER(TRIM(fs.setting_value)) = LOWER(TRIM(?))', [$this->funderValue]);
+                })
+                ->select('f.submission_id')
+                ->distinct();
+
+            $q->whereIn('s.submission_id', $funderSubmissionIds);
         }
 
         $q = $this->buildReviewStageQueries($q);
@@ -858,11 +903,7 @@ abstract class Collector implements CollectorInterface, ViewsCount
                                 )
                                 ->whereColumn('ra.round', '=', 'agrr.current_round')
                                 ->whereColumn('ra.stage_id', '=', 'agrr.stage_id')
-                                ->where(
-                                    fn (Builder $q) => $q
-                                        ->whereNotNull('ra.date_considered')
-                                        ->orWhereNotNull('ra.date_acknowledged') // Considered reviews can be null, see pkp/pkp-lib#11401
-                                ),
+                                ->where(fn (Builder $q) => ReviewAssignmentsDAO::whereConfirmedByEditor($q)),
                             'rw',
                             fn (JoinClause $join) => $join->on('s.submission_id', '=', 'rw.submission_id')
                         )

@@ -1561,6 +1561,7 @@ msgstr ""
 "संपादक {$editorName} यांनी {$submissionId} या सादरीकरणासाठीच्या {$round} "
 "फेरीच्या समीक्षणाला दुजोरा दिला आहे."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} ने {$submissionId} या सादरीकरणासाठी {$round} क्रमांकाच्या "
@@ -2031,6 +2032,7 @@ msgstr "चालू समीक्षण - विनंती स्वीक�
 msgid "dashboard.reviewAssignment.statusReviewOverdue.title"
 msgstr "समीक्षणाची पूर्ण करण्याची तारीख उलटून {$days} दिवस झाले आहेत"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusReviewOverdue.description"
 msgstr ""
 "या समीक्षकाने त्याचे समीक्षण पूर्ण केलेले नाही. <b>{$date} पर्यंत ते अपेक्षि"
@@ -3067,11 +3069,13 @@ msgstr ""
 msgid "dashboard.reviewAssignment.statusComplete.description"
 msgstr "<b>{$date}</b> रोजी संपादकाने समीक्षण स्वीकारले."
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.title"
-msgstr "समीक्षकाने समीक्षणाची विनंती नाकारली"
+msgstr "संपादकाने समीक्षणाची विनंती रद्द केली"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.description"
-msgstr "समीक्षकाने <b>{$date}</b> रोजी समीक्षणाची विनंती नाकारली आहे."
+msgstr "संपादकाने <b>{$date}</b> रोजी या समीक्षणाची विनंती रद्द केली."
 
 msgid "dashboard.reviewAssignment.statusRequestResend.title"
 msgstr "समीक्षकाकडून प्रतिसादाची वाट पाहत आहे"
@@ -3224,3 +3228,6 @@ msgid "dashboard.minimumConfirmedReviewsNotMet"
 msgstr ""
 "किमान आवश्यक समीक्षणांची संख्या पूर्ण झालेली नाही. तरीही तुम्हाला याकरता "
 "संपादकीय निर्णय घेऊन पुढे जायचे आहे का?"
+
+msgid "reviewer.competingInterests"
+msgstr "संभाव्य हितसंबंध"

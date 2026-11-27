@@ -27,6 +27,8 @@ use PKP\db\DAORegistry;
 use PKP\facades\Locale;
 use PKP\file\TemporaryFileDAO;
 use PKP\plugins\Hook;
+use PKP\security\AuditEvent;
+use PKP\security\AuditLog;
 use PKP\security\Role;
 use PKP\security\RoleDAO;
 use PKP\stageAssignment\StageAssignment;
@@ -34,6 +36,7 @@ use PKP\submission\SubmissionCommentDAO;
 use PKP\user\interest\UserInterest;
 use PKP\userGroup\relationships\UserUserGroup;
 use PKP\workflow\WorkflowStageDAO;
+use Psr\Log\LogLevel;
 
 class Repository
 {
@@ -107,6 +110,8 @@ class Repository
         $id = $this->dao->insert($user);
         Hook::call('User::add', [$user]);
 
+        AuditLog::log(AuditEvent::USER_CREATED, LogLevel::NOTICE, ['createdUserId' => $id]);
+
         return $id;
     }
 
@@ -127,6 +132,8 @@ class Repository
         Hook::call('User::delete::before', [&$user]);
 
         $this->dao->delete($user);
+
+        AuditLog::log(AuditEvent::USER_DELETED, LogLevel::NOTICE, ['deletedUserId' => $user->getId()]);
 
         Hook::call('User::delete', [&$user]);
     }
@@ -390,9 +397,7 @@ class Repository
         }
 
         // Delete all user group assignments for the old user
-        UserUserGroup::query()
-            ->withUserId($oldUserId)
-            ->delete();
+        Repo::userGroup()->deleteAssignmentsByUserId($oldUserId);
 
         // Transfer stage assignments.
         $stageAssignments = StageAssignment::withUserId($oldUserId)->get();
@@ -412,6 +417,8 @@ class Repository
                 $stageAssignment->delete();
             }
         }
+
+        AuditLog::log(AuditEvent::USER_MERGED, LogLevel::NOTICE, ['oldUserId' => $oldUserId, 'newUserId' => $newUserId]);
 
         $this->delete($this->get($oldUserId, true));
 
@@ -561,7 +568,7 @@ class Repository
             ->whereIn('user_interests.user_id', $userIds)
             ->leftJoin('controlled_vocab_entry_settings as cves', function ($join) {
                 $join->on('cves.controlled_vocab_entry_id', '=', 'user_interests.controlled_vocab_entry_id')
-                ->whereIn('cves.setting_name', ['interest', 'name']);
+                    ->whereIn('cves.setting_name', ['interest', 'name']);
             })
             ->orderBy('user_interests.user_id')
             ->orderBy('user_interests.controlled_vocab_entry_id')
@@ -581,7 +588,7 @@ class Repository
 
         $map = [];
         foreach ($rows as $r) {
-            $userId  = (int) $r->user_id;
+            $userId = (int) $r->user_id;
             $entryId = (int) $r->controlled_vocab_entry_id;
             $map[$userId][$entryId] ??= [
                 'id' => $entryId,

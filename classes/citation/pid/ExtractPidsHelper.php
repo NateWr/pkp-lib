@@ -17,8 +17,8 @@
 namespace PKP\citation\pid;
 
 use PKP\citation\Citation;
-use PKP\pid\Doi;
 use PKP\pid\Arxiv;
+use PKP\pid\Doi;
 use PKP\pid\Handle;
 use PKP\pid\Url;
 use PKP\pid\Urn;
@@ -27,7 +27,7 @@ class ExtractPidsHelper
 {
     public function execute(Citation $citation): Citation
     {
-        $raw = str_ireplace('http://', 'https://', $citation->getRawCitation());
+        $raw = $citation->getRawCitation();
 
         // doi
         $doi = Doi::extractFromString($raw);

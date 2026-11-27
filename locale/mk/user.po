@@ -2,7 +2,7 @@
 # Mirko Spiroski <mspiroski@id-press.eu>, 2023, 2024, 2025, 2026.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-04-22 18:48+0000\n"
+"PO-Revision-Date: 2026-10-26 03:06+0000\n"
 "Last-Translator: Mirko Spiroski <mspiroski@id-press.eu>\n"
 "Language-Team: Macedonian <http://translate.pkp.sfu.ca/projects/pkp-lib/user/"
 "mk/>\n"
@@ -956,3 +956,18 @@ msgid "user.masthead.update.message"
 msgstr ""
 "Ова ќе ажурира дали овој корисник се појавува на насловот на дневникот за "
 "избраната улога. Корисникот ќе биде известен за оваа промена."
+
+msgid "user.affiliations.error.rorApiRateLimited"
+msgstr ""
+"Премногу барања се испратени до ROR API. Почекајте малку пред да продолжите "
+"со пребарувањето."
+
+msgid "orcid.manager.siteWide.orcidCustomRedirectBaseUrl"
+msgstr "Прилагодена основна URL за пренасочување"
+
+msgid "orcid.manager.siteWide.orcidCustomRedirectBaseUrl.description"
+msgstr ""
+"Прилагодена основна URL адреса која се користи при креирање на ORCID "
+"пренасочувачки URL-а. Ова може да се примени на целата страница без "
+"активирање на горенаведените глобални ORCID настройки, бидејќи оваа поставка "
+"е применлива само на ниво на страница."

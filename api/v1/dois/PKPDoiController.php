@@ -20,6 +20,7 @@ namespace PKP\API\v1\dois;
 use APP\core\Application;
 use APP\facades\Repo;
 use APP\galley\Galley;
+use APP\plugins\IDoiRegistrationAgency;
 use APP\publication\Publication;
 use APP\submission\Submission;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -28,6 +29,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
+use LibXMLError;
 use PKP\context\Context;
 use PKP\core\DataObject;
 use PKP\core\PKPBaseController;
@@ -417,7 +419,6 @@ class PKPDoiController extends PKPBaseController
 
         $validIds = Repo::publication()
             ->getExportableDOIsSubmissionIds($context->getId(), $context->getData(Context::SETTING_DOI_VERSIONING));
-
         $invalidIds = array_diff($requestIds, $validIds);
         if (count($invalidIds)) {
             return response()->json([
@@ -445,17 +446,83 @@ class PKPDoiController extends PKPBaseController
         }
 
         // Invoke IDoiRegistrationAgency::exportSubmissions
-        $responseData = $agency->exportSubmissions($submissions, $context);
+        $submissionsData = $agency->exportSubmissions($submissions, $context);
 
-        if (!empty($responseData['xmlErrors'])) {
+        if (!empty($submissionsData['xmlErrors'])) {
             return response()->json([
-                'error' => __('api.dois.400.xmlExportFailed')
+                'error' => $this->getXmlExportFailedMessage($submissionsData['xmlErrors'])
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        $temporaryFileIds = [];
+
+        if (!empty($submissionsData)) {
+            $temporaryFileIds[] = $submissionsData['temporaryFileId'];
+        }
+
+        if (
+            in_array(Repo::doi()::TYPE_PEER_REVIEW, $agency->getAllowedDoiTypes()) &&
+            in_array(Repo::doi()::TYPE_PEER_REVIEW, $context->getData(Context::SETTING_ENABLED_DOI_TYPES))
+        ) {
+            $submissionIds = array_map(fn (Submission $submission) => $submission->getId(), $submissions);
+            $peerReviewsData = $this->getPeerReviewExports($submissionIds, $context, $agency);
+
+            if (!empty($peerReviewsData['xmlErrors'])) {
+                return response()->json([
+                    'error' => $this->getXmlExportFailedMessage($peerReviewsData['xmlErrors'])
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            if (!empty($peerReviewsData)) {
+                $temporaryFileIds[] = $peerReviewsData['temporaryFileId'];
+            }
+        }
+
         return response()->json([
-            'temporaryFileId' => $responseData['temporaryFileId']
+            'temporaryFileIds' => $temporaryFileIds
         ], Response::HTTP_OK);
+    }
+
+    /**
+     * Prepare the associated Peer Review DOI XML export for a list of submission IDs.
+     *
+     * @param array $submissionIds - IDs of the submissions for which the associated Peer Review DOI XML export should be generated.
+     * @param Context $context - The context in which the export is being performed.
+     * @param IDoiRegistrationAgency $agency - The DOI registration agency responsible for the export.
+     *
+     * @return array{ temporaryFileId: int|string, xmlErrors: array } - An array containing the temporary file ID and any XML errors encountered during export.
+     *
+     */
+    private function getPeerReviewExports(array $submissionIds, Context $context, IDoiRegistrationAgency $agency): array
+    {
+        $exportablePeerReviewIds = Repo::reviewAssignment()
+            ->getExportableDOIsPeerReviewIds($context->getId(), $context->getData(Context::SETTING_DOI_VERSIONING), $submissionIds);
+
+        if (empty($exportablePeerReviewIds)) {
+            return [];
+        }
+
+        $peerReviews = array_map(
+            fn ($exportablePeerReviewId) => Repo::reviewAssignment()->get($exportablePeerReviewId),
+            $exportablePeerReviewIds
+        );
+
+        return $agency->exportPeerReviews($peerReviews, $context);
+    }
+
+    /**
+     * Get the XML export failure message listing the validation errors.
+     *
+     * @param array $xmlErrors LibXMLError objects or strings
+     */
+    protected function getXmlExportFailedMessage(array $xmlErrors): string
+    {
+        $messages = array_unique(array_map(
+            fn ($error) => trim($error instanceof LibXMLError ? $error->message : (string) $error),
+            $xmlErrors
+        ));
+        $items = array_map(fn (string $message) => '<li>' . htmlspecialchars($message) . '</li>', $messages);
+        return __('api.dois.400.xmlExportFailed') . '<ul>' . implode('', $items) . '</ul>';
     }
 
     /**
@@ -498,7 +565,7 @@ class PKPDoiController extends PKPBaseController
         $doiIdsToUpdate = [];
         foreach ($requestIds as $submissionId) {
             dispatch(new DepositSubmission($submissionId, $context, $agency));
-            $doiIdsToUpdate = array_merge($doiIdsToUpdate, Repo::doi()->getDoisForSubmission($submissionId));
+            $doiIdsToUpdate = array_merge($doiIdsToUpdate, Repo::doi()->getPublishedDoisForSubmission($submissionId));
         }
 
         Repo::doi()->markSubmitted($doiIdsToUpdate);
@@ -548,7 +615,7 @@ class PKPDoiController extends PKPBaseController
         }
 
         foreach ($requestIds as $id) {
-            $doiIds = Repo::doi()->getDoisForSubmission($id);
+            $doiIds = Repo::doi()->getPublishedDoisForSubmission($id);
             foreach ($doiIds as $doiId) {
                 Repo::doi()->markRegistered($doiId);
             }
@@ -769,7 +836,8 @@ class PKPDoiController extends PKPBaseController
         if (method_exists($pubObjectHandler, 'getMinorVersionsWithSameDoi')) {
             return $pubObjectHandler->getMinorVersionsWithSameDoi($pubObject);
         }
-        return [];
+        // Not versioned, e.g. peer reviews
+        return [$pubObject];
     }
 
     /**

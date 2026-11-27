@@ -197,7 +197,7 @@ class CategoryCategoryController extends PKPBaseController
             $filenameBase = $categoryId . '-category';
             $originalFileName = $temporaryFile->getOriginalFileName();
             // Moves the temporary file to the public directory
-            $fileName = app()->get('context')->moveTemporaryFile($context, $temporaryFile, $filenameBase, $user->getId());
+            $fileName = app()->get('context')->moveTemporaryFile($context, $temporaryFile, $filenameBase, $user);
             $imageData = [
                 'name' => $originalFileName,
                 'thumbnailName' => $thumbnail['thumbnailName'],
@@ -288,8 +288,8 @@ class CategoryCategoryController extends PKPBaseController
             $coverThumbnailsMaxWidth = $context->getData('coverThumbnailsMaxWidth');
             $coverThumbnailsMaxHeight = $context->getData('coverThumbnailsMaxHeight');
             $thumbnailFilename = $categoryId . '-category-thumbnail' . $imageExtension;
-            $xRatio = min(1, ($coverThumbnailsMaxWidth ? $coverThumbnailsMaxWidth : 100) / $sizeArray[0]);
-            $yRatio = min(1, ($coverThumbnailsMaxHeight ? $coverThumbnailsMaxHeight : 100) / $sizeArray[1]);
+            $xRatio = min(1, ($coverThumbnailsMaxWidth ? $coverThumbnailsMaxWidth : 1024) / $sizeArray[0]);
+            $yRatio = min(1, ($coverThumbnailsMaxHeight ? $coverThumbnailsMaxHeight : 1024) / $sizeArray[1]);
             $ratio = min($xRatio, $yRatio);
             $thumbnailWidth = round($ratio * $sizeArray[0]);
             $thumbnailHeight = round($ratio * $sizeArray[1]);

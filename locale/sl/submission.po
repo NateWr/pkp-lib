@@ -1,11 +1,11 @@
-# Primož Svetek <primoz.svetek@gmail.com>, 2021, 2022, 2023, 2024, 2025.
+# Primož Svetek <primoz.svetek@gmail.com>, 2021, 2022, 2023, 2024, 2025, 2026.
 # Matevž Rudolf <matevz.rudolf@uni-lj.si>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-11-19T10:50:02+00:00\n"
-"PO-Revision-Date: 2025-06-09 18:06+0000\n"
+"PO-Revision-Date: 2026-07-13 17:35+0000\n"
 "Last-Translator: Primož Svetek <primoz.svetek@gmail.com>\n"
 "Language-Team: Slovenian <http://translate.pkp.sfu.ca/projects/pkp-lib/"
 "submission/sl/>\n"
@@ -2032,6 +2032,7 @@ msgstr ""
 "urednik {$editorName} je potrdil recenzijski krog {$round} za prispevek "
 "{$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} je končal recenzijo za recenzijski krog {$round} za "
@@ -3028,11 +3029,13 @@ msgstr "Urednik je potrdil recenzijo"
 msgid "dashboard.reviewAssignment.statusComplete.description"
 msgstr "Urednik je sprejel recenzijo dne <b>{$date}</b>."
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.title"
-msgstr "Recenzent je zavrnil prošnjo za recenzijo"
+msgstr "Urednik je preklical prošnjo za recenzijo"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.description"
-msgstr "Recenzent je zvrnil prošnjo za recenzijo dne <b>{$date}</b>."
+msgstr "Urednik je preklical to prošnjo za recenzijo dne <b>{$date}</b>."
 
 msgid "dashboard.reviewAssignment.statusRequestResend.title"
 msgstr "Čaka na odziv recenzenta"
@@ -3074,6 +3077,7 @@ msgstr ""
 "Recenzent je sprejel prošnjo za opravljanje recenzije. Za dokončanje "
 "recenzije je še <b>{$days} dni, rok je {$date}.</b>"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusReviewOverdue.description"
 msgstr ""
 "Ta recenzent ni dokončal recenzije. Rok za dokončanje je bil <b>{$date}.</b>"
@@ -3203,3 +3207,9 @@ msgstr ""
 
 msgid "dashboard.reviewAssignment.statusReceived.withoutRecommendation.description"
 msgstr "Recenzija je bila končana dne {$date}"
+
+msgid "reviewer.competingInterests"
+msgstr "Nasprotujoči interesi"
+
+msgid "ror.invalidRorId"
+msgstr "Prosimo vnesite veljaven ROR ID."

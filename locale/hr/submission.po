@@ -2021,6 +2021,7 @@ msgstr ""
 "Urednik {$editorName} je potvrdio recenziju za rundu {$round} recenzije za "
 "predaju {$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} je dovršen pregled za krug {$round} pregled za predaju "
@@ -2769,11 +2770,13 @@ msgstr "Sukob interesa"
 msgid "dashboard.reviewAssignment.statusReceived.withoutRecommendation.description"
 msgstr "Recenzija je dovršena {$date}"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.title"
-msgstr "Recenzent je otkazao zahtjev za recenziju"
+msgstr "Urednik je otkazao zahtjev za recenziju"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.description"
-msgstr "Recenzent je otkazao zahtjev za recenziju <b>{$date}</b>."
+msgstr "Urednik je otkazao ovaj zahtjev za recenziju <b>{$date}</b>."
 
 msgid "dashboard.reviewAssignment.statusRequestResend.description"
 msgstr ""
@@ -3094,9 +3097,11 @@ msgstr ""
 "Recenzent je prihvatio zahtjev za recenziju. Rok za dostavu recenzije je "
 "<b>{$date}</b> (još {$days} dana)"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusReviewOverdue.description"
 msgstr ""
-"Recenzent nije dovršio svoju recenziju. Rok za odgovor bio je <b>{$date}.</b>"
+"Recenzent nije dovršio svoju recenziju. Rok za recenziju bio je "
+"<b>{$date}</b>."
 
 msgid "dashboard.reviewAssignment.statusComplete.description"
 msgstr "Urednik je prihvatio recenziju <b>{$date}</b>."
@@ -3146,3 +3151,6 @@ msgstr "Ove datoteke bit će proslijeđene za objavu"
 
 msgid "dashboard.submissions.incomplete.bulkDelete.column.description"
 msgstr "Odaberite nedovršene prijave za brisanje."
+
+msgid "reviewer.competingInterests"
+msgstr "Sukob interesa"

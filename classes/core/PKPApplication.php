@@ -92,6 +92,7 @@ abstract class PKPApplication implements PKPApplicationInfoProvider
     public const ASSOC_TYPE_COMMENT = 0x0100010;
     public const ASSOC_TYPE_COMMENT_REPORT = 0x0100011;
     public const ASSOC_TYPE_DATA_CITATION = 0x0100012;
+    public const ASSOC_TYPE_SUBMISSION_REVIEW_COMMENT = 0x0100013;
 
     // Constant used in UsageStats for submission files that are not full texts
     public const ASSOC_TYPE_SUBMISSION_FILE_COUNTER_OTHER = 0x0000213;
@@ -120,7 +121,9 @@ abstract class PKPApplication implements PKPApplicationInfoProvider
         Hook::addUnsupportedHooks('TemplateResource::getFilename'); // pkp/pkp-lib#12088 Replaced with View::resolveName
 
         // QueuedPayment instances may be serialized
-        class_alias(\PKP\payment\QueuedPayment::class, '\QueuedPayment');
+        if (!class_exists('\QueuedPayment')) {
+            class_alias(\PKP\payment\QueuedPayment::class, '\QueuedPayment');
+        }
 
         ini_set('display_errors', Config::getVar('debug', 'display_errors', ini_get('display_errors')));
 
@@ -359,7 +362,14 @@ abstract class PKPApplication implements PKPApplicationInfoProvider
                 $dispatcher->dispatch($this->getRequest());
             } catch (\Throwable $t) {
                 if (Hook::run('PKPApplication::execute::catch', ['throwable' => $t]) !== Hook::ABORT) {
-                    // No hook handler took ownership; throw again
+                    // No hook handler took ownership; report through Laravel's
+                    // exception handler so it lands in the configured log channel.
+                    // When PHP's error_log is an active channel, the re-thrown exception
+                    // below is already recorded there by PHP's native fatal handler, so reporting
+                    // it here too would duplicate the entry, so skip logging in PHP's error_log
+                    if (!PKPExceptionHandler::usesErrorLogChannel()) {
+                        report($t);
+                    }
                     throw $t;
                 }
             }
@@ -603,6 +613,7 @@ abstract class PKPApplication implements PKPApplicationInfoProvider
             WORKFLOW_STAGE_ID_EXTERNAL_REVIEW => 'workflow.review.externalReview',
             WORKFLOW_STAGE_ID_EDITING => 'submission.editorial',
             WORKFLOW_STAGE_ID_PRODUCTION => 'submission.production',
+            WORKFLOW_STAGE_ID_DONE => 'submission.done',
         };
     }
 
@@ -619,7 +630,30 @@ abstract class PKPApplication implements PKPApplicationInfoProvider
             WORKFLOW_STAGE_ID_EXTERNAL_REVIEW => '#e08914',
             WORKFLOW_STAGE_ID_EDITING => '#006798',
             WORKFLOW_STAGE_ID_PRODUCTION => '#00b28d',
+            // PR_TODO: What colour should be used here?
+            WORKFLOW_STAGE_ID_DONE => '#555555',
         };
+    }
+
+    /**
+     * Get stages that are not part of the editorial workflow
+     */
+    public static function getNonWorkflowStages(): array
+    {
+        return [
+            WORKFLOW_STAGE_ID_DONE,
+        ];
+    }
+
+    /**
+     * Get all stages in the application that are used to determine authorization and workflow access.
+     */
+    public static function getValidStages(): array
+    {
+        return array_merge(
+            static::getApplicationStages(),
+            static::getNonWorkflowStages()
+        );
     }
 
     /**
@@ -666,6 +700,7 @@ abstract class PKPApplication implements PKPApplicationInfoProvider
             'dataAvailability',
             'dataCitations',
             'fundingStatement',
+            'funders',
         ];
     }
 
@@ -733,6 +768,7 @@ define('WORKFLOW_STAGE_ID_INTERNAL_REVIEW', 2);
 define('WORKFLOW_STAGE_ID_EXTERNAL_REVIEW', 3);
 define('WORKFLOW_STAGE_ID_EDITING', 4);
 define('WORKFLOW_STAGE_ID_PRODUCTION', 5);
+define('WORKFLOW_STAGE_ID_DONE', 6);
 
 /* TextArea insert tag variable types used to change their display when selected */
 define('INSERT_TAG_VARIABLE_TYPE_PLAIN_TEXT', 'PLAIN_TEXT');

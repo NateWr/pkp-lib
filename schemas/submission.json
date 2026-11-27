@@ -29,11 +29,6 @@
 				}
 			}
 		},
-		"canCurrentUserChangeMetadata": {
-			"type": "boolean",
-			"description": "Whether the current user has access to the publication metadata",
-			"readOnly": true
-		},
 		"commentsForTheEditors": {
 			"type": "string",
 			"description": "Optional. Comments from the submitting author to the editors. This is only available for submissions that have not yet been submitted. Once submitted, the message is converted to a discussion and you can not read or write to this property.",
@@ -43,7 +38,7 @@
 		},
 		"contextId": {
 			"type": "integer",
-			"description": "The id of the context this submission was created in.",
+			"description": "The ID of the context this submission was created in.",
 			"apiSummary": true,
 			"writeDisabledInApi": true
 		},
@@ -79,7 +74,7 @@
 		},
 		"id": {
 			"type": "integer",
-			"description": "The id of this submission.",
+			"description": "The ID of this submission.",
 			"readOnly": true,
 			"apiSummary": true
 		},
@@ -115,6 +110,14 @@
 			"readOnly": true,
 			"items": {
 				"$ref": "#/definitions/Publication"
+			}
+		},
+		"funders": {
+			"type": "array",
+			"description": "Optional metadata that contains an array of funders for this submission.",
+			"readOnly": true,
+			"items": {
+				"$ref": "#/definitions/Funder"
 			}
 		},
 		"recommendationsIn": {
@@ -336,6 +339,11 @@
 					},
 					"uploadedFilesCount": {
 						"type": "integer",
+						"validation": ["nullable"]
+					},
+					"returnStageId": {
+						"type": "integer",
+						"description": "Only present for the Done stage entry: the stage the submission occupied immediately before entering Done.",
 						"validation": ["nullable"]
 					}
 				}

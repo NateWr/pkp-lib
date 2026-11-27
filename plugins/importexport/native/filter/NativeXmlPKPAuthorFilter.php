@@ -174,7 +174,7 @@ class NativeXmlPKPAuthorFilter extends NativeImportFilter
                         break;
                     case 'country': $author->setCountry($n->textContent);
                         break;
-                    case 'email': $author->setEmail($n->textContent);
+                    case 'email': $author->setEmail($n->textContent ?: null);
                         break;
                     case 'url':
                         if ($author->getData('contributorType') === ContributorType::ANONYMOUS->getName()) {
@@ -183,7 +183,7 @@ class NativeXmlPKPAuthorFilter extends NativeImportFilter
                         $author->setUrl($n->textContent);
                         break;
                     case 'orcid':
-                        if ($author->getData('contributorType') === ContributorType::ANONYMOUS->getName()) {
+                        if (!in_array($author->getData('contributorType'), ContributorType::getTypesWithOrcid())) {
                             break;
                         }
                         $author->setOrcid($n->textContent);
@@ -210,7 +210,6 @@ class NativeXmlPKPAuthorFilter extends NativeImportFilter
                             ContributorRole::withContextId($context->getId())
                                 ->withRoleIds($contributorRoleIds)
                                 ->get()
-                                ->all()
                         );
                         break;
                 }
@@ -246,7 +245,7 @@ class NativeXmlPKPAuthorFilter extends NativeImportFilter
             }
         }
 
-        if ($author->getData('contributorType') !== ContributorType::ANONYMOUS->getName() && !$author->getData('email')) {
+        if ($author->getData('contributorType') === ContributorType::PERSON->getName() && !$author->getData('email')) {
             $deployment->addError(
                 Application::ASSOC_TYPE_SUBMISSION,
                 $publication->getId(),
@@ -266,7 +265,7 @@ class NativeXmlPKPAuthorFilter extends NativeImportFilter
             );
         }
 
-        if (!$author->getContributorRoles()) {
+        if ($author->getContributorRoles()->isEmpty()) {
             $deployment->addError(
                 Application::ASSOC_TYPE_AUTHOR,
                 $publication->getId(),

@@ -103,6 +103,10 @@ class PKPReviewerHandler extends Handler
             // Editorial task log event types
             'SUBMISSION_LOG_TASK_NOTE_POSTED' => PKPSubmissionEventLogEntry::SUBMISSION_LOG_TASK_NOTE_POSTED,
 
+            'SUBMISSION_REVIEW_METHOD_ANONYMOUS' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_ANONYMOUS,
+            'SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS,
+            'SUBMISSION_REVIEW_METHOD_OPEN' => ReviewAssignment::SUBMISSION_REVIEW_METHOD_OPEN,
+
             'GENRE_CATEGORY_DOCUMENT' => Genre::GENRE_CATEGORY_DOCUMENT,
             'GENRE_CATEGORY_ARTWORK' => Genre::GENRE_CATEGORY_ARTWORK,
             'GENRE_CATEGORY_SUPPLEMENTARY' => Genre::GENRE_CATEGORY_SUPPLEMENTARY,
@@ -252,6 +256,18 @@ class PKPReviewerHandler extends Handler
         }
 
         $declineReviewMessage = $request->getUserVar('declineReviewMessage');
+
+        // Save competing interests declared on Step 1 before declining. The decline form
+        // submits competingInterestOption even when the question was never presented (see
+        // regretMessage.tpl), so a declaration is only recorded when the context has
+        // competing interests guidelines, mirroring the condition that presents the question.
+        if ($request->getContext()->getData('competingInterests')) {
+            $reviewAssignment->setCompetingInterestsDeclared(true);
+            $competingInterests = $request->getUserVar('competingInterestOption') === 'hasCompetingInterests'
+                ? $request->getUserVar('reviewerCompetingInterests')
+                : null;
+            $reviewAssignment->setCompetingInterests($competingInterests);
+        }
 
         // Decline the review
         $reviewerAction = new ReviewerAction();

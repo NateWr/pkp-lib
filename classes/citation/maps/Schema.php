@@ -84,12 +84,6 @@ class Schema extends \PKP\core\maps\Schema
         $output = [];
         foreach ($props as $prop) {
             switch ($prop) {
-                case '_href':
-                    $output[$prop] = $this->getApiUrl(
-                        'citations/' . $item->getId(),
-                        $this->context->getData('urlPath')
-                    );
-                    break;
                 case 'authors':
                     $authors = [];
                     foreach (is_array($item->getData($prop)) ? $item->getData($prop) : [] as $author) {
@@ -120,8 +114,12 @@ class Schema extends \PKP\core\maps\Schema
         $schemaService = new PKPSchemaService();
         $schema = $schemaService->get($this->schema);
         $authorModel = [];
-        foreach (array_keys((array)$schema->properties->authors->items->properties) as $property) {
-            $authorModel[$property] = '';
+        foreach ($schema->properties->authors->items->properties as $property => $propSchema) {
+            $authorModel[$property] = match ($propSchema->type ?? 'string') {
+                'boolean' => false,
+                'array', 'object' => [],
+                default => '',
+            };
         }
         return $authorModel;
     }

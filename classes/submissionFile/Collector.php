@@ -96,6 +96,12 @@ class Collector implements CollectorInterface
         return $this->dao->getIds($this);
     }
 
+    /** @copydoc DAO::getBestIds() */
+    public function getBestIds(): Collection
+    {
+        return $this->dao->getBestIds($this);
+    }
+
     /**
      * @copydoc DAO::getMany()
      *
@@ -213,7 +219,6 @@ class Collector implements CollectorInterface
 
     /**
      * @param array<MediaVariantType>|null $mediaVariantTypes
-     * @return self
      */
     public function filterByMediaVariantTypes(?array $mediaVariantTypes): self
     {
@@ -223,7 +228,6 @@ class Collector implements CollectorInterface
 
     /**
      * @param array<int>|null $variantGroupIds
-     * @return self
      */
     public function filterByVariantGroupIds(array $variantGroupIds): self
     {
@@ -339,7 +343,8 @@ class Collector implements CollectorInterface
             $qb->where('sf.file_stage', '!=', SubmissionFile::SUBMISSION_FILE_DEPENDENT);
         }
 
-        $qb->orderBy('sf.created_at', 'desc');
+        $qb->orderBy('sf.created_at', 'desc')
+            ->orderBy('sf.submission_file_id', 'desc'); // for stable sort order
 
         if ($this->count !== null) {
             $qb->limit($this->count);

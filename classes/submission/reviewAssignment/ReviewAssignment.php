@@ -47,10 +47,9 @@ class ReviewAssignment extends \PKP\core\DataObject
     public const REVIEW_ASSIGNMENT_STATUS_RECEIVED = 7; // review has been submitted
     public const REVIEW_ASSIGNMENT_STATUS_COMPLETE = 8; // review has been confirmed by an editor
     public const REVIEW_ASSIGNMENT_STATUS_THANKED = 9; // reviewer has been thanked
-    public const REVIEW_ASSIGNMENT_STATUS_CANCELLED = 10; // reviewer cancelled review request
+    public const REVIEW_ASSIGNMENT_STATUS_CANCELLED = 10; // editor cancelled review request
     public const REVIEW_ASSIGNMENT_STATUS_REQUEST_RESEND = 11; // request resent to reviewer after they declined
     public const REVIEW_ASSIGNMENT_STATUS_VIEWED = 12; // editor has viewed the review assignment, intermediate status between received and complete
-
     /**
      * All review assignment statuses that indicate a
      * review was completed
@@ -166,6 +165,22 @@ class ReviewAssignment extends \PKP\core\DataObject
     public function setCompetingInterests($competingInterests)
     {
         $this->setData('competingInterests', $competingInterests);
+    }
+
+    /**
+     * Get whether the reviewer answered the competing interests question.
+     */
+    public function getCompetingInterestsDeclared(): bool
+    {
+        return (bool) $this->getData('competingInterestsDeclared');
+    }
+
+    /**
+     * Set whether the reviewer answered the competing interests question.
+     */
+    public function setCompetingInterestsDeclared(bool $competingInterestsDeclared): void
+    {
+        $this->setData('competingInterestsDeclared', $competingInterestsDeclared);
     }
 
     /**
@@ -745,6 +760,19 @@ class ReviewAssignment extends \PKP\core\DataObject
     }
 
     /**
+     * Whether an editor has "signed off" on a review.
+     * Used for confirming if review should be made broadly accessible if it is open/public.
+     */
+    public function isConfirmedByEditor(): bool
+    {
+        if ($this->getConsidered() === self::REVIEW_ASSIGNMENT_UNCONSIDERED) {
+            return false;
+        }
+
+        return $this->getDateConsidered() || $this->getDateAcknowledged();
+    }
+
+    /**
      * Get the translation key for the current status
      *
      * @param int $status Optionally pass a status to retrieve a specific key.
@@ -862,5 +890,19 @@ class ReviewAssignment extends \PKP\core\DataObject
         }
 
         return true;
+    }
+
+    /**
+     * Helper method to fetch current DOI
+     */
+    public function getDoi(): ?string
+    {
+        $doiObject = $this->getData('doiObject');
+
+        if (empty($doiObject)) {
+            return null;
+        } else {
+            return $doiObject->getData('doi');
+        }
     }
 }

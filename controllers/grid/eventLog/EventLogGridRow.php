@@ -21,9 +21,11 @@ use APP\facades\Repo;
 use APP\submission\Submission;
 use PKP\controllers\api\file\linkAction\DownloadFileLinkAction;
 use PKP\controllers\grid\eventLog\linkAction\EmailLinkAction;
+use PKP\controllers\grid\eventLog\linkAction\ReviewChangeLinkAction;
 use PKP\controllers\grid\GridRow;
 use PKP\log\EmailLogEntry;
 use PKP\log\event\EventLogEntry;
+use PKP\log\event\PKPSubmissionEventLogEntry;
 use PKP\log\event\SubmissionFileEventLogEntry;
 use PKP\submission\reviewAssignment\ReviewAssignment;
 use PKP\submissionFile\SubmissionFile;
@@ -76,6 +78,17 @@ class EventLogGridRow extends GridRow
                     if (!$submissionFile) {
                         break;
                     }
+
+                    // A log entry can name a file that is no longer one of the submission file's
+                    // revisions, e.g. a revision upload that was later cancelled. Downloading it
+                    // is not possible, so don't offer the link.
+                    $isRevision = $fileId && Repo::submissionFile()
+                        ->getRevisions($submissionFile->getId())
+                        ->contains(fn (object $revision): bool => (int) $revision->fileId === (int) $fileId);
+                    if (!$isRevision) {
+                        break;
+                    }
+                    
                     $filename = $logEntry->getLocalizedData('filename') ?? $submissionFile->getLocalizedData('name');
                     if ($submissionFile) {
                         $anonymousAuthor = false;
@@ -94,6 +107,24 @@ class EventLogGridRow extends GridRow
                                 $this->addAction(new DownloadFileLinkAction($request, $submissionFile, $workflowStageId, __('common.download'), $fileId, $filename));
                             }
                         }
+                    }
+                    break;
+                case PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_COMMENTS_MODIFIED:
+                case PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_RECOMMENDATION_MODIFIED:
+                case PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_FORM_RESPONSE_MODIFIED:
+                case PKPSubmissionEventLogEntry::SUBMISSION_LOG_REVIEW_REVIEWER_COMPETING_INTERESTS_MODIFIED:
+                    if (!$this->_isCurrentUserAssignedAuthor) {
+                        $this->addAction(
+                            new ReviewChangeLinkAction(
+                                $request,
+                                __('common.viewChanges'),
+                                __('submission.event.viewReview'),
+                                [
+                                    'submissionId' => $this->_submission->getId(),
+                                    'logEntryId' => $logEntry->getId(),
+                                ]
+                            )
+                        );
                     }
                     break;
             }

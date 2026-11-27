@@ -80,6 +80,9 @@ msgstr "The ROR API service is currently unavailable. Please refresh the page or
 msgid "user.affiliations.error.rorApiDeprecated"
 msgstr "The ROR API service in this installation is deprecated. Please contact your system administrator."
 
+msgid "user.affiliations.error.rorApiRateLimited"
+msgstr "Too many requests have been sent to the ROR API. Please wait a moment before continuing to search."
+
 msgid "user.authorization.accessDenied"
 msgstr "Access denied."
 
@@ -842,6 +845,12 @@ msgstr "Enable ORCID functionality site-wide"
 msgid "orcid.manager.siteWide.description"
 msgstr "ORCID functionality can optionally be enabled and configured at a site level for all journals/presses/servers. If enabled, this will override all context-level credentials and apply the following credentials to all journals/presses/servers on this installation."
 
+msgid "orcid.manager.siteWide.orcidCustomRedirectBaseUrl"
+msgstr "Custom Redirect Base URL"
+
+msgid "orcid.manager.siteWide.orcidCustomRedirectBaseUrl.description"
+msgstr "A custom base URL used when constructing ORCID redirect URLs. This can be applied site-wide without enabling the above site-wide ORCID settings override as this setting is only applicable at a site level."
+
 msgid "orcid.field.verification.request"
 msgstr "Request verification"
 
@@ -898,6 +907,9 @@ msgstr "Confirm Access"
 
 msgid "user.confirmAccess.description"
 msgstr "Signed in as <strong>{$userFullName}</strong>. Please enter your password to continue."
+
+msgid "user.confirmAccess.required"
+msgstr "Your access to Administration has expired. Reload the page and confirm your password to continue."
 
 msgid "user.lastAction.incomplete"
 msgstr "Your last action was not completed. Please try again."

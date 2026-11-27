@@ -3,8 +3,8 @@
 /**
  * @file classes/invitation/stepType/SendInvitationStep.php
  *
- * Copyright (c) 2014-2024 Simon Fraser University
- * Copyright (c) 2000-2024 John Willinsky
+ * Copyright (c) 2014-2026 Simon Fraser University
+ * Copyright (c) 2000-2026 John Willinsky
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class SendInvitationStep
@@ -18,6 +18,8 @@ use APP\core\Application;
 use Exception;
 use PKP\components\forms\invitation\UserDetailsForm;
 use PKP\context\Context;
+use PKP\facades\Locale;
+use PKP\i18n\LocaleMetadata;
 use PKP\invitation\core\Invitation;
 use PKP\invitation\sections\Email;
 use PKP\invitation\sections\Form;
@@ -84,14 +86,15 @@ class SendInvitationStep extends InvitationStepTypes
      */
     private function invitationDetailsForm(Context $context): stdClass
     {
-        $localeNames = $context->getSupportedFormLocaleNames();
-        $locales = [];
-        foreach ($localeNames as $key => $name) {
-            $locales[] = [
-                'key' => $key,
-                'label' => $name,
-            ];
+        $supportedFormLocales = $context->getSupportedFormLocales();
+        $sitePrimaryLocale = Application::get()->getRequest()->getSite()->getPrimaryLocale();
+        if (!in_array($sitePrimaryLocale, $supportedFormLocales)) {
+            $supportedFormLocales[] = $sitePrimaryLocale;
         }
+        $locales = collect(Locale::getFormattedDisplayNames($supportedFormLocales, null, LocaleMetadata::LANGUAGE_LOCALE_WITHOUT))
+            ->map(fn (string $name, string $locale) => ['key' => $locale, 'label' => $name])
+            ->values()
+            ->toArray();
         $sections = new Sections(
             'userDetails',
             __('userInvitation.enterDetails.stepName'),
@@ -109,6 +112,8 @@ class SendInvitationStep extends InvitationStepTypes
             [
                 'validateFields' => [],
                 'userGroups' => $this->getAllUserGroups($context),
+                'enableEnrollmentMasthead' => $context->getData('enableEnrollmentMasthead'),
+                'enableEnrollmentMastheadReviewers' => $context->getData('enableEnrollmentMastheadReviewers'),
             ]
         );
         $step = new Step(
@@ -132,10 +137,10 @@ class SendInvitationStep extends InvitationStepTypes
     {
         $sections = new Sections(
             'userInvitedEmail',
-            __('userInvitation.sendMail.stepLabel'),
+            __('userInvitation.sendMail.stepName'),
             'email',
             'UserInvitationEmailComposerStep',
-            __('userInvitation.sendMail.stepName'),
+            __('userInvitation.sendMail.stepDescription'),
         );
         $fakeInvitation = $this->getFakeInvitation();
         $mailable = new UserRoleAssignmentInvitationNotify($context, $fakeInvitation);

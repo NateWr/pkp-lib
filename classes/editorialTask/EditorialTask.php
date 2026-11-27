@@ -21,6 +21,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
@@ -32,6 +33,17 @@ use PKP\note\SaveNoteWithFiles;
 use PKP\notification\Notification;
 use PKP\submission\reviewAssignment\ReviewAssignment;
 
+/**
+ * @mixin Builder
+ *
+ * @method Builder|static withAssoc(int $assocType, int $assocId)
+ * @method Builder|static withStageId(int $stageId)
+ * @method Builder|static withOpen()
+ * @method Builder|static orderByDate(string $orderBy, string $direction = EditorialTask::ORDER_DIR_ASC)
+ * @method Builder|static withParticipantIds(array $userIds)
+ * @method Builder|static withAssocIds(array $assocIds)
+ * @method Builder|static withAssocType(int $assocType)
+ */
 class EditorialTask extends Model
 {
     use ModelWithSettings;
@@ -69,7 +81,7 @@ class EditorialTask extends Model
         'assocType', 'assocId', 'stageId', 'seq',
         'createdAt', 'updatedAt', 'closed', 'dateDue',
         'createdBy', 'type', 'status', 'dateStarted',
-        'dateClosed', 'title', 'startedBy'
+        'dateClosed', 'title', 'startedBy', 'editTaskTemplateId'
     ];
 
     protected $casts = [
@@ -87,6 +99,7 @@ class EditorialTask extends Model
         'dateStarted' => 'datetime',
         'dateClosed' => 'datetime',
         'title' => 'string',
+        'editTaskTemplateId' => 'int',
     ];
 
     protected static function booted(): void
@@ -176,6 +189,14 @@ class EditorialTask extends Model
     public function participants(): HasMany
     {
         return $this->hasMany(Participant::class, 'edit_task_id', 'edit_task_id');
+    }
+
+    /**
+     * Relationship to source task template if task was auto-created from one.
+     */
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(Template::class, 'edit_task_template_id', 'edit_task_template_id');
     }
 
     public function notes(): MorphMany

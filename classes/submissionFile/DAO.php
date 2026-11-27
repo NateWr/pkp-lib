@@ -22,10 +22,11 @@ use APP\core\Application;
 use APP\facades\Repo;
 use Exception;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\LazyCollection;
 use PKP\core\EntityDAO;
+use PKP\core\interfaces\CollectorInterface;
 use PKP\db\DAORegistry;
 use PKP\plugins\PKPPubIdPluginDAO;
 use PKP\services\PKPSchemaService;
@@ -101,7 +102,7 @@ class DAO extends EntityDAO implements PKPPubIdPluginDAO
             ->when($submissionId !== null, fn (Builder $query) => $query->where('sf.submission_id', $submissionId))
             ->first();
 
-        return $row ? $this->fromRow($row) : null;
+        return $row ? $this->fromRow($row, [$id], (object) []) : null;
     }
 
     /**
@@ -142,29 +143,45 @@ class DAO extends EntityDAO implements PKPPubIdPluginDAO
     }
 
     /**
-     * Get a collection of announcements matching the configured query
+     * Get the best id, assoc and mimetype of the submission files matching the configured query,
+     * without loading the files (see SubmissionFile::getBestId())
      *
-     * @return LazyCollection<int,T>
+     * @return Collection<int,object{submissionId:int,assocType:?int,assocId:?int,bestId:int|string,mimetype:string}> Keyed by submission file id
      */
-    public function getMany(Collector $query): LazyCollection
+    public function getBestIds(Collector $query): Collection
     {
-        return LazyCollection::make(function () use ($query) {
-            $rows = $query
-                ->getQueryBuilder()
-                ->get();
+        $qb = $query
+            ->getQueryBuilder()
+            ->select(['sf.submission_file_id', 'sf.submission_id', 'sf.assoc_type', 'sf.assoc_id', 'f.mimetype']);
+        // getBestId() only finds a publisher id that is part of the schema. Will be removed in pkp/pkp-lib#13816
+        $hasPublisherId = isset($this->schemaService->get($this->schema)->properties->{'pub-id::publisher-id'});
+        if ($hasPublisherId) {
+            $qb->leftJoin(
+                $this->settingsTable . ' AS sfs',
+                fn (JoinClause $join) => $join->on('sfs.submission_file_id', '=', 'sf.submission_file_id')
+                    ->where('sfs.setting_name', '=', 'pub-id::publisher-id')
+                    ->where('sfs.locale', '=', '')
+            )
+                ->addSelect('sfs.setting_value AS publisher_id');
+        }
 
-            foreach ($rows as $row) {
-                yield $row->submission_file_id => $this->fromRow($row);
-            }
-        });
+        return $qb->get()->mapWithKeys(fn (object $row) => [
+            (int) $row->submission_file_id => (object) [
+                'submissionId' => (int) $row->submission_id,
+                'assocType' => $row->assoc_type === null ? null : (int) $row->assoc_type,
+                'assocId' => $row->assoc_id === null ? null : (int) $row->assoc_id,
+                'bestId' => $hasPublisherId && strlen((string) $row->publisher_id) ? $row->publisher_id : (int) $row->submission_file_id,
+                'mimetype' => $row->mimetype,
+            ],
+        ]);
     }
 
     /**
      * @copydoc EntityDAO::fromRow()
      */
-    public function fromRow(object $primaryRow): SubmissionFile
+    public function fromRow(object $primaryRow, array $ids, object $cache, ?CollectorInterface $query = null): SubmissionFile
     {
-        $submissionFile = parent::fromRow($primaryRow);
+        $submissionFile = parent::fromRow($primaryRow, $ids, $cache, $query);
         $submissionFile->setData('submissionLocale', $primaryRow->submission_locale);
         $submissionFile->setData('path', $primaryRow->path);
         $submissionFile->setData('mimetype', $primaryRow->mimetype);

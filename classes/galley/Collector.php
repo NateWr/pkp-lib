@@ -34,6 +34,8 @@ class Collector implements CollectorInterface
 
     public ?array $doiIds = null;
 
+    public ?array $submissionFileIds = null;
+
     public function __construct(DAO $dao)
     {
         $this->dao = $dao;
@@ -50,6 +52,12 @@ class Collector implements CollectorInterface
     public function getIds(): Collection
     {
         return $this->dao->getIds($this);
+    }
+
+    /** @copydoc DAO::getBestIds() */
+    public function getBestIds(): Collection
+    {
+        return $this->dao->getBestIds($this);
     }
 
     /**
@@ -80,6 +88,12 @@ class Collector implements CollectorInterface
         return $this;
     }
 
+    public function filterBySubmissionFileIds(?array $submissionFileIds): self
+    {
+        $this->submissionFileIds = $submissionFileIds;
+        return $this;
+    }
+
     public function getQueryBuilder(): Builder
     {
         $qb = DB::table($this->dao->table . ' as g')
@@ -94,6 +108,9 @@ class Collector implements CollectorInterface
             })
             ->when(!is_null($this->doiIds), function (Builder $qb) {
                 $qb->whereIn('g.doi_id', $this->doiIds);
+            })
+            ->when(!is_null($this->submissionFileIds), function (Builder $qb) {
+                $qb->whereIn('g.submission_file_id', $this->submissionFileIds);
             })
             ->orderBy('g.seq', 'asc');
 

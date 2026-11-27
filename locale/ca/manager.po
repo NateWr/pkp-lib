@@ -379,9 +379,6 @@ msgstr ""
 msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
 
-msgid "manager.dois.registrationAgency.registeredMessagePreamble"
-msgstr ""
-
 msgid "manager.emails.addEmail"
 msgstr "Afegir plantilla"
 
@@ -821,7 +818,7 @@ msgid "manager.setup.dois.registration"
 msgstr ""
 
 msgid "doi.manager.settings.doiPrefix"
-msgstr ""
+msgstr "Prefix DOI"
 
 msgid "doi.manager.setup.automaticDeposit"
 msgstr ""

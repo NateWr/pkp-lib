@@ -61,6 +61,7 @@ class ReviewsMigration extends \PKP\migration\Migration
             $table->index(['reviewer_id'], 'review_assignments_reviewer_id');
 
             $table->text('competing_interests')->nullable();
+            $table->boolean('competing_interests_declared')->default(false)->comment('Whether the reviewer answered the competing interests question; false means no declaration is on record.');
 
             $table->bigInteger('reviewer_recommendation_id')->nullable();
             $table
@@ -86,6 +87,10 @@ class ReviewsMigration extends \PKP\migration\Migration
             $table->datetime('date_due')->nullable();
             $table->datetime('date_response_due')->nullable();
             $table->datetime('last_modified')->nullable();
+
+            $table->bigInteger('last_modified_by_id')->nullable()->comment('The ID of the user who last made modifications to the submitted review.');
+            $table->foreign('last_modified_by_id')->references('user_id')->on('users')->nullOnDelete();
+
             $table->smallInteger('reminder_was_automatic')->default(0);
             $table->smallInteger('declined')->default(0);
             $table->smallInteger('cancelled')->default(0);

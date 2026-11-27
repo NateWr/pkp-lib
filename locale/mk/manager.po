@@ -2,7 +2,7 @@
 # Emilija Andonoska <emilija-andonoska@hotmail.com>, 2023.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-04-22 18:48+0000\n"
+"PO-Revision-Date: 2026-10-26 03:06+0000\n"
 "Last-Translator: Mirko Spiroski <mspiroski@id-press.eu>\n"
 "Language-Team: Macedonian <http://translate.pkp.sfu.ca/projects/pkp-lib/"
 "manager/mk/>\n"
@@ -417,11 +417,6 @@ msgid "manager.dois.registrationAgency.errorMessagePreamble"
 msgstr ""
 "Следната грешка беше вратена од {$registrationAgency} и содржи детали за "
 "причината за грешката:"
-
-msgid "manager.dois.registrationAgency.registeredMessagePreamble"
-msgstr ""
-"Следната порака беше вратена од {$registrationAgency} и содржи детали за "
-"регистрацијата:"
 
 msgid "manager.emails.addEmail"
 msgstr "Додади шаблон"
@@ -3909,8 +3904,9 @@ msgstr "Метаподатоци"
 
 msgid "manager.setup.editorialMasthead.order.reviewers.description"
 msgstr ""
-"Рецензентите ќе бидат прикажани во стандардизиран формат за да се одржи "
-"униформноста и да се обезбеди лесно откривање во овој дел."
+"Прегледувачите кои завршиле преглед во претходната календарска година ќе "
+"бидат прикажани во стандарден формат за да се одржи униформност и да се "
+"овозможи лесно пронаоѓање во овој дел."
 
 msgid "manager.setup.appearance.editorialMasthead.description"
 msgstr ""
@@ -3945,3 +3941,35 @@ msgid "manager.categories.form.removeCoverImageFileNotFound"
 msgstr ""
 "Не може да се пронајдат сликите од насловната страница и сликичките. Можеби "
 "веќе се избришани. Обидете се повторно да ја вчитате страницата."
+
+msgid "doi.manager.settings.doiSuffixPattern.required"
+msgstr "Потребна е шема на суфиксот DOI."
+
+msgid "mailable.changeProfileEmailInvitationNotify.description"
+msgstr ""
+"Корисниците кои бараат промена на нивната е-адреса во нивниот кориснички "
+"профил ќе го добијат ова барање за потврда."
+
+msgid "plugins.importexport.user.error.invalidRolePeriod"
+msgstr ""
+"Улогата \"{$userGroup}\" на корисникот \"{$username}\" не е увезена бидејќи "
+"датумот на почетокот не е пред датумот на крајот."
+
+msgid "manager.setup.enableEnrollmentMasthead"
+msgstr "Главна страница според запишување"
+
+msgid "manager.setup.enableEnrollmentMasthead.enable"
+msgstr "Прикажи заглавје базирано на пријавувањата на корисниците"
+
+msgid "manager.setup.enableEnrollmentMastheadReviewers.enable"
+msgstr "Овозможи прикажување на рецензентите на насловната страница"
+
+msgid "plugins.importexport.user.error.invalidRoleDate"
+msgstr ""
+"Улогата „{$userGroup}“ на корисникот „{$username}“ не е увезена затоа што "
+"„{$date}“ не е валиден датум."
+
+msgid "plugins.importexport.user.error.roleOverlap"
+msgstr ""
+"Улогата „{$userGroup}“ на корисникот „{$username}“ не е увезена бидејќи "
+"датумот на почетокот не е претходен на датумот на крајот."

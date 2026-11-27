@@ -17,7 +17,6 @@
 namespace PKP\plugins\importexport\native\filter;
 
 use APP\core\Application;
-use PKP\publication\PKPPublication;
 use APP\facades\Repo;
 use APP\plugins\importexport\native\NativeImportExportDeployment;
 use APP\publication\Publication;
@@ -26,7 +25,7 @@ use PKP\controlledVocab\ControlledVocab;
 use PKP\filter\FilterGroup;
 use PKP\plugins\importexport\PKPImportExportFilter;
 use PKP\plugins\PluginRegistry;
-use PKP\submission\PKPSubmission;
+use PKP\publication\PKPPublication;
 use PKP\submission\Representation;
 use PKP\submission\RepresentationDAOInterface;
 
@@ -139,6 +138,19 @@ class PKPPublicationNativeXmlFilter extends NativeExportFilter
             $entityNode->appendChild($citationsListNode);
         }
 
+        if ($contextName = $entity->getData('contextName')) {
+            $this->createLocalizedNodes($doc, $entityNode, 'contextName', $contextName);
+        }
+        if ($contextAbbreviation = $entity->getData('contextAbbreviation')) {
+            $this->createLocalizedNodes($doc, $entityNode, 'contextAbbreviation', $contextAbbreviation);
+        }
+        if ($contextPrimaryLocale = $entity->getData('contextPrimaryLocale')) {
+            $entityNode->appendChild($doc->createElementNS($deployment->getNamespace(), 'contextPrimaryLocale', htmlspecialchars($contextPrimaryLocale, ENT_COMPAT, 'UTF-8')));
+        }
+        if ($publisherLocation = $entity->getData('publisherLocation')) {
+            $entityNode->appendChild($doc->createElementNS($deployment->getNamespace(), 'publisherLocation', htmlspecialchars($publisherLocation, ENT_COMPAT, 'UTF-8')));
+        }
+
         return $entityNode;
     }
 
@@ -210,6 +222,9 @@ class PKPPublicationNativeXmlFilter extends NativeExportFilter
         $this->createLocalizedNodes($doc, $entityNode, 'prefix', $entity->getData('prefix'));
         $this->createLocalizedNodes($doc, $entityNode, 'subtitle', $entity->getSubTitles('html'));
         $this->createLocalizedNodes($doc, $entityNode, 'abstract', $entity->getData('abstract'));
+        $this->createLocalizedNodes($doc, $entityNode, 'plainLanguageSummary', $entity->getData('plainLanguageSummary'));
+        $this->createLocalizedNodes($doc, $entityNode, 'dataAvailability', $entity->getData('dataAvailability'));
+        $this->createLocalizedNodes($doc, $entityNode, 'fundingStatement', $entity->getData('fundingStatement'));
         $this->createLocalizedNodes($doc, $entityNode, 'coverage', $entity->getData('coverage'));
         $this->createLocalizedNodes($doc, $entityNode, 'type', $entity->getData('type'));
         $this->createLocalizedNodes($doc, $entityNode, 'source', $entity->getData('source'));

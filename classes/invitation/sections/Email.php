@@ -18,6 +18,7 @@ use APP\facades\Repo;
 use Exception;
 use PKP\emailTemplate\EmailTemplate;
 use PKP\facades\Locale;
+use PKP\i18n\LocaleMetadata;
 use PKP\mail\Mailable;
 use PKP\user\User;
 use stdClass;
@@ -59,11 +60,12 @@ class Email extends Section
         $config->variables = [];
         $config->locale = Locale::getLocale();
         $config->locales = [];
+        $localeNames = Locale::getFormattedDisplayNames($this->locales, null, LocaleMetadata::LANGUAGE_LOCALE_WITHOUT);
         foreach ($this->locales as $locale) {
             $config->variables[$locale] = $this->getVariables($locale);
             $config->locales[] = [
                 'locale' => $locale,
-                'name' => Locale::getMetadata($locale)->getDisplayName(),
+                'name' => $localeNames[$locale] ?? $locale,
             ];
         }
         return $config;
@@ -98,21 +100,15 @@ class Email extends Section
 
         $emailTemplates = collect();
         if ($this->mailable::getEmailTemplateKey()) {
-            $user = $request->getUser();
-
             $emailTemplate = Repo::emailTemplate()->getByKey($context->getId(), $this->mailable::getEmailTemplateKey());
-            if ($emailTemplate && Repo::emailTemplate()->isTemplateAccessibleToUser($user, $emailTemplate, $context->getId())) {
+            if ($emailTemplate) {
                 $emailTemplates->add($emailTemplate);
             }
             Repo::emailTemplate()
                 ->getCollector($context->getId())
                 ->alternateTo([$this->mailable::getEmailTemplateKey()])
                 ->getMany()
-                ->each(function (EmailTemplate $template) use ($context, $user, $emailTemplates) {
-                    if(Repo::emailTemplate()->isTemplateAccessibleToUser($user, $template, $context->getId())) {
-                        $emailTemplates->add($template);
-                    }
-                });
+                ->each(fn (EmailTemplate $e) => $emailTemplates->add($e));
         }
 
         return Repo::emailTemplate()->getSchemaMap()->mapMany($emailTemplates)->toArray();

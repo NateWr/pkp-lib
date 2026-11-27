@@ -2037,6 +2037,7 @@ msgstr ""
 "Editor {$editorName} telah mengonfirmasi review untuk tahap {$round} review "
 "untuk naskah {$submissionId}."
 
+#, fuzzy
 msgid "log.review.reviewReady"
 msgstr ""
 "{$reviewerName} telah merampungkan review untuk tahap {$round} review untuk "
@@ -2754,10 +2755,11 @@ msgstr ""
 msgid "dashboard.applyFilters"
 msgstr "Menerapkan Filter"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusReviewOverdue.description"
 msgstr ""
-"Reviewer tidak menyelesaikan review mereka. Batas waktu respon telah "
-"berakhir pada <b>$date}.</b>"
+"Reviewer tidak menyelesaikan review mereka. Batas waktu review telah berakhir "
+"pada <b>{$date}</b>."
 
 msgid "dashboard.declinedDuringStage"
 msgstr "Menolak pada saat tahap {$stageName}."
@@ -3126,11 +3128,13 @@ msgstr ""
 msgid "dashboard.reviewAssignment.statusComplete.description"
 msgstr "Review telah diterima oleh editor pada <b>{$date}</b>."
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.title"
-msgstr "Reviewer membatalkan permintaan review"
+msgstr "Permintaan review dibatalkan oleh editor"
 
+#, fuzzy
 msgid "dashboard.reviewAssignment.statusCancelled.description"
-msgstr "Reviewer telah membatalkan permintaan review pada <b>{$date}</b>."
+msgstr "Editor membatalkan permintaan review ini pada <b>{$date}</b>."
 
 msgid "dashboard.reviewAssignment.statusRequestResend.title"
 msgstr "Menunggu Respon dari reviewer"
@@ -3183,3 +3187,6 @@ msgstr ""
 
 msgid "dashboard.reviewAssignment.statusReceived.withoutRecommendation.description"
 msgstr "Proses review selesai pada {$date}"
+
+msgid "reviewer.competingInterests"
+msgstr "Konflik Kepentingan"
